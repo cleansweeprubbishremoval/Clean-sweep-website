@@ -11,7 +11,8 @@ Website for Clean Sweep Rubbish Removals: household, garden, reno and office rub
 - `logo-round.png` - rounded logo
 
 ## Quote form emails
-Get a free access key from web3forms.com and paste it into `WEB3FORMS_KEY` near the bottom of `index.html`.
+On Netlify, the form works through Netlify Forms. Turn on form detection, then add an email notification for the `quote` form.
+On other hosts, get a free access key from web3forms.com and paste it into `WEB3FORMS_KEY` near the bottom of `index.html`.
 
 ## Hosting
 Works on Cloudflare Pages, Netlify or GitHub Pages as-is. No build step needed.
