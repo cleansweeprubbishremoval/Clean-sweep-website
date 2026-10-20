@@ -1189,7 +1189,15 @@ footer.site .big span{color:var(--lime-deep)}
 
   // ---- Booking settings: paste your links here once they're set up ----
   // Stripe Payment Links (Stripe dashboard > Payment Links). Leave '' until created.
-  const STRIPE_LINKS = { deposit: '', q1: '', q2: '', q3: '', full: '', sweep: '', bin: '' };
+  const STRIPE_LIVE_LINKS = { deposit: '', q1: '', q2: '', q3: '', full: '', sweep: '', bin: '' };
+  // Stripe sandbox (test mode) links: used on the Claude preview, or on the live site at /#stripetest
+  const STRIPE_TEST_LINKS = {
+    deposit: 'https://book.stripe.com/test_00wbJ15QjdAGfL83NI4c800', q1: 'https://book.stripe.com/test_8x2cN5guX2W2aqO5VQ4c801',
+    q2: 'https://book.stripe.com/test_eVq3cvemP0NU1Ui4RM4c802', q3: 'https://book.stripe.com/test_6oU9AT3IbdAG0Qe9824c803',
+    full: 'https://book.stripe.com/test_00wdR96UncwCdD0ac64c804', sweep: 'https://book.stripe.com/test_5kQ28rceH68e7eC6ZU4c805',
+    bin: 'https://book.stripe.com/test_4gM4gz1A3cwC42q1FA4c806' };
+  const stripeTest = !!window.claude || location.hash === '#stripetest';
+  const STRIPE_LINKS = stripeTest ? STRIPE_TEST_LINKS : STRIPE_LIVE_LINKS;
   // Google Apps Script web app URL that adds bookings to your Google Calendar.
   const CALENDAR_URL = '';
   const DEPOSIT = 100;
@@ -1370,7 +1378,7 @@ footer.site .big span{color:var(--lime-deep)}
     const text = summary(r);
     const details = `<dl><dt>When</dt><dd>${esc(r.dateLabel)}, ${esc(r.window)}</dd><dt>Where</dt><dd>${esc(r.street)}, ${esc(r.suburb)} ${esc(r.postcode)}</dd><dt>Job</dt><dd>${esc(r.job)}${r.extras ? ' + ' + esc(r.extras) : ''}</dd><dt>Total</dt><dd>${esc(r.total)} estimated</dd></dl>`;
     const payBox = payUrl
-      ? `<div class="paybox"><b>Last step: pay ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'now'}</b><span class="note">Secure checkout by Stripe. Card, Apple Pay, Google Pay or direct debit.</span><a class="btn" href="${esc(payUrl)}" rel="noopener">Pay ${esc(r.payNow)} securely</a></div>`
+      ? `<div class="paybox"><b>Last step: pay ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'now'}</b>${stripeTest ? '<span class="note"><b>Test mode:</b> no real money is taken. Use card 4242 4242 4242 4242, any future date and any CVC.</span>' : ''}<span class="note">Secure checkout by Stripe. Card, Apple Pay, Google Pay or direct debit.</span><a class="btn" href="${esc(payUrl)}" rel="noopener">Pay ${esc(r.payNow)} securely</a></div>`
       : `<div class="paybox"><b>Payment: ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'in full'}</b><span class="note">We'll send a secure payment link to ${esc(r.phone || r.email)} shortly.</span></div>`;
     done.innerHTML = saved
       ? `<span class="ref">Booking ${esc(r.ref)}</span><h3>You're booked in, ${first}!</h3><p>We'll ${r.phone ? 'text' : 'email'} you at <b>${esc(r.phone || r.email)}</b> 48 hours before to confirm.</p><p class="note">Need to cancel? Let us know at least 24 hours before your collection time, or the booking is non-refundable.</p>${details}${payBox}<div class="acts"><button class="btn ghost" type="button" id="again">Make another booking</button></div>`
