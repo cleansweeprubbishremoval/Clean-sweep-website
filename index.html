@@ -417,6 +417,25 @@ footer.site .mail{overflow-wrap:anywhere}
 @media (min-width:761px) and (max-width:1000px){footer.site .wrap{grid-template-columns:1fr 1fr}footer.site .wrap>:first-child{grid-column:1/-1}}
 @media (min-width:1600px){.wrap{max-width:1320px}}
 
+/* 3D trailer viewer */
+.guide{grid-template-columns:1fr 1.12fr}
+@media (max-width:860px){.guide{grid-template-columns:1fr}}
+.t3d{position:relative;width:100%;aspect-ratio:6/5;max-width:100%;border-radius:26px;overflow:hidden;background:radial-gradient(120% 90% at 50% 18%,var(--card) 0%,color-mix(in oklab,var(--sky) 16%,var(--paper)) 70%,color-mix(in oklab,var(--lime) 18%,var(--paper)) 100%);border:1px solid var(--line)}
+@media (max-width:520px){.t3d{aspect-ratio:1/1}}
+.t3d canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y;outline:none}
+.t3d canvas:active{cursor:grabbing}
+.t3d canvas:focus-visible{box-shadow:inset 0 0 0 3px var(--sky)}
+.t3d-lvl{position:absolute;left:14px;top:14px;background:var(--ink);color:var(--paper);font:700 .82rem var(--f-body);padding:.45em .8em;border-radius:999px;pointer-events:none}
+.t3d-hint{position:absolute;left:50%;top:14px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;background:var(--lime);color:#0B1426;font:800 .8rem var(--f-body);padding:.45em .85em;border-radius:999px;pointer-events:none;transition:opacity .4s;animation:hintNudge 2.4s ease-in-out infinite}
+.t3d-hint svg{width:15px;height:15px}
+.t3d.used .t3d-hint{opacity:0;animation:none}
+@keyframes hintNudge{0%,100%{transform:translateX(-50%)}50%{transform:translateX(calc(-50% + 6px))}}
+@media (max-width:520px){.t3d-hint{top:auto;bottom:62px}}
+.t3d-ctl{position:absolute;left:10px;right:10px;bottom:10px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.t3d-ctl button{font:700 .82rem var(--f-body);color:var(--ink);background:color-mix(in oklab,var(--card) 88%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1.5px solid var(--line);border-radius:999px;padding:.5em .9em;cursor:pointer}
+.t3d-ctl button:hover{border-color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.t3d-hint{animation:none}}
+
 /* owner inbox */
 .inbox{margin-top:40px;background:var(--card);color:var(--ink);border-radius:24px;padding:24px;display:grid;gap:14px}
 .inbox h3{font-size:1.3rem}
@@ -640,7 +659,15 @@ footer.site .big span{color:var(--lime-deep)}
         </g>
         <path id="lvlLine" class="lvl-line" d="M90 150h420"/>
       </svg>
-      <figcaption class="note">Tap the trailer or a price to see each load.</figcaption>
+      <div class="t3d" id="t3d" hidden>
+        <canvas id="t3dCanvas" tabindex="0" aria-label="3D trailer. Drag or use the arrow keys to spin it."></canvas>
+        <span class="t3d-lvl" id="t3dLvl">½ load · about 8 m³</span>
+        <span class="t3d-hint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 2v5h-5M6 22v-5h5"/></svg>Drag to spin</span>
+        <div class="t3d-ctl" role="group" aria-label="Trailer views">
+          <button type="button" data-view="side">Side</button><button type="button" data-view="back">Back</button><button type="button" data-view="top">Look inside</button><button type="button" data-view="spin" aria-label="Reset and spin">↻</button>
+        </div>
+      </div>
+      <figcaption class="note" id="t3dCap">Tap the trailer or a price to see each load.</figcaption>
       </figure>
       </div>
 
@@ -1093,7 +1120,7 @@ footer.site .big span{color:var(--lime-deep)}
   ];
   const money = n => Math.round(n).toLocaleString('en-AU');
   const fill = $('#fill'), lvl = $('#lvlLine'), qGroups = $$('.trailer .q'), volNum = $('#volNum'), volUnit = $('#volUnit'), fits = $('#fits'), qs = $('#quoteSize');
-  let curPrice = 950, sel = 1, prevSel = 1;
+  let curPrice = 950, sel = 1, prevSel = 1, t3d = null;
   const setSize = (i, animate = true) => {
     sel = i; const s = SIZES[i];
     $$('.size').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.i === i)));
@@ -1119,6 +1146,7 @@ footer.site .big span{color:var(--lime-deep)}
     }
     $$('.trailer .tick').forEach(t => t.classList.toggle('on', +t.dataset.i === i));
     prevSel = i;
+    if (t3d) t3d.setLevel(i, animate);
     curPrice = s.price;
   };
   $$('.size').forEach(b => b.addEventListener('click', () => setSize(+b.dataset.i)));
@@ -1506,6 +1534,220 @@ footer.site .big span{color:var(--lime-deep)}
       raf = requestAnimationFrame(loop);
     });
   }
+
+  // ---- 3D trailer viewer (Three.js): spin it to see each load ----
+  (() => {
+    const fig = $('.trailer-fig'), svgT = $('.trailer'), box3 = $('#t3d');
+    if (!fig || !box3) return;
+    let started = false;
+    const start = async () => {
+      if (started) return; started = true;
+      const ok = await loadThree();
+      if (!ok || !window.THREE) return;
+      try { t3d = build(window.THREE); } catch (e) { console.warn(e); t3d = null; return; }
+      t3d.setLevel(sel, false);
+      svgT.setAttribute('hidden', ''); box3.hidden = false; $('#t3dCap').textContent = 'Drag to spin the trailer. Tap a price to change the load.';
+      t3d.resize();
+    };
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); start(); } }, { rootMargin: '400px' });
+      io.observe(fig);
+    } else start();
+
+    function build(T) {
+      const cv = $('#t3dCanvas');
+      const renderer = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+      renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+      const scene = new T.Scene();
+      const cam = new T.PerspectiveCamera(30, 1, .1, 100);
+      const target = new T.Vector3(.35, 1.15, 0);
+
+      scene.add(new T.HemisphereLight(0xf2f8ff, 0x9aa88a, .75));
+      const sunL = new T.DirectionalLight(0xffffff, .75); sunL.position.set(5, 9, 6); sunL.castShadow = true;
+      sunL.shadow.mapSize.set(1024, 1024); Object.assign(sunL.shadow.camera, { left: -5, right: 5, top: 5, bottom: -5, near: 1, far: 30 });
+      scene.add(sunL);
+      const fillL = new T.DirectionalLight(0xdfeeff, .25); fillL.position.set(-6, 4, -5); scene.add(fillL);
+
+      // ground shadow catcher
+      const ground = new T.Mesh(new T.PlaneGeometry(30, 30), new T.ShadowMaterial({ opacity: .22 }));
+      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+      // ---------- materials ----------
+      const std = (c, r = .55, m = .05, extra = {}) => new T.MeshStandardMaterial(Object.assign({ color: c, roughness: r, metalness: m }, extra));
+      const galv = std(0xc3cbd4, .42, .3), galvDark = std(0x8e98a4, .5, .3);
+      const navy = std(0x12203a, .5, .25), black = std(0x15171b, .85, 0), rubber = std(0x1d1f23, .9, 0);
+      const red = std(0xe5484d, .4, 0, { emissive: 0x5a0d10 }), amber = std(0xffb020, .4, 0, { emissive: 0x4a3000 });
+      const canvasTex = (w, h, draw, rep) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new T.CanvasTexture(c); if (rep) { t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rep[0], rep[1]); } t.anisotropy = 4; return t; };
+      const meshTex = (rx, ry) => canvasTex(128, 128, (x, w) => { x.clearRect(0, 0, w, w); x.strokeStyle = '#d3d9e0'; x.lineWidth = 4; for (let i = 0; i <= w; i += 32) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, w); x.stroke(); x.beginPath(); x.moveTo(0, i); x.lineTo(w, i); x.stroke(); } }, [rx, ry]);
+      const meshMat = (rx, ry) => new T.MeshStandardMaterial({ map: meshTex(rx, ry), transparent: true, alphaTest: .4, side: T.DoubleSide, metalness: .15, roughness: .5 });
+      const plateTex = canvasTex(256, 256, (x, w) => {
+        x.fillStyle = '#7d8793'; x.fillRect(0, 0, w, w);
+        for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+          x.save(); x.translate(c * 32 + 16 + (r % 2 ? 8 : -8), r * 32 + 16); x.rotate(r % 2 ? .7 : -.7);
+          x.fillStyle = '#a3adb8'; x.fillRect(-11, -2.5, 22, 5); x.fillStyle = '#5f6873'; x.fillRect(-11, 2.5, 22, 1.5); x.restore();
+        }
+      }, [8, 4]);
+      const plate = new T.MeshStandardMaterial({ map: plateTex, metalness: .2, roughness: .55 });
+
+      const add = (geo, mat, x, y, z, parent, rot) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); if (rot) m.rotation.set(rot[0] || 0, rot[1] || 0, rot[2] || 0); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m; };
+      const B = (w, h, d) => new T.BoxGeometry(w, h, d);
+      const C = (r, h, s = 16) => new T.CylinderGeometry(r, r, h, s);
+
+      // ---------- trailer (1 unit = 1 metre; bed is 4 m x 2 m, cage 2 m high) ----------
+      const trailer = new T.Group(); scene.add(trailer);
+      const L = 4, W = 2, H = 2, FLOOR = .62, X0 = -L / 2, Z0 = -W / 2;
+      // chassis
+      add(B(L + .1, .12, .1), galv, 0, FLOOR - .1, Z0 + .05, trailer); add(B(L + .1, .12, .1), galv, 0, FLOOR - .1, -Z0 - .05, trailer);
+      for (let i = 0; i <= 4; i++) add(B(.08, .08, W), galvDark, X0 + .05 + i * (L - .1) / 4, FLOOR - .12, 0, trailer);
+      add(new T.BoxGeometry(L, .04, W), plate, 0, FLOOR - .02, 0, trailer);
+      // drawbar A-frame, coupling, jockey wheel
+      const dbar = (z) => { const len = 1.75, g = add(B(len, .09, .09), galv, 0, 0, 0, trailer); g.position.set(L / 2 + .75, FLOOR - .12, z * .48); g.rotation.y = z * .5; return g; };
+      dbar(1); dbar(-1);
+      add(B(.32, .14, .16), galvDark, L / 2 + 1.55, FLOOR - .1, 0, trailer);
+      add(new T.SphereGeometry(.06, 12, 10), galvDark, L / 2 + 1.72, FLOOR - .06, 0, trailer);
+      add(C(.035, .55), galv, L / 2 + 1.05, FLOOR - .32, .2, trailer);
+      add(C(.075, .05, 18), rubber, L / 2 + 1.05, .075, .2, trailer, [Math.PI / 2, 0, 0]);
+      // axle, wheels, mudguards
+      const AX = .15;
+      add(C(.04, W + .3), galvDark, AX, .33, 0, trailer, [Math.PI / 2, 0, 0]);
+      const wheel = z => {
+        const g = new T.Group(); g.position.set(AX, .33, z); trailer.add(g);
+        add(new T.TorusGeometry(.25, .09, 14, 28), rubber, 0, 0, 0, g);
+        add(C(.2, .2, 24), galv, 0, 0, 0, g, [Math.PI / 2, 0, 0]);
+        add(C(.07, .24, 12), galvDark, 0, 0, 0, g, [Math.PI / 2, 0, 0]);
+        for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; add(C(.015, .23, 8), galvDark, Math.cos(a) * .12, Math.sin(a) * .12, 0, g, [Math.PI / 2, 0, 0]); }
+        const guard = new T.Mesh(new T.CylinderGeometry(.42, .42, .3, 24, 1, true, Math.PI / 2, Math.PI), galv.clone());
+        guard.rotation.set(Math.PI / 2, 0, 0); guard.position.set(AX, .36, z); guard.material.side = T.DoubleSide; guard.castShadow = true; trailer.add(guard);
+      };
+      wheel(W / 2 + .18); wheel(-W / 2 - .18);
+      // lights + number plate
+      [Z0 + .2, -Z0 - .2].forEach(z => { add(B(.05, .1, .2), red, X0 - .04, FLOOR - .08, z, trailer); add(B(.05, .06, .08), amber, X0 - .04, FLOOR - .08, z + (z > 0 ? -.15 : .15), trailer); });
+      const plateNo = canvasTex(256, 96, (x, w, h) => { x.fillStyle = '#f7f7f2'; x.fillRect(0, 0, w, h); x.strokeStyle = '#12203a'; x.lineWidth = 6; x.strokeRect(3, 3, w - 6, h - 6); x.fillStyle = '#12203a'; x.font = '900 54px Archivo, Arial Black, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('CLN·SWP', w / 2, h / 2 + 3); });
+      const pm = new T.MeshStandardMaterial({ map: plateNo, roughness: .5 });
+      add(B(.02, .12, .34), [navy, pm, navy, navy, navy, navy], X0 - .06, FLOOR - .1, 0, trailer);
+
+      // cage: posts, rails, mesh, painted lower panels with branding
+      const postG = B(.06, H, .06);
+      [X0, X0 + 1, X0 + 2, X0 + 3, -X0].forEach(x => { [Z0, -Z0].forEach(z => add(postG, galv, x, FLOOR + H / 2, z, trailer)); });
+      [1 / 3, 2 / 3].forEach(k => add(postG, galv, -X0, FLOOR + H / 2, Z0 + k * W, trailer));
+      add(postG, galv, X0, FLOOR + H / 2, 0, trailer);
+      const rail = (len, x, y, z, alongZ) => add(alongZ ? B(.06, .06, len) : B(len, .06, .06), galv, x, y, z, trailer);
+      [FLOOR + .38, FLOOR + H].forEach(y => { rail(L, 0, y, Z0); rail(L, 0, y, -Z0); rail(W, X0, y, 0, true); rail(W, -X0, y, 0, true); });
+      const LOWER = .38;
+      const sideTex = new T.CanvasTexture(brandCanvas());
+      const sideMat = new T.MeshStandardMaterial({ map: sideTex, roughness: .5, metalness: .2 });
+      const panel = (z, flip) => { const m = new T.Mesh(B(L, LOWER, .025), [navy, navy, navy, navy, flip ? navy : sideMat, flip ? sideMat : navy]); m.position.set(0, FLOOR + LOWER / 2, z); m.castShadow = m.receiveShadow = true; trailer.add(m); };
+      panel(-Z0, false); panel(Z0, true);
+      add(B(.025, LOWER, W), navy, X0, FLOOR + LOWER / 2, 0, trailer); add(B(.025, LOWER, W), navy, -X0, FLOOR + LOWER / 2, 0, trailer);
+      const mh = H - LOWER;
+      const meshPanel = (w, x, z, ry) => { const m = new T.Mesh(new T.PlaneGeometry(w, mh), meshMat(w / .45, mh / .45)); m.position.set(x, FLOOR + LOWER + mh / 2, z); m.rotation.y = ry; m.receiveShadow = true; trailer.add(m); };
+      meshPanel(L, 0, -Z0, 0); meshPanel(L, 0, Z0, 0); meshPanel(W, X0, 0, Math.PI / 2); meshPanel(W, -X0, 0, Math.PI / 2);
+      // logo roundel on the front of each side
+      const tex = new T.Texture($('.hero-art .badge')); tex.needsUpdate = true;
+      const roundel = (z, s) => { const m = new T.Mesh(new T.CircleGeometry(.3, 40), new T.MeshBasicMaterial({ map: tex, transparent: true })); m.position.set(1.35, FLOOR + LOWER + .42, z + s * .016); if (s < 0) m.rotation.y = Math.PI; trailer.add(m); add(new T.CircleGeometry(.33, 40), navy, 1.35, FLOOR + LOWER + .42, z + s * .012, trailer, [0, s < 0 ? Math.PI : 0, 0]); };
+      roundel(-Z0, 1); roundel(Z0, -1);
+
+      // ---------- the load ----------
+      const RB = (w, h, d, c, r = .7) => { const g = new T.Group(); add(B(w, h, d), std(c, r), 0, h / 2, 0, g); return g; };
+      const cardboard = (w, h, d) => { const g = RB(w, h, d, 0xc49a6c, .9); add(B(w + .002, .03, .08), std(0xe7d3b0, .6), 0, h - .005, 0, g); return g; };
+      const bag = (r) => { const g = new T.Group(); const m = add(new T.SphereGeometry(r, 14, 10), std(0x22262c, .3, .1), 0, r * .8, 0, g); m.scale.set(1, .8, 1); add(new T.ConeGeometry(r * .25, r * .5, 8), std(0x22262c, .3, .1), 0, r * 1.55, 0, g); return g; };
+      const couch = () => { const g = new T.Group(), c = std(0x3a6ea5, .85); add(B(1.8, .26, .85), c, 0, .13 + .08, 0, g); add(B(1.8, .4, .2), c, 0, .4, -.33, g); add(B(.18, .34, .85), c, -.81, .3, 0, g); add(B(.18, .34, .85), c, .81, .3, 0, g); [-.8, .8].forEach(x => [-.35, .35].forEach(z => add(B(.06, .08, .06), std(0x3b2b1f), x, .04, z, g))); return g; };
+      const fridgeDown = () => { const g = RB(1.6, .65, .62, 0xeef1f4, .35); add(B(.8, .04, .04), galv, .3, .67, .2, g); return g; };
+      const washer = () => { const g = RB(.6, .62, .6, 0xf2f4f6, .4); add(C(.18, .03, 24), std(0x9fb8cc, .2, .3), .31, .36, 0, g, [0, 0, Math.PI / 2]); return g; };
+      const mattress = (c = 0xf4f1ea) => { const g = RB(1.9, .2, 1.35, c, .95); add(B(1.92, .03, 1.37), std(0x5a86c4, .8), 0, .1, 0, g); return g; };
+      const bike = () => { const g = new T.Group(), f = std(0xe5484d, .4, .3); [-.38, .38].forEach(x => add(new T.TorusGeometry(.28, .03, 8, 24), black, x, .31, 0, g)); add(C(.025, .62), f, 0, .45, 0, g, [0, 0, Math.PI / 2.6]); add(C(.025, .5), f, -.12, .48, 0, g, [0, 0, -.9]); add(C(.02, .3), galv, .32, .66, 0, g); add(B(.06, .03, .4), black, .32, .8, 0, g); return g; };
+      const greens = (n, sx, sz) => { const g = new T.Group(), shades = [0x5f9a2c, 0x76b33a, 0x4d8424, 0x8cc04a]; for (let i = 0; i < n; i++) { const r = .16 + Math.random() * .17; const lf = add(new T.IcosahedronGeometry(r, 0), std(shades[i % 4], .95, 0, { flatShading: true }), (Math.random() - .5) * sx, r * .7 + Math.random() * .2, (Math.random() - .5) * sz, g, [Math.random() * 3, Math.random() * 3, 0]); lf.scale.set(1 + Math.random() * .5, .7 + Math.random() * .3, 1 + Math.random() * .4); } for (let i = 0; i < 4; i++) add(C(.025, .9, 6), std(0x6b4a2b, .9), (Math.random() - .5) * sx * .8, .35, (Math.random() - .5) * sz * .8, g, [Math.random() - .5, 0, 1.2 + Math.random() * .6]); return g; };
+      const timber = () => { const g = new T.Group(), w = std(0xc8a06a, .8); for (let i = 0; i < 4; i++) add(B(2.1, .045, .14), w, 0, .03 + i * .05, -.2 + i * .13, g, [0, .06 * i, 0]); return g; };
+      const chair = () => { const g = new T.Group(), w = std(0x8a5a3b, .7); add(B(.45, .05, .45), w, 0, .45, 0, g); add(B(.45, .45, .05), w, 0, .7, -.2, g); [-.19, .19].forEach(x => [-.19, .19].forEach(z => add(B(.04, .45, .04), w, x, .22, z, g))); return g; };
+      const tv = () => { const g = RB(.95, .58, .07, 0x111316, .3); add(B(.88, .5, .01), std(0x2a4d6b, .15, .4), 0, .29, .04, g); return g; };
+
+      const PLACE = [
+        [ // ¼ load: floor layer
+          [couch(), -1.0, .5, 0], [fridgeDown(), 1.05, .52, 0], [washer(), -1.55, -.5, .2], [cardboard(.5, .48, .5), -.85, -.48, .3],
+          [cardboard(.55, .45, .45), -.25, -.5, -.2], [cardboard(.45, .4, .45), .3, -.55, .1], [bag(.3), .95, -.45, 0], [bag(.28), 1.6, -.5, 0], [bag(.26), .1, .45, 0]],
+        [ // ½ load
+          [mattress(), -.95, .05, .04], [cardboard(.5, .45, .5), -1.45, .3, .3], [cardboard(.45, .4, .45), -.6, -.45, -.2],
+          [bike(), .85, .45, .1], [bag(.3), 1.55, -.45, 0], [bag(.28), .95, -.5, 0], [cardboard(.5, .45, .5), .25, -.5, .15], [bag(.27), .2, .35, 0]],
+        [ // ¾ load
+          [greens(14, 1.7, 1.6), -1.0, 0, 0], [timber(), .75, -.35, .08], [chair(), 1.45, .45, .6], [cardboard(.55, .45, .5), .4, .45, -.25], [bag(.3), 1.55, -.45, 0]],
+        [ // full load
+          [greens(16, 1.9, 1.7), .95, 0, 0], [mattress(0xece8df), -1.0, 0, -.12], [tv(), -1.3, -.35, .3], [cardboard(.5, .42, .5), -.55, .45, .4], [bag(.3), -1.6, .5, 0], [cardboard(.45, .4, .45), -.2, -.5, -.3]],
+      ];
+      const loads = PLACE.map((layer, q) => {
+        const grp = new T.Group(); trailer.add(grp);
+        layer.forEach(([obj, x, z, ry]) => { obj.position.set(x, FLOOR + q * .5, z); obj.rotation.y = ry; obj.userData.home = obj.position.clone(); grp.add(obj); });
+        grp.visible = false; return grp;
+      });
+
+      // fill volume + level ring
+      const fillMat = new T.MeshBasicMaterial({ color: 0x84c430, transparent: true, opacity: .14, depthWrite: false });
+      const fill = new T.Mesh(B(L - .06, 1, W - .06), fillMat); fill.position.set(0, FLOOR, 0); fill.scale.y = .001; trailer.add(fill);
+      const ring = new T.LineSegments(new T.EdgesGeometry(new T.PlaneGeometry(L - .02, W - .02)), new T.LineBasicMaterial({ color: 0x5f9a1c }));
+      ring.rotation.x = -Math.PI / 2; ring.position.y = FLOOR + 1; trailer.add(ring);
+
+      // ---------- camera orbit ----------
+      let az = .75, el = .36, dist = 9.2, autoSpin = !reduce, dragging = false, vAz = 0, lastX = 0, lastY = 0, visible = true, raf = 0;
+      const tween = { az: null };
+      const place = () => { cam.position.set(target.x + dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az)); cam.lookAt(target); };
+      const resize = () => { const r = box3.getBoundingClientRect(); if (!r.width) return; renderer.setSize(r.width, r.height, false); cam.aspect = r.width / r.height; dist = 11.4 / Math.min(1, cam.aspect / 1.15) ** .55; cam.updateProjectionMatrix(); place(); };
+      addEventListener('resize', resize);
+      const stopAuto = () => { autoSpin = false; box3.classList.add('used'); };
+      cv.addEventListener('pointerdown', e => { dragging = true; stopAuto(); lastX = e.clientX; lastY = e.clientY; vAz = 0; cv.setPointerCapture(e.pointerId); if (hasGsap) gsap.killTweensOf(view); });
+      cv.addEventListener('pointermove', e => {
+        if (!dragging) return;
+        const dx = e.clientX - lastX, dy = e.clientY - lastY; lastX = e.clientX; lastY = e.clientY;
+        vAz = -dx * .009; az += vAz;
+        if (e.pointerType === 'mouse') el = Math.max(.06, Math.min(1.35, el + dy * .006));
+      });
+      const up = () => { dragging = false; };
+      cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+      cv.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') { stopAuto(); az += .2; } if (e.key === 'ArrowRight') { stopAuto(); az -= .2; } if (e.key === 'ArrowUp') el = Math.min(1.35, el + .1); if (e.key === 'ArrowDown') el = Math.max(.06, el - .1); });
+
+      const view = { get az() { return az; }, set az(v) { az = v; }, get el() { return el; }, set el(v) { el = v; } };
+      const goView = (a, e) => {
+        stopAuto(); const tgtA = az + ((((a - az) % (Math.PI * 2)) + Math.PI * 3) % (Math.PI * 2) - Math.PI);
+        if (hasGsap && !reduce) gsap.to(view, { az: tgtA, el: e, duration: .9, ease: 'power3.inOut' }); else { az = tgtA; el = e; }
+      };
+      $$('.t3d-ctl [data-view]').forEach(b => b.addEventListener('click', () => {
+        const v = b.dataset.view;
+        if (v === 'side') goView(0, .22); if (v === 'back') goView(-Math.PI / 2, .3); if (v === 'top') goView(az, 1.32); if (v === 'spin') { autoSpin = !reduce; box3.classList.remove('used'); goView(.75, .36); setTimeout(() => autoSpin = !reduce, 950); }
+      }));
+
+      const io2 = new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); if (visible && !raf) raf = requestAnimationFrame(loop); }, { threshold: 0 });
+      io2.observe(box3);
+      let last = performance.now();
+      function loop(now) {
+        const dt = Math.min(.05, (now - last) / 1000); last = now;
+        if (!dragging) { if (Math.abs(vAz) > .0005) { az += vAz; vAz *= .92; } else if (autoSpin) az += dt * .28; }
+        place(); renderer.render(scene, cam);
+        raf = visible ? requestAnimationFrame(loop) : 0;
+      }
+      resize(); raf = requestAnimationFrame(loop);
+
+      let curLevel = -1;
+      function setLevel(i, animate = true) {
+        const anim = animate && hasGsap && !reduce;
+        loads.forEach((g, q) => {
+          const on = q <= i, was = g.visible && g.userData.on;
+          g.userData.on = on;
+          if (on && !was) {
+            g.visible = true;
+            g.children.forEach((o, k) => { const h = o.userData.home; if (anim) gsap.fromTo(o.position, { y: h.y + 2.4 + k * .15 }, { y: h.y, duration: .75, ease: 'bounce.out', delay: Math.max(0, q - curLevel - 1) * .2 + k * .05 }); else o.position.copy(h); });
+          } else if (!on && was) {
+            if (anim) g.children.forEach((o, k) => gsap.to(o.position, { y: o.userData.home.y + 2.6, duration: .35, ease: 'power2.in', delay: k * .02, onComplete: () => { if (!g.userData.on) g.visible = false; } }));
+            else g.visible = false;
+          }
+        });
+        const hgt = (i + 1) * .5;
+        if (anim) { gsap.to(fill.scale, { y: hgt, duration: .8, ease: 'power2.out' }); gsap.to(fill.position, { y: FLOOR + hgt / 2, duration: .8, ease: 'power2.out' }); gsap.to(ring.position, { y: FLOOR + hgt, duration: .8, ease: 'elastic.out(1,.6)' }); }
+        else { fill.scale.y = hgt; fill.position.y = FLOOR + hgt / 2; ring.position.y = FLOOR + hgt; }
+        $('#t3dLvl').textContent = `${SIZES[i].label} · about ${SIZES[i].m3} m³`;
+        curLevel = i;
+      }
+      return { setLevel, resize };
+    }
+  })();
 })();
 </script>
 
