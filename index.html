@@ -1193,8 +1193,8 @@ footer.site .big span{color:var(--lime-deep)}
   const revs = $('#revs');
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   if (REVIEWS.length) {
-    // One review at a time, moving to the next every 15 seconds
-    const ROTATE_MS = 15000;
+    // One review at a time, moving to the next every 10 seconds
+    const ROTATE_MS = 10000;
     const card = r => `<article class="rev rev-slide" role="group" aria-roledescription="review"><div class="stars" aria-label="${r.stars} out of 5 stars">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</div>${r.title ? `<h3>${esc(r.title)}</h3>` : ''}<p class="rev-quote">“${esc(r.text)}”</p><footer><span class="av">${esc(r.name[0] || '?')}</span><span>${esc(r.name)}<br><small style="font-weight:500;opacity:.65">${esc(r.when || 'Google review')}</small></span></footer></article>`;
     revs.classList.add('revs-rotate');
     revs.innerHTML = `<div class="rev-stage" aria-live="polite">${REVIEWS.map(card).join('')}</div>`
