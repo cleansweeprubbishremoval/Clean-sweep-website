@@ -360,6 +360,7 @@ form.card{gap:26px}
 @media (max-width:520px){.extras-pick{grid-template-columns:1fr}}
 .stepper{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--paper);border-radius:14px;padding:10px 12px}
 .stepper span{display:grid;line-height:1.2}
+.bins-row{background:color-mix(in oklab,var(--sun) 30%,var(--paper));border:2px solid color-mix(in oklab,var(--sun) 70%,transparent)}
 .stepper small{color:var(--ink-soft);font-size:.8rem}
 .ctl{display:flex;align-items:center;gap:6px}
 .ctl button{width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:800 1.1rem/1 var(--f-body);cursor:pointer}
@@ -724,7 +725,7 @@ footer.site .big span{color:var(--lime-deep)}
         <article class="deal bin">
           <span class="tag">Bin collection</span>
           <div class="price">$50<small>per standard wheelie bin</small></div>
-          <p>Bin full mid-week, or after a party, Halloween or Christmas? We'll empty it.</p>
+          <p>Bin full mid-week, or after a party, Halloween or Christmas? We'll empty it. Book as many bins as you need.</p>
           <p class="fine">Bigger bins: contact us for a quote.</p>
         </article>
         <article class="deal extras">
@@ -865,6 +866,7 @@ footer.site .big span{color:var(--lime-deep)}
                 <label><input type="radio" name="job" id="j-sweep" value="sweep"><span><i>The Big Sweep</i><b>$400</b><small>kerbside pile</small></span></label>
                 <label><input type="radio" name="job" id="j-bin" value="bin"><span><i>Bin collection</i><b>$50</b><small>per wheelie bin</small></span></label>
               </div>
+              <div class="stepper bins-row" id="binsRow" hidden><span><b>How many bins?</b><small>$50 per standard wheelie bin</small></span><div class="ctl"><button type="button" data-b="-1" aria-label="One less bin">−</button><output id="x-bins" aria-live="polite">1</output><button type="button" data-b="1" aria-label="One more bin">+</button></div></div>
               <div class="extras-pick">
                 <div class="stepper"><span><b>Mattresses</b><small>+$120 each</small></span><div class="ctl"><button type="button" data-x="mattress" data-d="-1" aria-label="One less mattress">−</button><output id="x-mattress">0</output><button type="button" data-x="mattress" data-d="1" aria-label="One more mattress">+</button></div></div>
                 <div class="stepper"><span><b>Gas bottles</b><small>+$30 each</small></span><div class="ctl"><button type="button" data-x="gas" data-d="-1" aria-label="One less gas bottle">−</button><output id="x-gas">0</output><button type="button" data-x="gas" data-d="1" aria-label="One more gas bottle">+</button></div></div>
@@ -1280,7 +1282,7 @@ footer.site .big span{color:var(--lime-deep)}
     deposit: 'https://book.stripe.com/test_00wbJ15QjdAGfL83NI4c800', q1: 'https://book.stripe.com/test_8x2cN5guX2W2aqO5VQ4c801',
     q2: 'https://book.stripe.com/test_eVq3cvemP0NU1Ui4RM4c802', q3: 'https://book.stripe.com/test_6oU9AT3IbdAG0Qe9824c803',
     full: 'https://book.stripe.com/test_00wdR96UncwCdD0ac64c804', sweep: 'https://book.stripe.com/test_5kQ28rceH68e7eC6ZU4c805',
-    bin: 'https://book.stripe.com/test_28E6oHfqT1RYdD0gAu4c807' };
+    bin: 'https://book.stripe.com/test_aFa14nguX8gm42q6ZU4c808' };
   const stripeTest = !!window.claude || location.hash === '#stripetest';
   const STRIPE_LINKS = stripeTest ? STRIPE_TEST_LINKS : STRIPE_LIVE_LINKS;
   // Google Apps Script web app URL that adds bookings to your Google Calendar.
@@ -1293,6 +1295,7 @@ footer.site .big span{color:var(--lime-deep)}
   };
   const EXTRAS = { mattress: { name: 'Mattress', price: 120 }, gas: { name: 'Gas bottle', price: 30 } };
   const qty = { mattress: 0, gas: 0 };
+  let bins = 1;
   const cash = n => '$' + Math.round(n).toLocaleString('en-AU');
 
   // ---- Saved bookings (owner view on the Claude page) ----
@@ -1322,7 +1325,8 @@ footer.site .big span{color:var(--lime-deep)}
 
   const state = () => {
     const f = new FormData(form);
-    const jobKey = f.get('job') || 'q2', job = JOBS[jobKey];
+    const jobKey = f.get('job') || 'q2';
+    const job = jobKey === 'bin' ? { name: `Bin collection × ${bins} bin${bins > 1 ? 's' : ''}`, price: JOBS.bin.price * bins } : JOBS[jobKey];
     const extrasTotal = Object.keys(qty).reduce((t, k) => t + qty[k] * EXTRAS[k].price, 0);
     const total = job.price + extrasTotal;
     const payChoice = jobKey === 'bin' ? 'full' : (f.get('pay') || 'deposit');
@@ -1342,11 +1346,15 @@ footer.site .big span{color:var(--lime-deep)}
     $('#pFullAmt').textContent = cash(job.price) + ' today';
     const dep = $('#p-dep');
     dep.disabled = jobKey === 'bin';
+    $('#binsRow').hidden = jobKey !== 'bin';
     if (jobKey === 'bin') $('#p-full').checked = true;
   };
   form.addEventListener('input', refresh);
   form.addEventListener('change', refresh);
-  $$('.ctl button').forEach(b => b.addEventListener('click', () => {
+  $$('.ctl button[data-b]').forEach(b => b.addEventListener('click', () => {
+    bins = Math.max(1, Math.min(50, bins + +b.dataset.b)); $('#x-bins').textContent = bins; refresh();
+  }));
+  $$('.ctl button[data-x]').forEach(b => b.addEventListener('click', () => {
     const k = b.dataset.x; qty[k] = Math.max(0, Math.min(20, qty[k] + +b.dataset.d));
     $('#x-' + k).textContent = qty[k]; refresh();
   }));
@@ -1471,13 +1479,13 @@ footer.site .big span{color:var(--lime-deep)}
     const text = summary(r);
     const details = `<dl><dt>When</dt><dd>${esc(r.dateLabel)}, ${esc(r.window)}</dd><dt>Where</dt><dd>${esc(r.street)}, ${esc(r.suburb)} ${esc(r.postcode)}</dd><dt>Job</dt><dd>${esc(r.job)}${r.extras ? ' + ' + esc(r.extras) : ''}</dd><dt>Total</dt><dd>${esc(r.total)} estimated</dd></dl>`;
     const payBox = payUrl
-      ? `<div class="paybox"><b>Last step: pay ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'now'}</b>${stripeTest ? '<span class="note"><b>Test mode:</b> no real money is taken. Use card 4242 4242 4242 4242, any future date and any CVC.</span>' : ''}<span class="note">Secure checkout by Stripe. Card, Apple Pay, Google Pay or direct debit.</span><a class="btn" href="${esc(payUrl)}" rel="noopener">Pay ${esc(r.payNow)} securely</a></div>`
+      ? `<div class="paybox"><b>Last step: pay ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'now'}</b>${stripeTest ? '<span class="note"><b>Test mode:</b> no real money is taken. Use card 4242 4242 4242 4242, any future date and any CVC.</span>' : ''}<span class="note">Secure checkout by Stripe. Card, Apple Pay, Google Pay or direct debit.</span>${st.jobKey === 'bin' && bins > 1 ? `<span class="note"><b>At checkout, set the quantity to ${bins}</b> (one per bin).</span>` : ''}<a class="btn" href="${esc(payUrl)}" rel="noopener">Pay ${esc(r.payNow)} securely</a></div>`
       : `<div class="paybox"><b>Payment: ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'in full'}</b><span class="note">We'll send a secure payment link to ${esc(r.phone || r.email)} shortly.</span></div>`;
     done.innerHTML = saved
       ? `<span class="ref">Booking ${esc(r.ref)}</span><h3>You're booked in, ${first}!</h3><p>We'll ${r.phone ? 'text' : 'email'} you at <b>${esc(r.phone || r.email)}</b> 48 hours before to confirm.</p><p class="note">Need to cancel? Let us know at least 24 hours before your collection time, or the booking is non-refundable.</p>${details}${payBox}<div class="acts"><button class="btn ghost" type="button" id="again">Make another booking</button></div>`
       : `<span class="ref">Booking ${esc(r.ref)}</span><h3>Nearly there, ${first}.</h3><p>We couldn't send your booking from here. Copy it below and text it to <b>0493 866 368</b> or email <b>cleansweeprubbishremovals@gmail.com</b>.</p><pre id="sumText">${esc(text)}</pre><div class="acts"><button class="btn" type="button" id="copySum">Copy my booking</button><button class="btn ghost" type="button" id="again">Edit details</button></div>`;
     form.hidden = true; done.hidden = false; btn.disabled = false; btn.textContent = 'Confirm booking';
-    if (saved) { form.reset(); qty.mattress = qty.gas = 0; $('#x-mattress').textContent = $('#x-gas').textContent = '0'; refresh(); }
+    if (saved) { form.reset(); qty.mattress = qty.gas = 0; bins = 1; $('#x-mattress').textContent = $('#x-gas').textContent = '0'; $('#x-bins').textContent = '1'; refresh(); }
     const cs = $('#copySum');
     if (cs) cs.addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(text); cs.textContent = 'Copied'; }
