@@ -68,7 +68,7 @@ function doGet(e) {
 function addBooking_(p) {
   const [y, m, d] = String(p.date || '').split('-').map(Number);
   if (!y || !m || !d) throw new Error('Missing or invalid date: ' + p.date);
-  const h = WINDOWS[p.window] || [7, 11];
+  const h = WINDOWS[p.window] || hourSlot_(p.window);
   const at = hr => Utilities.parseDate(Utilities.formatString('%04d-%02d-%02d %02d:00', y, m, d, hr), TZ, 'yyyy-MM-dd HH:mm');
   const address = [p.street, p.suburb, 'NSW', p.postcode].filter(String).join(' ');
   const title = 'Clean Sweep: ' + (p.size || 'Pickup') + ' – ' + (p.name || 'Customer') + ' – ' + (p.phone || p.email || '');
@@ -301,6 +301,14 @@ function sms_(to, body) {
       payload: JSON.stringify({ messages: [{ source: 'clean-sweep-website', to: num, body: body.slice(0, 600) }] }),
     });
   } catch (err) { console.warn('SMS failed: ' + err); }
+}
+
+// '10am' .. '4pm' from the website -> a one-hour calendar slot, e.g. [15, 16] for 3pm
+function hourSlot_(w) {
+  const m = String(w || '').match(/(\d{1,2})\s*(am|pm)/i);
+  if (!m) return [10, 11];
+  let h = Number(m[1]) % 12; if (m[2].toLowerCase() === 'pm') h += 12;
+  return [h, h + 1];
 }
 
 function shortWindow_(w) { return String(w || '').replace(/.*\((.*)\)/, '$1'); }

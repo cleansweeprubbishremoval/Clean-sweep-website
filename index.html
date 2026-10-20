@@ -464,6 +464,21 @@ footer.site .mail{overflow-wrap:anywhere}
 @media (max-width:760px){.revs.revs-rotate{grid-template-columns:minmax(0,1fr)}.revs-rotate .rev-stage{order:0}.revs-rotate .rev-ctl{order:1}.revs-rotate .rev-cta{order:2}}
 @media (prefers-reduced-motion:reduce){.rev-slide,.rev-slide.on{transition:none;transform:none}}
 
+/* preferred time scroller */
+.times-wrap{position:relative;display:flex;align-items:center;gap:6px;min-width:0}
+.times{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 4px;padding:4px 2px 8px;flex:1;min-width:0;scrollbar-width:thin;-webkit-overflow-scrolling:touch;mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%)}
+.times label{flex:none;scroll-snap-align:start;cursor:pointer;position:relative}
+.times input{position:absolute;opacity:0;pointer-events:none}
+.times span{display:grid;place-items:center;width:74px;height:66px;border:2px solid var(--line);border-radius:16px;background:var(--paper);transition:border-color .15s,background .15s,transform .15s}
+.times b{font:900 italic 1.45rem/1 var(--f-display);font-stretch:108%}
+.times small{font:600 .7rem var(--f-body);margin-left:2px;font-style:normal;text-transform:uppercase;opacity:.75}
+.times label:hover span{transform:translateY(-2px)}
+.times input:checked+span{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.times input:focus-visible+span{outline:3px solid var(--sky);outline-offset:2px}
+.tscroll{flex:none;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:800 1.2rem/1 var(--f-body);cursor:pointer;display:grid;place-items:center}
+.tscroll:hover{border-color:var(--ink)}
+@media (hover:none){.tscroll{display:none}}
+
 /* owner inbox */
 .inbox{margin-top:40px;background:var(--card);color:var(--ink);border-radius:24px;padding:24px;display:grid;gap:14px}
 .inbox h3{font-size:1.3rem}
@@ -870,15 +885,22 @@ footer.site .big span{color:var(--lime-deep)}
 
             <div class="stepf" role="group" aria-labelledby="st2">
               <h3 class="sth" id="st2"><span class="sn">2</span>When suits you?</h3>
-              <div class="two">
-                <div class="field"><label for="q-date">Day</label><input id="q-date" name="date" type="date" required></div>
-                <div class="field"><span class="flabel">Arrival window</span>
-                  <div class="pick" role="radiogroup" aria-label="Arrival window">
-                    <label><input type="radio" id="w-am" name="window" value="Morning (7–11am)" checked><span>7–11am</span></label>
-                    <label><input type="radio" id="w-mid" name="window" value="Midday (11am–2pm)"><span>11am–2pm</span></label>
-                    <label><input type="radio" id="w-pm" name="window" value="Afternoon (2–5pm)"><span>2–5pm</span></label>
+              <div class="field"><label for="q-date">Day</label><input id="q-date" name="date" type="date" required></div>
+              <div class="field"><span class="flabel" id="timeLabel">Preferred time <span class="opt">(swipe for more)</span></span>
+                <div class="times-wrap">
+                  <button type="button" class="tscroll prev" aria-label="Earlier times" tabindex="-1">‹</button>
+                  <div class="times" role="radiogroup" aria-labelledby="timeLabel">
+                  <label><input type="radio" id="t-10am" name="window" value="10am" checked><span><b>10<small>am</small></b></span></label>
+                  <label><input type="radio" id="t-11am" name="window" value="11am"><span><b>11<small>am</small></b></span></label>
+                  <label><input type="radio" id="t-12pm" name="window" value="12pm"><span><b>12<small>pm</small></b></span></label>
+                  <label><input type="radio" id="t-1pm" name="window" value="1pm"><span><b>1<small>pm</small></b></span></label>
+                  <label><input type="radio" id="t-2pm" name="window" value="2pm"><span><b>2<small>pm</small></b></span></label>
+                  <label><input type="radio" id="t-3pm" name="window" value="3pm"><span><b>3<small>pm</small></b></span></label>
+                  <label><input type="radio" id="t-4pm" name="window" value="4pm"><span><b>4<small>pm</small></b></span></label>
                   </div>
+                  <button type="button" class="tscroll next" aria-label="Later times" tabindex="-1">›</button>
                 </div>
+                <p class="hint">We'll aim to arrive at your chosen time and text you if we're running a little early or late.</p>
               </div>
             </div>
 
@@ -1312,7 +1334,7 @@ footer.site .big span{color:var(--lime-deep)}
     $('#sJob').textContent = `${job.name} · ${cash(job.price)}`;
     const ex = Object.keys(qty).filter(k => qty[k]).map(k => `${qty[k]} × ${EXTRAS[k].name.toLowerCase()}${qty[k] > 1 ? 's' : ''}`);
     $('#sExtrasRow').hidden = !ex.length; $('#sExtras').textContent = ex.join(', ');
-    $('#sWhen').textContent = f.get('date') ? `${niceDate(f.get('date'))}, ${String(f.get('window')).replace(/ \(.*/, '').toLowerCase()}` : 'Pick a day';
+    $('#sWhen').textContent = f.get('date') ? `${niceDate(f.get('date'))}, ${f.get('window') || ''}` : 'Pick a day';
     $('#sTotal').textContent = cash(total);
     $('#sPayLabel').textContent = payChoice === 'deposit' ? 'Pay today (deposit)' : 'Pay today (in full)';
     $('#sPay').textContent = cash(payNow);
@@ -1332,6 +1354,13 @@ footer.site .big span{color:var(--lime-deep)}
   const jobFromSize = ['q1', 'q2', 'q3', 'full'];
   qs.addEventListener('click', () => { const r = $('#j-' + jobFromSize[sel]); if (r) { r.checked = true; refresh(); } });
   refresh();
+
+  // Preferred time scroller: arrows scroll the strip, and the chosen time scrolls into view
+  (() => {
+    const strip = $('.times'); if (!strip) return;
+    $$('.tscroll').forEach(b => b.addEventListener('click', () => strip.scrollBy({ left: (b.classList.contains('next') ? 1 : -1) * 164, behavior: reduce ? 'auto' : 'smooth' })));
+    strip.addEventListener('change', e => { const l = e.target.closest('label'); if (l) l.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: reduce ? 'auto' : 'smooth' }); });
+  })();
 
   const makeRef = () => 'CS-' + ymd(new Date()).slice(2).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
 
@@ -1356,7 +1385,7 @@ footer.site .big span{color:var(--lime-deep)}
     `Booking ${r.ref}: Clean Sweep Rubbish Removals`,
     `Name: ${r.name}`, `Phone: ${r.phone}`, r.email && `Email: ${r.email}`,
     `Address: ${r.street}, ${r.suburb} ${r.postcode}`,
-    `Job: ${r.job}`, r.extras && `Extras: ${r.extras}`, `When: ${r.dateLabel}, ${r.window}`,
+    `Job: ${r.job}`, r.extras && `Extras: ${r.extras}`, `When: ${r.dateLabel}, around ${r.window}`,
     `Estimated total: ${r.total}`, `Payment: ${r.payChoice} (${r.payNow} now)`,
     r.items.length && `Items: ${r.items.join(', ')}`, r.notes && `Notes: ${r.notes}`
   ].filter(Boolean).join('\n');
