@@ -322,6 +322,85 @@ fieldset{border:0;padding:0;margin:0}
 .done pre{white-space:pre-wrap;background:var(--paper);border-radius:14px;padding:16px;font:500 .88rem/1.5 var(--f-mono);margin:0;max-height:260px;overflow:auto}
 .done .acts{display:flex;flex-wrap:wrap;gap:10px}
 
+/* booking */
+.quote{grid-template-columns:.78fr 1.22fr}
+.quote-side{position:sticky;top:96px}
+@media (max-width:900px){.quote-side{position:static}}
+.sum{background:color-mix(in oklab,var(--band-ink) 7%,transparent);border:1.5px solid color-mix(in oklab,var(--band-ink) 16%,transparent);border-radius:20px;padding:18px 20px;display:grid;gap:10px}
+.sum .tag{font:500 .72rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--lime)}
+.sum-row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-size:.95rem}
+.sum-row span{color:color-mix(in oklab,var(--band-ink) 72%,transparent)}
+.sum-row b{text-align:right;font-variant-numeric:tabular-nums}
+.sum-row.total{border-top:1px dashed color-mix(in oklab,var(--band-ink) 25%,transparent);padding-top:10px}
+.sum-row.pay b{font:900 italic 1.9rem/1 var(--f-display);font-stretch:112%;color:var(--lime)}
+.sum-note{font-size:.82rem;color:color-mix(in oklab,var(--band-ink) 62%,transparent)}
+form.card{gap:26px}
+.stepf{display:grid;gap:14px;min-width:0}
+.stepf+.stepf{border-top:2px dashed var(--line);padding-top:24px}
+.sth{display:flex;align-items:center;gap:12px;font-size:1.4rem;font-stretch:108%;margin:0}
+.sn{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--lime);color:#0B1426;font:900 1rem var(--f-body);font-style:normal}
+.flabel{font-weight:700;font-size:.92rem}
+.opt{font-weight:500;opacity:.6}
+.jobs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:520px){.jobs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.jobs label,.payopts label{position:relative;cursor:pointer;display:grid}
+.jobs input,.payopts input{position:absolute;opacity:0;pointer-events:none}
+.jobs span{border:2px solid var(--line);border-radius:16px;padding:12px 10px;display:grid;gap:4px;justify-items:center;text-align:center;transition:border-color .15s,background .15s,transform .15s}
+.jobs i{font-style:normal;font-weight:800;font-size:.9rem}
+.jobs b{font:900 italic 1.35rem/1 var(--f-display);font-stretch:110%;font-variant-numeric:tabular-nums}
+.jobs small{font:500 .7rem var(--f-mono);color:var(--ink-soft)}
+.jobs label:hover span{transform:translateY(-2px)}
+.jobs input:checked+span{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.jobs input:checked+span small{color:color-mix(in oklab,var(--paper) 70%,transparent)}
+.jobs input:checked+span b{color:var(--sel-price)}
+.jobs input:focus-visible+span,.payopts input:focus-visible+span{outline:3px solid var(--sky);outline-offset:2px}
+.extras-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.extras-pick{grid-template-columns:1fr}}
+.stepper{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--paper);border-radius:14px;padding:10px 12px}
+.stepper span{display:grid;line-height:1.2}
+.stepper small{color:var(--ink-soft);font-size:.8rem}
+.ctl{display:flex;align-items:center;gap:6px}
+.ctl button{width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:800 1.1rem/1 var(--f-body);cursor:pointer}
+.ctl button:hover{background:var(--lime);border-color:var(--lime);color:#0B1426}
+.ctl output{min-width:1.6em;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+.payopts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.payopts{grid-template-columns:1fr}}
+.payopts span{border:2px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;gap:4px;transition:border-color .15s,background .15s}
+.payopts em{font:900 italic 1.5rem/1.05 var(--f-display);font-stretch:110%;color:var(--lime-deep)}
+.payopts small{color:var(--ink-soft);font-size:.84rem}
+.payopts input:checked+span{border-color:var(--lime-deep);background:color-mix(in oklab,var(--lime) 14%,var(--card))}
+.payopts input:disabled+span{opacity:.45;cursor:not-allowed}
+.secure{display:flex;gap:10px;align-items:flex-start;font-size:.85rem;color:var(--ink-soft)}
+.secure svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--lime-deep)}
+.field input:invalid.touched,.field input.bad{border-color:#D2353B}
+.done .ref{font:500 .82rem var(--f-mono);letter-spacing:.08em;color:var(--ink-soft)}
+.done dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0;font-size:.95rem}
+.done dt{color:var(--ink-soft)}
+.done dd{margin:0;font-weight:700;min-width:0;overflow-wrap:anywhere}
+.done .paybox{background:var(--paper);border-radius:18px;padding:16px;display:grid;gap:10px}
+.done .paybox .btn{justify-self:start}
+
+/* sydney modal */
+.modal{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));background:rgba(8,14,28,.62);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.modal-box{background:var(--card);color:var(--ink);border-radius:26px;padding:clamp(22px,4vw,34px);max-width:440px;width:100%;display:grid;gap:12px;box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
+.modal-box h3{font-size:1.7rem}
+.modal-box p{color:var(--ink-soft)}
+.modal-box .addr{color:var(--ink);font-weight:700;background:var(--paper);border-radius:12px;padding:12px 14px}
+.pin{width:52px;height:52px;border-radius:16px;background:var(--lime);color:#0B1426;display:grid;place-items:center}
+.pin svg{width:28px;height:28px}
+.modal-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.modal-msg{color:#D2353B!important;font-weight:600}
+
+/* drive-off */
+.drive{position:fixed;inset:0;z-index:98;background:linear-gradient(180deg,#9FDBFF 0%,#D9F1FF 55%,#EAF5E0 100%);overflow:hidden;cursor:pointer}
+.drive canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.drive-text{position:absolute;left:0;right:0;top:calc(9vh + env(safe-area-inset-top,0px));display:grid;justify-items:center;gap:6px;text-align:center;color:#12203A;padding-inline:16px;pointer-events:none}
+.drive-text b{font:900 italic clamp(2.4rem,7vw,4.6rem)/1 var(--f-display);font-stretch:115%}
+.drive-text span{font:600 1.1rem var(--f-body)}
+.drive-skip{position:absolute;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:rgba(18,32,58,.85);color:#F3F7EF;border:0;border-radius:999px;padding:.6em 1.1em;font:700 .9rem var(--f-body);cursor:pointer}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:96;background:var(--ink);color:var(--paper);padding:14px 18px;border-radius:16px;box-shadow:0 20px 50px -15px rgba(0,0,0,.5);max-width:calc(100% - 32px);font-size:.95rem}
+.toast b{color:var(--sel-price)}
+
 /* owner inbox */
 .inbox{margin-top:40px;background:var(--card);color:var(--ink);border-radius:24px;padding:24px;display:grid;gap:14px}
 .inbox h3{font-size:1.3rem}
@@ -440,7 +519,7 @@ footer.site .big span{color:var(--lime-deep)}
         <h2 class="split">Three steps to a clear space.</h2>
       </div>
       <div class="steps">
-        <div class="step"><span class="n">1</span><h3>Send a photo</h3><p>Fill in the quote form or text a photo to 0493 866 368. Tell us roughly what's there and where.</p></div>
+        <div class="step"><span class="n">1</span><h3>Book online</h3><p>Book online below, or text a photo to 0493 866 368 if you're not sure what size you need.</p></div>
         <div class="step"><span class="n">2</span><h3>Confirm your price</h3><p>Check the price list, then we confirm your final price on site before we start loading. No surprises.</p></div>
         <div class="step"><span class="n">3</span><h3>We load &amp; sweep</h3><p>We turn up, do all the lifting, take it away and sweep up so there's nothing left behind.</p></div>
       </div>
@@ -653,7 +732,7 @@ footer.site .big span{color:var(--lime-deep)}
         <details><summary>How soon can you come?</summary><p>Get in touch and we'll give you the next available time. We're often able to come within a day or two.</p></details>
         <details><summary>What happens to my rubbish?</summary><p>We sort it before it goes anywhere. Metal, cardboard and e-waste go to recycling, usable items can go to charity, and only what's left goes to a licensed waste facility.</p></details>
         <details><summary>Do you carry heavy items down stairs?</summary><p>Yes. We do all the lifting from anywhere on the property, including upstairs, backyards and under the house. Stairs or a long carry can add a little to the price, and we'll tell you upfront.</p></details>
-        <details><summary>How can I pay?</summary><p>Ask when you book and we'll go through the options with you.</p></details>
+        <details><summary>How can I pay?</summary><p>When you book online you can pay a $100 deposit or the full price through our secure Stripe checkout, by card, Apple Pay, Google Pay or direct debit from your bank account. Anything left over is settled on the day.</p></details>
       </div>
     </div>
   </section>
@@ -662,12 +741,21 @@ footer.site .big span{color:var(--lime-deep)}
     <div class="wrap">
       <div class="quote">
         <div class="quote-side">
-          <span class="eyebrow">Book a pickup</span>
-          <h2 class="split">Let's get it gone.</h2>
-          <p class="lede">Tell us what needs to go and when suits you. We'll call to lock in a time. Not sure of the size? Text a photo.</p>
+          <span class="eyebrow">Book online</span>
+          <h2 class="split">Book your pickup.</h2>
+          <p class="lede">Pick your load, choose a day and pay securely online. We'll text you the day before to confirm.</p>
+          <aside class="sum" id="sum" aria-live="polite">
+            <span class="tag">Your booking</span>
+            <div class="sum-row"><span>Job</span><b id="sJob">½ load</b></div>
+            <div class="sum-row" id="sExtrasRow" hidden><span>Extras</span><b id="sExtras"></b></div>
+            <div class="sum-row"><span>When</span><b id="sWhen">Pick a day</b></div>
+            <div class="sum-row total"><span>Estimated total</span><b id="sTotal">$950</b></div>
+            <div class="sum-row pay"><span id="sPayLabel">Pay today (deposit)</span><b id="sPay">$100</b></div>
+            <p class="sum-note">Final price confirmed on site before we start loading.</p>
+          </aside>
           <div class="contact">
             <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
-              <div><small>Call or text</small><b>0493 866 368</b></div><button class="copy" type="button" data-copy="0493 866 368">Copy</button></div>
+              <div><small>Rather talk? Call or text</small><b>0493 866 368</b></div><button class="copy" type="button" data-copy="0493 866 368">Copy</button></div>
             <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
               <div><small>Email</small><b>cleansweeprubbishremovals@gmail.com</b></div><button class="copy" type="button" data-copy="cleansweeprubbishremovals@gmail.com">Copy</button></div>
           </div>
@@ -676,39 +764,78 @@ footer.site .big span{color:var(--lime-deep)}
         <div>
           <form class="card" id="qform" name="quote" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
             <input type="hidden" name="form-name" value="quote">
+            <input type="hidden" name="ref"><input type="hidden" name="size"><input type="hidden" name="extras"><input type="hidden" name="dateLabel"><input type="hidden" name="total"><input type="hidden" name="payChoice"><input type="hidden" name="payNow"><input type="hidden" name="at">
             <p hidden><label>Leave this empty <input name="bot-field"></label></p>
-            <div class="two">
-              <div class="field"><label for="q-name">Your name</label><input id="q-name" name="name" autocomplete="name" required></div>
-              <div class="field"><label for="q-phone">Phone</label><input id="q-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required></div>
-            </div>
-            <div class="two">
-              <div class="field"><label for="q-email">Email <span style="font-weight:500;opacity:.6">(optional)</span></label><input id="q-email" name="email" type="email" autocomplete="email"></div>
-              <div class="field"><label for="q-suburb">Suburb</label><input id="q-suburb" name="suburb" autocomplete="address-level2" required></div>
-            </div>
-            <div class="two">
-              <div class="field"><label for="q-size">What do you need?</label>
-                <select id="q-size" name="size"><option>Not sure</option><option>¼ load ($550)</option><option selected>½ load ($950)</option><option>¾ load ($1,350)</option><option>Full load ($1,750)</option><option>The Big Sweep ($400)</option><option>Bin collection ($40)</option></select></div>
-              <div class="field"><label for="q-date">Preferred day</label><input id="q-date" name="date" type="date"></div>
-            </div>
-            <fieldset class="field"><legend>What's going?</legend>
-              <div class="pick">
-                <label><input type="checkbox" id="q-i1" name="items" value="Furniture"><span>Furniture</span></label>
-                <label><input type="checkbox" id="q-i2" name="items" value="Mattresses"><span>Mattresses</span></label>
-                <label><input type="checkbox" id="q-i3" name="items" value="Whitegoods"><span>Whitegoods</span></label>
-                <label><input type="checkbox" id="q-i4" name="items" value="E-waste"><span>E-waste</span></label>
-                <label><input type="checkbox" id="q-i8" name="items" value="Gas bottles"><span>Gas bottles</span></label>
-                <label><input type="checkbox" id="q-i9" name="items" value="Paint & oil"><span>Paint &amp; oil</span></label>
-                <label><input type="checkbox" id="q-i10" name="items" value="Fire extinguishers"><span>Fire extinguishers</span></label>
-                <label><input type="checkbox" id="q-i5" name="items" value="Green waste"><span>Green waste</span></label>
-                <label><input type="checkbox" id="q-i6" name="items" value="Building waste"><span>Building waste</span></label>
-                <label><input type="checkbox" id="q-i7" name="items" value="General junk"><span>General junk</span></label>
+            <div class="stepf" role="group" aria-labelledby="st1">
+              <h3 class="sth" id="st1"><span class="sn">1</span>What are we taking?</h3>
+              <div class="jobs" role="radiogroup" aria-label="Job">
+                <label><input type="radio" name="job" id="j-q1" value="q1"><span><i>¼ load</i><b>$550</b><small>≈ 4 m³</small></span></label>
+                <label><input type="radio" name="job" id="j-q2" value="q2" checked><span><i>½ load</i><b>$950</b><small>≈ 8 m³</small></span></label>
+                <label><input type="radio" name="job" id="j-q3" value="q3"><span><i>¾ load</i><b>$1,350</b><small>≈ 12 m³</small></span></label>
+                <label><input type="radio" name="job" id="j-full" value="full"><span><i>Full load</i><b>$1,750</b><small>≈ 16 m³</small></span></label>
+                <label><input type="radio" name="job" id="j-sweep" value="sweep"><span><i>The Big Sweep</i><b>$400</b><small>kerbside pile</small></span></label>
+                <label><input type="radio" name="job" id="j-bin" value="bin"><span><i>Bin collection</i><b>$40</b><small>per wheelie bin</small></span></label>
               </div>
-            </fieldset>
-            <div class="field"><label for="q-notes">Anything else we should know?</label><textarea id="q-notes" name="notes" placeholder="e.g. couch is upstairs, rubbish is in the backyard, access via side gate"></textarea></div>
+              <div class="extras-pick">
+                <div class="stepper"><span><b>Mattresses</b><small>+$120 each</small></span><div class="ctl"><button type="button" data-x="mattress" data-d="-1" aria-label="One less mattress">−</button><output id="x-mattress">0</output><button type="button" data-x="mattress" data-d="1" aria-label="One more mattress">+</button></div></div>
+                <div class="stepper"><span><b>Gas bottles</b><small>+$30 each</small></span><div class="ctl"><button type="button" data-x="gas" data-d="-1" aria-label="One less gas bottle">−</button><output id="x-gas">0</output><button type="button" data-x="gas" data-d="1" aria-label="One more gas bottle">+</button></div></div>
+              </div>
+              <div class="field"><span class="flabel">What's going? <span class="opt">(optional)</span></span>
+                <div class="pick">
+                  <label><input type="checkbox" id="q-i1" name="items" value="Furniture"><span>Furniture</span></label>
+                  <label><input type="checkbox" id="q-i3" name="items" value="Whitegoods"><span>Whitegoods</span></label>
+                  <label><input type="checkbox" id="q-i4" name="items" value="E-waste"><span>E-waste</span></label>
+                  <label><input type="checkbox" id="q-i9" name="items" value="Paint & oil"><span>Paint &amp; oil</span></label>
+                  <label><input type="checkbox" id="q-i10" name="items" value="Fire extinguishers"><span>Fire extinguishers</span></label>
+                  <label><input type="checkbox" id="q-i5" name="items" value="Green waste"><span>Green waste</span></label>
+                  <label><input type="checkbox" id="q-i6" name="items" value="Building waste"><span>Building waste</span></label>
+                  <label><input type="checkbox" id="q-i7" name="items" value="General junk"><span>General junk</span></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="stepf" role="group" aria-labelledby="st2">
+              <h3 class="sth" id="st2"><span class="sn">2</span>When suits you?</h3>
+              <div class="two">
+                <div class="field"><label for="q-date">Day</label><input id="q-date" name="date" type="date" required></div>
+                <div class="field"><span class="flabel">Arrival window</span>
+                  <div class="pick" role="radiogroup" aria-label="Arrival window">
+                    <label><input type="radio" id="w-am" name="window" value="Morning (7–11am)" checked><span>7–11am</span></label>
+                    <label><input type="radio" id="w-mid" name="window" value="Midday (11am–2pm)"><span>11am–2pm</span></label>
+                    <label><input type="radio" id="w-pm" name="window" value="Afternoon (2–5pm)"><span>2–5pm</span></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="stepf" role="group" aria-labelledby="st3">
+              <h3 class="sth" id="st3"><span class="sn">3</span>Your details</h3>
+              <div class="two">
+                <div class="field"><label for="q-name">Full name</label><input id="q-name" name="name" autocomplete="name" required></div>
+                <div class="field"><label for="q-phone">Best contact number</label><input id="q-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required></div>
+              </div>
+              <div class="field"><label for="q-email">Email <span class="opt">(for your receipt)</span></label><input id="q-email" name="email" type="email" autocomplete="email" required></div>
+              <div class="field"><label for="q-street">Pickup address</label><input id="q-street" name="street" autocomplete="street-address" placeholder="Street number and name" required></div>
+              <div class="two">
+                <div class="field"><label for="q-suburb">Suburb</label><input id="q-suburb" name="suburb" autocomplete="address-level2" required></div>
+                <div class="field"><label for="q-postcode">Postcode</label><input id="q-postcode" name="postcode" autocomplete="postal-code" inputmode="numeric" maxlength="4" required></div>
+              </div>
+              <div class="field"><label for="q-notes">Access and other notes <span class="opt">(optional)</span></label><textarea id="q-notes" name="notes" placeholder="e.g. couch is upstairs, rubbish is in the backyard, access via side gate"></textarea></div>
+            </div>
+
+            <div class="stepf" role="group" aria-labelledby="st4">
+              <h3 class="sth" id="st4"><span class="sn">4</span>Payment</h3>
+              <div class="payopts" role="radiogroup" aria-label="How much to pay now">
+                <label><input type="radio" name="pay" id="p-dep" value="deposit" checked><span><b>Pay a deposit</b><em id="pDepAmt">$100 today</em><small>The rest on the day, once we've confirmed the load.</small></span></label>
+                <label><input type="radio" name="pay" id="p-full" value="full"><span><b>Pay in full</b><em id="pFullAmt">$950 today</em><small>Any difference is settled on the day.</small></span></label>
+              </div>
+              <p class="secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Secure checkout by Stripe. Pay by card, Apple Pay, Google Pay or direct debit from your bank account. Mattresses, gas bottles and any change to the load size are settled on the day.</span></p>
+            </div>
+
             <p class="err" id="qerr" hidden></p>
             <div class="form-foot">
-              <small>We'll only use your details to get back to you about this quote.</small>
-              <span class="magnet"><button class="btn" type="submit" id="qsubmit">Send my booking request</button></span>
+              <small>We only use your details for this booking.</small>
+              <span class="magnet"><button class="btn" type="submit" id="qsubmit">Confirm booking</button></span>
             </div>
           </form>
           <div class="done" id="qdone" hidden></div>
@@ -716,8 +843,8 @@ footer.site .big span{color:var(--lime-deep)}
       </div>
       <div class="inbox" id="inbox" hidden>
         <span class="tag">Only you can see this</span>
-        <h3>Booking requests</h3>
-        <div id="inboxList"><p class="note">No requests yet. New ones from this page will show up here.</p></div>
+        <h3>Bookings</h3>
+        <div id="inboxList"><p class="note">No bookings yet. New ones from this page will show up here.</p></div>
       </div>
     </div>
   </section>
@@ -747,6 +874,28 @@ footer.site .big span{color:var(--lime-deep)}
   <a class="btn ghost" href="tel:0493866368">Call</a>
   <a class="btn" href="#quote" data-scroll>Book now</a>
 </div>
+
+<div class="modal" id="syd" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="sydTitle" aria-describedby="sydText">
+    <div class="pin" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
+    <h3 id="sydTitle">Is this pickup in Sydney?</h3>
+    <p id="sydText">We only collect from Sydney and surrounding suburbs. Please confirm this address is in Sydney:</p>
+    <p class="addr" id="sydAddr"></p>
+    <div class="modal-acts">
+      <button class="btn" type="button" id="sydYes">Yes, it's in Sydney</button>
+      <button class="btn ghost" type="button" id="sydNo">No, it's not</button>
+    </div>
+    <p class="modal-msg" id="sydMsg" hidden>Sorry, we only cover Sydney at the moment. Give us a call on 0493 866 368 and we'll try to point you to someone local.</p>
+  </div>
+</div>
+
+<div class="drive" id="drive" hidden aria-hidden="true">
+  <canvas id="driveCanvas"></canvas>
+  <div class="drive-text"><b>You're booked in!</b><span>We're on our way.</span></div>
+  <button class="drive-skip" type="button" id="driveSkip">Skip</button>
+</div>
+
+<div class="toast" id="paidToast" hidden role="status"><b>Payment received.</b> Thanks, we'll see you on the day!</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
@@ -979,7 +1128,22 @@ footer.site .big span{color:var(--lime-deep)}
     setTimeout(() => b.textContent = 'Copy', 1600);
   }));
 
-  // ---- Quote form ----
+  // ---- Booking settings: paste your links here once they're set up ----
+  // Stripe Payment Links (Stripe dashboard > Payment Links). Leave '' until created.
+  const STRIPE_LINKS = { deposit: '', q1: '', q2: '', q3: '', full: '', sweep: '', bin: '' };
+  // Google Apps Script web app URL that adds bookings to your Google Calendar.
+  const CALENDAR_URL = '';
+  const DEPOSIT = 100;
+
+  const JOBS = {
+    q1: { name: '¼ load', price: 550 }, q2: { name: '½ load', price: 950 }, q3: { name: '¾ load', price: 1350 },
+    full: { name: 'Full load', price: 1750 }, sweep: { name: 'The Big Sweep', price: 400 }, bin: { name: 'Bin collection', price: 40 },
+  };
+  const EXTRAS = { mattress: { name: 'Mattress', price: 120 }, gas: { name: 'Gas bottle', price: 30 } };
+  const qty = { mattress: 0, gas: 0 };
+  const cash = n => '$' + Math.round(n).toLocaleString('en-AU');
+
+  // ---- Saved bookings (owner view on the Claude page) ----
   let db = null, user = null;
   const caps = (async () => {
     if (!window.claude || !window.claude.use) return;
@@ -991,43 +1155,136 @@ footer.site .big span{color:var(--lime-deep)}
           const all = [];
           snap.docs.forEach(d => ((d.data() || {}).requests || []).forEach(r => all.push(r)));
           all.sort((a, b) => (b.at || '').localeCompare(a.at || ''));
-          $('#inboxList').innerHTML = all.length ? all.map(r => `<div class="req"><b>${esc(r.name)} · ${esc(r.suburb)}</b><span>${esc(r.phone)}${r.email ? ' · ' + esc(r.email) : ''}</span><span>${esc(r.size)}${r.items && r.items.length ? ' · ' + esc(r.items.join(', ')) : ''}${r.date ? ' · wants ' + esc(r.date) : ''}</span>${r.notes ? `<span>${esc(r.notes)}</span>` : ''}<span class="meta">${new Date(r.at).toLocaleString('en-AU')}</span></div>`).join('') : '<p class="note">No requests yet. New ones from this page will show up here.</p>';
+          $('#inboxList').innerHTML = all.length ? all.map(r => `<div class="req"><b>${esc(r.name)} · ${esc(r.job || r.size || '')}</b><span>${esc(r.phone)}${r.email ? ' · ' + esc(r.email) : ''}</span><span>${esc([r.street, r.suburb, r.postcode].filter(Boolean).join(', '))}</span><span>${r.date ? esc(r.dateLabel || r.date) + ' · ' + esc(r.window || '') : ''}</span><span>${r.payChoice ? esc(r.payChoice) + ' · ' + esc(r.payNow || '') : ''}${r.ref ? ' · ' + esc(r.ref) : ''}</span>${r.notes ? `<span>${esc(r.notes)}</span>` : ''}<span class="meta">${new Date(r.at).toLocaleString('en-AU')}</span></div>`).join('') : '<p class="note">No bookings yet. New ones from this page will show up here.</p>';
         }, () => {});
       }
     } catch (e) {}
   })();
 
   const form = $('#qform'), err = $('#qerr'), done = $('#qdone'), btn = $('#qsubmit');
+  const dateIn = $('#q-date');
+  const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  dateIn.min = ymd(tomorrow);
+  const niceDate = v => { if (!v) return ''; const [y, m, d] = v.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' }); };
+
+  const state = () => {
+    const f = new FormData(form);
+    const jobKey = f.get('job') || 'q2', job = JOBS[jobKey];
+    const extrasTotal = Object.keys(qty).reduce((t, k) => t + qty[k] * EXTRAS[k].price, 0);
+    const total = job.price + extrasTotal;
+    const payChoice = jobKey === 'bin' ? 'full' : (f.get('pay') || 'deposit');
+    const payNow = payChoice === 'deposit' ? Math.min(DEPOSIT, job.price) : job.price;
+    return { f, jobKey, job, extrasTotal, total, payChoice, payNow };
+  };
+  const refresh = () => {
+    const { f, jobKey, job, total, payChoice, payNow } = state();
+    $('#sJob').textContent = `${job.name} · ${cash(job.price)}`;
+    const ex = Object.keys(qty).filter(k => qty[k]).map(k => `${qty[k]} × ${EXTRAS[k].name.toLowerCase()}${qty[k] > 1 ? 's' : ''}`);
+    $('#sExtrasRow').hidden = !ex.length; $('#sExtras').textContent = ex.join(', ');
+    $('#sWhen').textContent = f.get('date') ? `${niceDate(f.get('date'))}, ${String(f.get('window')).replace(/ \(.*/, '').toLowerCase()}` : 'Pick a day';
+    $('#sTotal').textContent = cash(total);
+    $('#sPayLabel').textContent = payChoice === 'deposit' ? 'Pay today (deposit)' : 'Pay today (in full)';
+    $('#sPay').textContent = cash(payNow);
+    $('#pDepAmt').textContent = cash(Math.min(DEPOSIT, job.price)) + ' today';
+    $('#pFullAmt').textContent = cash(job.price) + ' today';
+    const dep = $('#p-dep');
+    dep.disabled = jobKey === 'bin';
+    if (jobKey === 'bin') $('#p-full').checked = true;
+  };
+  form.addEventListener('input', refresh);
+  form.addEventListener('change', refresh);
+  $$('.ctl button').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.x; qty[k] = Math.max(0, Math.min(20, qty[k] + +b.dataset.d));
+    $('#x-' + k).textContent = qty[k]; refresh();
+  }));
+  // Price list buttons pre-select the job here
+  const jobFromSize = ['q1', 'q2', 'q3', 'full'];
+  qs.addEventListener('click', () => { const r = $('#j-' + jobFromSize[sel]); if (r) { r.checked = true; refresh(); } });
+  refresh();
+
+  const makeRef = () => 'CS-' + ymd(new Date()).slice(2).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+
+  // ---- Sydney check ----
+  const modal = $('#syd');
+  let lastFocus = null;
+  const openModal = addr => new Promise(resolve => {
+    $('#sydAddr').textContent = addr; $('#sydMsg').hidden = true; $('#sydYes').hidden = false;
+    lastFocus = document.activeElement; modal.hidden = false; if (lenis) lenis.stop();
+    $('#sydYes').focus();
+    const close = v => { modal.hidden = true; if (lenis) lenis.start(); if (lastFocus) lastFocus.focus(); cleanup(); resolve(v); };
+    const yes = () => close(true);
+    const no = () => { $('#sydMsg').hidden = false; $('#sydYes').hidden = true; $('#sydNo').textContent = 'Close'; $('#sydNo').onclick = () => { $('#sydNo').textContent = "No, it's not"; close(false); }; };
+    const key = e => { if (e.key === 'Escape') close(false); if (e.key === 'Tab') { const f = [...modal.querySelectorAll('button:not([hidden])')]; const i = f.indexOf(document.activeElement); if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); } } };
+    const back = e => { if (e.target === modal) close(false); };
+    $('#sydYes').addEventListener('click', yes); $('#sydNo').onclick = no;
+    document.addEventListener('keydown', key); modal.addEventListener('click', back);
+    const cleanup = () => { $('#sydYes').removeEventListener('click', yes); document.removeEventListener('keydown', key); modal.removeEventListener('click', back); };
+  });
+
   const summary = r => [
-    'Booking request: Clean Sweep Rubbish Removals',
-    `Name: ${r.name}`, `Phone: ${r.phone}`, r.email && `Email: ${r.email}`, `Suburb: ${r.suburb}`,
-    `Job: ${r.size}`, r.items.length && `Items: ${r.items.join(', ')}`, r.date && `Preferred day: ${r.date}`, r.notes && `Notes: ${r.notes}`
+    `Booking ${r.ref}: Clean Sweep Rubbish Removals`,
+    `Name: ${r.name}`, `Phone: ${r.phone}`, r.email && `Email: ${r.email}`,
+    `Address: ${r.street}, ${r.suburb} ${r.postcode}`,
+    `Job: ${r.job}`, r.extras && `Extras: ${r.extras}`, `When: ${r.dateLabel}, ${r.window}`,
+    `Estimated total: ${r.total}`, `Payment: ${r.payChoice} (${r.payNow} now)`,
+    r.items.length && `Items: ${r.items.join(', ')}`, r.notes && `Notes: ${r.notes}`
   ].filter(Boolean).join('\n');
+
   form.addEventListener('submit', async e => {
     e.preventDefault();
-    const f = new FormData(form);
+    const st = state(), f = st.f;
     const r = {
+      ref: makeRef(),
       name: (f.get('name') || '').trim(), phone: (f.get('phone') || '').trim(), email: (f.get('email') || '').trim(),
-      suburb: (f.get('suburb') || '').trim(), size: f.get('size'), date: f.get('date') || '',
+      street: (f.get('street') || '').trim(), suburb: (f.get('suburb') || '').trim(), postcode: (f.get('postcode') || '').trim(),
+      jobKey: st.jobKey, job: `${st.job.name} (${cash(st.job.price)})`, size: st.job.name,
+      extras: Object.keys(qty).filter(k => qty[k]).map(k => `${qty[k]} × ${EXTRAS[k].name} (+${cash(qty[k] * EXTRAS[k].price)})`).join(', '),
+      date: f.get('date') || '', dateLabel: niceDate(f.get('date')), window: f.get('window') || '',
+      total: cash(st.total), payChoice: st.payChoice === 'deposit' ? 'Deposit' : 'Paid in full', payNow: cash(st.payNow),
       items: f.getAll('items'), notes: (f.get('notes') || '').trim(), at: new Date().toISOString()
     };
-    const missing = [!r.name && 'your name', !r.phone && 'a phone number', !r.suburb && 'your suburb'].filter(Boolean);
-    if (missing.length) { err.textContent = 'Please add ' + missing.join(', ') + ' so we can get back to you.'; err.hidden = false; return; }
-    if (r.phone.replace(/\D/g, '').length < 8) { err.textContent = 'That phone number looks too short. Please check it.'; err.hidden = false; return; }
-    err.hidden = true; btn.disabled = true; btn.textContent = 'Sending…';
+    const need = [
+      [!r.date, 'a day', '#q-date'], [!r.name, 'your name', '#q-name'], [r.phone.replace(/\D/g, '').length < 8, 'a contact number', '#q-phone'],
+      [!/^\S+@\S+\.\S+$/.test(r.email), 'your email', '#q-email'], [!r.street, 'the pickup address', '#q-street'],
+      [!r.suburb, 'your suburb', '#q-suburb'], [!/^\d{4}$/.test(r.postcode), 'a 4-digit postcode', '#q-postcode']
+    ];
+    $$('.field input', form).forEach(i => i.classList.remove('bad'));
+    const missing = need.filter(n => n[0]);
+    if (r.date && r.date < dateIn.min) missing.unshift([true, 'a day from tomorrow onwards', '#q-date']);
+    if (missing.length) {
+      missing.forEach(m => $(m[2]).classList.add('bad'));
+      err.textContent = 'Please add ' + missing.map(m => m[1]).join(', ') + '.'; err.hidden = false;
+      $(missing[0][2]).focus(); return;
+    }
+    err.hidden = true;
+
+    const ok = await openModal(`${r.street}, ${r.suburb} NSW ${r.postcode}`);
+    if (!ok) return;
+
+    btn.disabled = true; btn.textContent = 'Booking…';
+    const drivePromise = playDrive();
     let saved = false;
+    try {
+      if (CALENDAR_URL) {
+        const body = new URLSearchParams({ ...r, items: r.items.join(', ') });
+        await fetch(CALENDAR_URL, { method: 'POST', mode: 'no-cors', body });
+        saved = true;
+      }
+    } catch (e1) {}
     try {
       if (WEB3FORMS_KEY) {
         const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject: 'New booking request: ' + r.name + ' (' + r.suburb + ')', from_name: 'Clean Sweep website', ...r, items: r.items.join(', ') }) });
+          body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject: 'New booking: ' + r.name + ' (' + r.suburb + ')', from_name: 'Clean Sweep website', ...r, items: r.items.join(', ') }) });
         const j = await res.json().catch(() => ({}));
         if (res.ok && j.success) saved = true;
       }
-      if (!saved && !window.claude) {
-        const body = new URLSearchParams();
-        new FormData(form).forEach((v, k) => body.append(k, v));
-        const res = await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString() });
-        if (res.ok) saved = true;
+      if (!window.claude) {
+        try {
+          const body = new URLSearchParams({ 'form-name': 'quote', ...r, items: r.items.join(', ') });
+          const res = await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString() });
+          if (res.ok) saved = true;
+        } catch (e4) {}
       }
       await caps;
       if (!saved && db && user) {
@@ -1040,21 +1297,199 @@ footer.site .big span{color:var(--lime-deep)}
           saved = true;
         }
       }
-    } catch (e2) { saved = false; }
+    } catch (e2) {}
+    await drivePromise;
+
+    const first = esc(r.name.split(' ')[0]);
+    const link = STRIPE_LINKS[st.payChoice === 'deposit' ? 'deposit' : st.jobKey];
+    const payUrl = link ? `${link}${link.includes('?') ? '&' : '?'}client_reference_id=${encodeURIComponent(r.ref)}&prefilled_email=${encodeURIComponent(r.email)}` : '';
     const text = summary(r);
+    const details = `<dl><dt>When</dt><dd>${esc(r.dateLabel)}, ${esc(r.window)}</dd><dt>Where</dt><dd>${esc(r.street)}, ${esc(r.suburb)} ${esc(r.postcode)}</dd><dt>Job</dt><dd>${esc(r.job)}${r.extras ? ' + ' + esc(r.extras) : ''}</dd><dt>Total</dt><dd>${esc(r.total)} estimated</dd></dl>`;
+    const payBox = payUrl
+      ? `<div class="paybox"><b>Last step: pay ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'now'}</b><span class="note">Secure checkout by Stripe. Card, Apple Pay, Google Pay or direct debit.</span><a class="btn" href="${esc(payUrl)}" rel="noopener">Pay ${esc(r.payNow)} securely</a></div>`
+      : `<div class="paybox"><b>Payment: ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'in full'}</b><span class="note">We'll text a secure payment link to ${esc(r.phone)} shortly.</span></div>`;
     done.innerHTML = saved
-      ? `<h3>Thanks, ${esc(r.name.split(' ')[0])}!</h3><p>Your request is in. We'll call you on <b>${esc(r.phone)}</b> to lock in a time. Want it faster? Text a photo of the rubbish to <b>0493 866 368</b>.</p><div class="acts"><button class="btn ghost" type="button" id="again">Send another</button></div>`
-      : `<h3>Nearly there, ${esc(r.name.split(' ')[0])}.</h3><p>We couldn't send this from here. Copy your request below and text it to <b>0493 866 368</b> or email <b>cleansweeprubbishremovals@gmail.com</b>.</p><pre id="sumText">${esc(text)}</pre><div class="acts"><button class="btn" type="button" id="copySum">Copy my request</button><button class="btn ghost" type="button" id="again">Edit details</button></div>`;
-    form.hidden = true; done.hidden = false; btn.disabled = false; btn.textContent = 'Send my booking request';
-    if (saved) form.reset();
+      ? `<span class="ref">Booking ${esc(r.ref)}</span><h3>You're booked in, ${first}!</h3><p>We'll text you on <b>${esc(r.phone)}</b> the day before to confirm.</p>${details}${payBox}<div class="acts"><button class="btn ghost" type="button" id="again">Make another booking</button></div>`
+      : `<span class="ref">Booking ${esc(r.ref)}</span><h3>Nearly there, ${first}.</h3><p>We couldn't send your booking from here. Copy it below and text it to <b>0493 866 368</b> or email <b>cleansweeprubbishremovals@gmail.com</b>.</p><pre id="sumText">${esc(text)}</pre><div class="acts"><button class="btn" type="button" id="copySum">Copy my booking</button><button class="btn ghost" type="button" id="again">Edit details</button></div>`;
+    form.hidden = true; done.hidden = false; btn.disabled = false; btn.textContent = 'Confirm booking';
+    if (saved) { form.reset(); qty.mattress = qty.gas = 0; $('#x-mattress').textContent = $('#x-gas').textContent = '0'; refresh(); }
     const cs = $('#copySum');
     if (cs) cs.addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(text); cs.textContent = 'Copied'; }
       catch (e3) { const rg = document.createRange(); rg.selectNodeContents($('#sumText')); const s = getSelection(); s.removeAllRanges(); s.addRange(rg); cs.textContent = 'Selected, now copy'; }
     });
-    $('#again').addEventListener('click', () => { done.hidden = true; form.hidden = false; });
+    $('#again').addEventListener('click', () => { done.hidden = true; form.hidden = false; refresh(); });
     scrollToEl($('#quote'));
   });
+
+  // Back from Stripe checkout
+  try {
+    if (new URLSearchParams(location.search).get('paid') === '1') {
+      const t = $('#paidToast'); t.hidden = false; setTimeout(() => t.hidden = true, 7000);
+    }
+  } catch (e) {}
+
+  // ---- 3D ute + trailer drive-off (Three.js) ----
+  const THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  let threeP = null;
+  const loadThree = () => threeP || (threeP = new Promise(res => {
+    if (window.THREE) return res(true);
+    const sc = document.createElement('script'); sc.src = THREE_URL; sc.async = true;
+    sc.onload = () => res(!!window.THREE); sc.onerror = () => res(false);
+    document.head.appendChild(sc);
+  }));
+  form.addEventListener('pointerenter', loadThree, { once: true });
+  form.addEventListener('focusin', loadThree, { once: true });
+
+  const brandCanvas = () => {
+    const c = document.createElement('canvas'); c.width = 1024; c.height = 256;
+    const x = c.getContext('2d');
+    x.fillStyle = '#12203A'; x.fillRect(0, 0, 1024, 256);
+    x.fillStyle = '#84C430'; x.fillRect(0, 214, 1024, 18);
+    x.font = 'italic 900 132px Archivo, "Arial Black", sans-serif'; x.textBaseline = 'middle';
+    x.fillStyle = '#F3F7EF'; x.fillText('CLEAN', 40, 108);
+    const w = x.measureText('CLEAN ').width;
+    x.fillStyle = '#84C430'; x.fillText('SWEEP', 40 + w, 108);
+    x.font = '700 36px Figtree, system-ui, sans-serif'; x.fillStyle = '#F3F7EF';
+    x.fillText('RUBBISH REMOVALS · 0493 866 368', 44, 186);
+    return c;
+  };
+
+  function playDrive() {
+    return new Promise(async resolve => {
+      if (reduce) return resolve();
+      const ok = await Promise.race([loadThree(), new Promise(r => setTimeout(() => r(false), 4000))]);
+      if (!ok || !window.THREE) return resolve();
+      const T = window.THREE, wrap = $('#drive'), cv = $('#driveCanvas');
+      let renderer;
+      try { renderer = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: true }); } catch (e) { return resolve(); }
+      wrap.hidden = false; if (lenis) lenis.stop();
+      renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+      renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+      const scene = new T.Scene(); scene.fog = new T.Fog(0xd6efff, 45, 150);
+      const cam = new T.PerspectiveCamera(32, 1, .1, 200);
+      const size = () => {
+        const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false);
+        cam.aspect = w / h; const d = Math.max(23, 12.5 / (.573 * cam.aspect));
+        cam.position.set(-1.1 + d * .22, d * .24, d * .94); cam.lookAt(-1.1, 1.2, 0); cam.updateProjectionMatrix();
+      };
+      size(); addEventListener('resize', size);
+
+      scene.add(new T.HemisphereLight(0xeaf6ff, 0x6f9a52, .6));
+      const sun = new T.DirectionalLight(0xffffff, .7); sun.position.set(8, 16, 10); sun.castShadow = true;
+      sun.shadow.mapSize.set(1024, 1024); Object.assign(sun.shadow.camera, { left: -20, right: 20, top: 12, bottom: -12 });
+      scene.add(sun);
+
+      const M = c => new T.MeshStandardMaterial({ color: c, roughness: .55, metalness: .1 });
+      const navy = M(0x12203a), lime = M(0x84c430), black = M(0x111418), grey = M(0x9aa6b8), glass = M(0x7cc8ff), white = M(0xf3f7ef), red = M(0xe5484d), amber = M(0xffd23f);
+      const box = (w, h, d, mat, x, y, z, g) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; (g || scene).add(m); return m; };
+
+      // ground and road
+      const ground = new T.Mesh(new T.PlaneGeometry(400, 400), M(0x8cc06a)); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+      const road = new T.Mesh(new T.PlaneGeometry(400, 7), M(0x4a5263)); road.rotation.x = -Math.PI / 2; road.position.y = .01; road.receiveShadow = true; scene.add(road);
+      for (let i = -60; i < 120; i += 4) { const l = new T.Mesh(new T.PlaneGeometry(2, .18), white); l.rotation.x = -Math.PI / 2; l.position.set(i, .02, 0); scene.add(l); }
+      const kerb = new T.Mesh(new T.BoxGeometry(400, .2, .4), M(0xd9dee6)); kerb.position.set(0, .1, -3.7); scene.add(kerb);
+
+      const rig = new T.Group(); scene.add(rig);
+      const ute = new T.Group(); rig.add(ute);
+      const wheels = [];
+      const wheel = (x, z, g) => {
+        const w = new T.Group(); w.position.set(x, .5, z);
+        const t = new T.Mesh(new T.CylinderGeometry(.5, .5, .38, 28), black); t.rotation.x = Math.PI / 2; t.castShadow = true; w.add(t);
+        const h = new T.Mesh(new T.CylinderGeometry(.24, .24, .4, 16), grey); h.rotation.x = Math.PI / 2; w.add(h);
+        const s = new T.Mesh(new T.BoxGeometry(.08, .3, .42), grey); w.add(s);
+        g.add(w); wheels.push(w); return w;
+      };
+      // ute body (front faces +x)
+      box(5.2, .55, 2, navy, 0, .95, 0, ute);                // chassis / lower body
+      box(1.4, .5, 1.9, navy, 2.0, 1.45, 0, ute);            // bonnet
+      box(1.7, 1.05, 1.9, navy, .55, 1.75, 0, ute);          // cab
+      box(.08, .7, 1.7, glass, 1.42, 1.85, 0, ute).rotation.z = -.35; // windscreen
+      box(1.3, .5, .02, glass, .55, 1.95, .96, ute);         // side window
+      box(.14, .2, 1.9, lime, 2.72, 1.1, 0, ute);            // bumper stripe
+      box(.06, .16, .3, amber, 2.72, 1.42, .7, ute); box(.06, .16, .3, amber, 2.72, 1.42, -.7, ute);
+      // tray
+      box(2.6, .12, 2.05, navy, -1.75, 1.28, 0, ute);
+      box(2.6, .55, .08, navy, -1.75, 1.6, 1.0, ute); box(2.6, .55, .08, navy, -1.75, 1.6, -1.0, ute);
+      box(.08, .55, 2.05, navy, -3.02, 1.6, 0, ute);
+      box(2.6, .1, .1, lime, -1.75, 1.9, 1.02, ute);
+      box(.6, .5, .6, M(0xffffff), -1.0, 1.6, .3, ute); box(.7, .4, .55, amber, -2.1, 1.55, -.3, ute);
+      wheel(1.75, 1.0, ute); wheel(1.75, -1.0, ute); wheel(-1.7, 1.0, ute); wheel(-1.7, -1.0, ute);
+      box(.15, .2, .2, red, -3.08, 1.1, .8, ute); box(.15, .2, .2, red, -3.08, 1.1, -.8, ute);
+
+      // logo on the driver door
+      const img = $('.hero-art .badge');
+      const tex = new T.Texture(img); tex.needsUpdate = true;
+      const door = new T.Mesh(new T.CircleGeometry(.48, 40), new T.MeshBasicMaterial({ map: tex, transparent: true }));
+      door.position.set(.45, 1.2, 1.012); ute.add(door);
+
+      // trailer
+      const tr = new T.Group(); tr.position.x = -6.4; rig.add(tr);
+      box(3.6, .14, 2.1, navy, 0, .95, 0, tr);
+      box(1.8, .1, .1, navy, 2.6, .9, 0, tr);              // drawbar
+      const side = new T.CanvasTexture(brandCanvas());
+      const sideMat = new T.MeshStandardMaterial({ map: side, roughness: .6 });
+      const panel = new T.Mesh(new T.BoxGeometry(3.6, .9, .06), [navy, navy, navy, navy, sideMat, navy]); panel.position.set(0, 1.47, 1.05); panel.castShadow = true; tr.add(panel);
+      box(3.6, .9, .06, navy, 0, 1.47, -1.05, tr);
+      box(.06, .9, 2.1, navy, 1.8, 1.47, 0, tr); box(.06, .9, 2.1, navy, -1.8, 1.47, 0, tr);
+      // cage rails
+      [[0, 2.5, 1.05], [0, 2.5, -1.05]].forEach(p => box(3.6, .07, .07, lime, ...p, tr));
+      [-1.8, -.6, .6, 1.8].forEach(x => { box(.07, 1.1, .07, navy, x, 2.0, 1.05, tr); box(.07, 1.1, .07, navy, x, 2.0, -1.05, tr); });
+      const trLogo = new T.Mesh(new T.CircleGeometry(.36, 40), new T.MeshBasicMaterial({ map: tex, transparent: true }));
+      trLogo.position.set(1.3, 2.05, 1.09); tr.add(trLogo);
+      wheel(0, 1.12, tr); wheel(0, -1.12, tr);
+      box(.12, .2, .2, red, -1.86, 1.05, .85, tr); box(.12, .2, .2, red, -1.86, 1.05, -.85, tr);
+      // rubbish
+      const junk = new T.Group(); tr.add(junk);
+      box(1.5, .55, .9, M(0x3eb4ff), -.9, 1.35, .45, junk); box(1.5, .45, .25, M(0x3eb4ff), -.9, 1.75, .02, junk); // couch
+      box(1.7, .22, 1.3, white, .7, 1.95, -.2, junk).rotation.z = .12;   // mattress
+      box(.7, .7, .7, M(0xffffff), .9, 1.4, .5, junk).rotation.y = .3;   // box
+      box(.6, .55, .6, amber, -.2, 2.25, -.5, junk).rotation.y = -.4;
+      box(.8, .9, .7, M(0xe8ecf2), -1.3, 1.45, -.55, junk);             // washer
+      const greens = new T.Group(); junk.add(greens);
+      [[-.4, 2.55, .3, .55], [.2, 2.7, .1, .45], [-1.1, 2.45, -.2, .5], [.9, 2.45, .3, .4]].forEach(([x, y, z, r]) => {
+        const s = new T.Mesh(new T.IcosahedronGeometry(r, 1), lime); s.position.set(x, y, z); s.castShadow = true; greens.add(s);
+      });
+      const bike = new T.Mesh(new T.TorusGeometry(.32, .05, 8, 24), black); bike.position.set(1.4, 2.4, -.6); bike.rotation.y = .5; junk.add(bike);
+
+      // dust puffs
+      const puffs = [], puffMat = new T.MeshBasicMaterial({ color: 0xe9e4d8, transparent: true, opacity: .5, depthWrite: false });
+      const puff = (x, z) => { const p = new T.Mesh(new T.SphereGeometry(.2, 10, 8), puffMat.clone()); p.position.set(x, .3, z + (Math.random() - .5) * .3); p.userData = { t: 0, v: Math.random() * .6 + .4 }; scene.add(p); puffs.push(p); };
+
+      let x0 = .8, t0 = performance.now(), last = t0, finished = false, raf = 0, dist = 0, prevX = x0;
+      rig.position.x = x0;
+      const DUR = 5.2;
+      const end = () => {
+        if (finished) return; finished = true; cancelAnimationFrame(raf);
+        wrap.style.transition = 'opacity .45s'; wrap.style.opacity = '0';
+        setTimeout(() => {
+          wrap.hidden = true; wrap.style.opacity = ''; wrap.style.transition = '';
+          removeEventListener('resize', size); renderer.dispose(); if (lenis) lenis.start(); resolve();
+        }, 460);
+      };
+      wrap.onclick = end; $('#driveSkip').onclick = e => { e.stopPropagation(); end(); };
+      const text = $('.drive-text');
+      if (hasGsap) gsap.fromTo(text.children, { y: 30, opacity: 0, scale: .8 }, { y: 0, opacity: 1, scale: 1, duration: .7, stagger: .12, ease: 'back.out(2.2)' });
+      const loop = now => {
+        const t = (now - t0) / 1000, dt = Math.min(.05, (now - last) / 1000); last = now;
+        // idle rumble, then accelerate away
+        const go = Math.max(0, t - 1.3);
+        rig.position.x = x0 + .55 * go * go * go + 1.1 * go * go;
+        const dx = rig.position.x - prevX; prevX = rig.position.x; dist += dx;
+        wheels.forEach(w => w.rotation.z = -dist / .5);
+        ute.position.y = t < 1.3 ? Math.sin(t * 60) * .015 : 0;
+        ute.rotation.z = go > 0 && go < .9 ? Math.sin(go / .9 * Math.PI) * .045 : 0;
+        junk.position.y = t < 1.3 ? Math.abs(Math.sin(t * 30)) * .02 : Math.abs(Math.sin(go * 9)) * .05;
+        if (t > .2 && Math.random() < (go > 0 ? .55 : .1)) puff(rig.position.x - 3.2, -.6);
+        if (go > 0 && Math.random() < .35) puff(rig.position.x - 6.4, 1.1);
+        puffs.forEach(p => { p.userData.t += dt; const k = p.userData.t; p.position.y += dt * p.userData.v; p.scale.setScalar(1 + k * 1.8); p.material.opacity = Math.max(0, .5 - k * .45); });
+        renderer.render(scene, cam);
+        if (t > DUR) return end();
+        raf = requestAnimationFrame(loop);
+      };
+      raf = requestAnimationFrame(loop);
+    });
+  }
 })();
 </script>
 
