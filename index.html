@@ -507,7 +507,7 @@ footer.site .big span{color:var(--lime-deep)}
         <div class="hero-facts">
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Fully insured</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>We do all the lifting</span>
-          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Upfront prices from $40</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Upfront prices from $50</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>We sweep up after</span>
         </div>
       </div>
@@ -691,7 +691,7 @@ footer.site .big span{color:var(--lime-deep)}
         </article>
         <article class="deal bin">
           <span class="tag">Bin collection</span>
-          <div class="price">$40<small>per standard wheelie bin</small></div>
+          <div class="price">$50<small>per standard wheelie bin</small></div>
           <p>Bin full mid-week, or after a party, Halloween or Christmas? We'll empty it.</p>
           <p class="fine">Bigger bins: contact us for a quote.</p>
         </article>
@@ -830,7 +830,7 @@ footer.site .big span{color:var(--lime-deep)}
                 <label><input type="radio" name="job" id="j-q3" value="q3"><span><i>¾ load</i><b>$1,350</b><small>≈ 12 m³</small></span></label>
                 <label><input type="radio" name="job" id="j-full" value="full"><span><i>Full load</i><b>$1,750</b><small>≈ 16 m³</small></span></label>
                 <label><input type="radio" name="job" id="j-sweep" value="sweep"><span><i>The Big Sweep</i><b>$400</b><small>kerbside pile</small></span></label>
-                <label><input type="radio" name="job" id="j-bin" value="bin"><span><i>Bin collection</i><b>$40</b><small>per wheelie bin</small></span></label>
+                <label><input type="radio" name="job" id="j-bin" value="bin"><span><i>Bin collection</i><b>$50</b><small>per wheelie bin</small></span></label>
               </div>
               <div class="extras-pick">
                 <div class="stepper"><span><b>Mattresses</b><small>+$120 each</small></span><div class="ctl"><button type="button" data-x="mattress" data-d="-1" aria-label="One less mattress">−</button><output id="x-mattress">0</output><button type="button" data-x="mattress" data-d="1" aria-label="One more mattress">+</button></div></div>
@@ -1197,7 +1197,7 @@ footer.site .big span{color:var(--lime-deep)}
     deposit: 'https://book.stripe.com/test_00wbJ15QjdAGfL83NI4c800', q1: 'https://book.stripe.com/test_8x2cN5guX2W2aqO5VQ4c801',
     q2: 'https://book.stripe.com/test_eVq3cvemP0NU1Ui4RM4c802', q3: 'https://book.stripe.com/test_6oU9AT3IbdAG0Qe9824c803',
     full: 'https://book.stripe.com/test_00wdR96UncwCdD0ac64c804', sweep: 'https://book.stripe.com/test_5kQ28rceH68e7eC6ZU4c805',
-    bin: 'https://book.stripe.com/test_4gM4gz1A3cwC42q1FA4c806' };
+    bin: 'https://book.stripe.com/test_28E6oHfqT1RYdD0gAu4c807' };
   const stripeTest = !!window.claude || location.hash === '#stripetest';
   const STRIPE_LINKS = stripeTest ? STRIPE_TEST_LINKS : STRIPE_LIVE_LINKS;
   // Google Apps Script web app URL that adds bookings to your Google Calendar.
@@ -1206,7 +1206,7 @@ footer.site .big span{color:var(--lime-deep)}
 
   const JOBS = {
     q1: { name: '¼ load', price: 550 }, q2: { name: '½ load', price: 950 }, q3: { name: '¾ load', price: 1350 },
-    full: { name: 'Full load', price: 1750 }, sweep: { name: 'The Big Sweep', price: 400 }, bin: { name: 'Bin collection', price: 40 },
+    full: { name: 'Full load', price: 1750 }, sweep: { name: 'The Big Sweep', price: 400 }, bin: { name: 'Bin collection', price: 50 },
   };
   const EXTRAS = { mattress: { name: 'Mattress', price: 120 }, gas: { name: 'Gas bottle', price: 30 } };
   const qty = { mattress: 0, gas: 0 };
