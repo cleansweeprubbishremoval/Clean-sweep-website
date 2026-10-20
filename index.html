@@ -447,6 +447,23 @@ footer.site .mail{overflow-wrap:anywhere}
 .t3d-ctl button:hover{border-color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.t3d-hint{animation:none}}
 
+/* reviews slideshow */
+.revs.revs-rotate{grid-template-columns:minmax(0,2fr) minmax(0,1fr);align-items:stretch}
+.rev-stage{display:grid;min-width:0}
+.rev-slide{grid-area:1/1;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .6s ease,transform .6s ease,visibility 0s linear .6s}
+.rev-slide.on{opacity:1;visibility:visible;transform:none;transition:opacity .6s ease,transform .6s ease}
+.rev-slide h3{font-size:1.25rem}
+.rev-quote{font-size:clamp(1.05rem,1.6vw,1.25rem);line-height:1.5}
+.rev-ctl{grid-column:1/-1;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.rev-dots{display:flex;gap:8px}
+.rev-dots button{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);background:transparent;padding:0;cursor:pointer}
+.rev-dots button[aria-selected="true"]{background:var(--ink)}
+.rev-pause{font:700 .85rem var(--f-body);border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:.4em .9em;cursor:pointer}
+.rev-timer{flex:1;min-width:80px;max-width:240px;height:3px;border-radius:3px;background:var(--line);overflow:hidden}
+.rev-timer i{display:block;height:100%;width:0;background:var(--lime-deep)}
+@media (max-width:760px){.revs.revs-rotate{grid-template-columns:minmax(0,1fr)}.revs-rotate .rev-stage{order:0}.revs-rotate .rev-ctl{order:1}.revs-rotate .rev-cta{order:2}}
+@media (prefers-reduced-motion:reduce){.rev-slide,.rev-slide.on{transition:none;transform:none}}
+
 /* owner inbox */
 .inbox{margin-top:40px;background:var(--card);color:var(--ink);border-radius:24px;padding:24px;display:grid;gap:14px}
 .inbox h3{font-size:1.3rem}
@@ -1176,8 +1193,46 @@ footer.site .big span{color:var(--lime-deep)}
   const revs = $('#revs');
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   if (REVIEWS.length) {
-    revs.innerHTML = REVIEWS.map(r => `<article class="rev"><div class="stars" aria-label="${r.stars} out of 5 stars">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</div>${r.title ? `<h3 style="font-size:1.15rem">${esc(r.title)}</h3>` : ''}<p>${esc(r.text)}</p><footer><span class="av">${esc(r.name[0] || '?')}</span><span>${esc(r.name)}<br><small style="font-weight:500;opacity:.65">${esc(r.when || 'Google review')}</small></span></footer></article>`).join('')
-      + (REVIEWS.length % 3 ? `<article class="rev rev-cta"><h3>Had a job done by us?</h3><p>We'd really appreciate a quick review on Google. It helps other locals find us.</p><a class="btn" href="https://maps.google.com/?cid=13192151809772390359" target="_blank" rel="noopener" style="justify-self:start">Leave a review</a></article>` : '');
+    // One review at a time, moving to the next every 15 seconds
+    const ROTATE_MS = 15000;
+    const card = r => `<article class="rev rev-slide" role="group" aria-roledescription="review"><div class="stars" aria-label="${r.stars} out of 5 stars">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</div>${r.title ? `<h3>${esc(r.title)}</h3>` : ''}<p class="rev-quote">“${esc(r.text)}”</p><footer><span class="av">${esc(r.name[0] || '?')}</span><span>${esc(r.name)}<br><small style="font-weight:500;opacity:.65">${esc(r.when || 'Google review')}</small></span></footer></article>`;
+    revs.classList.add('revs-rotate');
+    revs.innerHTML = `<div class="rev-stage" aria-live="polite">${REVIEWS.map(card).join('')}</div>`
+      + `<article class="rev rev-cta"><h3>Had a job done by us?</h3><p>We'd really appreciate a quick review on Google. It helps other locals find us.</p><a class="btn" href="https://maps.google.com/?cid=13192151809772390359" target="_blank" rel="noopener" style="justify-self:start">Leave a review</a></article>`
+      + (REVIEWS.length > 1 ? `<div class="rev-ctl"><div class="rev-dots" role="tablist" aria-label="Choose a review">${REVIEWS.map((r, i) => `<button type="button" role="tab" aria-label="Review ${i + 1} of ${REVIEWS.length}" data-i="${i}"></button>`).join('')}</div><button type="button" class="rev-pause" id="revPause" aria-pressed="false">Pause</button><span class="rev-timer" aria-hidden="true"><i id="revBar"></i></span></div>` : '');
+    const slides = $$('.rev-slide', revs), dots = $$('.rev-dots button', revs), bar = $('#revBar');
+    let cur = 0, paused = false, hold = false, timer = 0, startedAt = 0, left = ROTATE_MS;
+    const show = (i, user) => {
+      cur = (i + slides.length) % slides.length;
+      slides.forEach((el, k) => { el.classList.toggle('on', k === cur); el.setAttribute('aria-hidden', String(k !== cur)); });
+      dots.forEach((d, k) => d.setAttribute('aria-selected', String(k === cur)));
+      if (user) restart();
+    };
+    const tick = () => { show(cur + 1); restart(); };
+    const restart = () => {
+      clearTimeout(timer); left = ROTATE_MS;
+      if (!bar) return;
+      bar.style.transition = 'none'; bar.style.width = '0%';
+      if (paused || hold || slides.length < 2) return;
+      startedAt = Date.now(); timer = setTimeout(tick, left);
+      requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transition = `width ${left}ms linear`; bar.style.width = '100%'; }));
+    };
+    const stop = () => { clearTimeout(timer); if (bar) { const w = getComputedStyle(bar).width; bar.style.transition = 'none'; bar.style.width = w; } };
+    const resume = () => {
+      if (paused || hold || slides.length < 2) return;
+      const done = bar ? parseFloat(bar.style.width) / (bar.parentElement.clientWidth || 1) : 0;
+      left = Math.max(800, ROTATE_MS * (1 - (isFinite(done) ? done : 0)));
+      timer = setTimeout(tick, left);
+      if (bar) requestAnimationFrame(() => { bar.style.transition = `width ${left}ms linear`; bar.style.width = '100%'; });
+    };
+    dots.forEach(d => d.addEventListener('click', () => show(+d.dataset.i, true)));
+    const pb = $('#revPause');
+    if (pb) pb.addEventListener('click', () => { paused = !paused; pb.setAttribute('aria-pressed', String(paused)); pb.textContent = paused ? 'Play' : 'Pause'; paused ? stop() : restart(); });
+    const stage = $('.rev-stage', revs);
+    stage.addEventListener('pointerenter', () => { hold = true; stop(); }); stage.addEventListener('pointerleave', () => { hold = false; resume(); });
+    stage.addEventListener('focusin', () => { hold = true; stop(); }); stage.addEventListener('focusout', () => { hold = false; resume(); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else resume(); });
+    show(0); restart();
   } else {
     revs.innerHTML = `<div class="rev-empty"><div class="ghosts"><i></i><i style="width:90px"></i><i style="width:40px"></i></div><h3>Our Google reviews</h3><p class="note" style="max-width:52ch">See what our customers say about us on Google. If we've done a job for you, we'd love a review there too.</p></div>`;
   }
