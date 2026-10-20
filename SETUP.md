@@ -25,15 +25,26 @@ Two things to set up: **Stripe** (to take payments) and **Google Calendar** (so 
 
 Every payment shows the customer's booking number (like `CS-261103-AB12`) in Stripe under **Client reference ID**, so you can match payments to bookings.
 
-## 2. Google Calendar (about 5 minutes)
+## 2. Google Calendar, emails, texts and 48-hour reminders (about 10 minutes)
 
-1. Go to **script.google.com**, signed in to the Google account whose calendar you use. Click **New project**.
+Do this signed in to **cleansweeprubbishremoval@gmail.com**. Bookings go into that account's calendar and emails come from it.
+
+1. Go to **script.google.com** and click **New project**.
 2. Delete what's there, paste in everything from `google-calendar/Code.gs`, and click **Save**.
-3. Optional check: pick `testBooking` in the menu at the top and click **Run**. Allow access when asked. A test booking for tomorrow should appear in your calendar (delete it after).
-4. Click **Deploy → New deployment**, click the cog and choose **Web app**.
-   - Execute as: **Me**
-   - Who has access: **Anyone**
-5. Click **Deploy**, allow access, and copy the **Web app URL**.
+3. In the menu at the top, pick **setup** and click **Run**. Allow access when Google asks (click *Advanced → Go to project* if it warns you). This switches on the hourly check that sends 48-hour reminders, and emails you to say it's connected.
+4. Optional check: pick **testBooking** and click **Run**. A test booking appears in your calendar and you get the emails. Delete the test event after.
+5. Click **Deploy → New deployment**, click the cog and choose **Web app**. Set *Execute as*: **Me**, and *Who has access*: **Anyone**. Click **Deploy** and copy the **Web app URL**.
 6. Send that URL to Claude, or paste it into `CALENDAR_URL` in `index.html`.
 
-Each booking then appears in your calendar in the customer's arrival window, with their name and phone number in the title, the address as the location, and every detail in the notes. You also get an email for each one.
+### Text messages (optional)
+Google can't send texts by itself. To get a text on 0493 866 368 for every booking, and to text customers who only gave a phone number:
+1. Make an account at **clicksend.com** (Australian, pay as you go, a few cents per text) and add some credit.
+2. Copy your **username** and **API key** from the ClickSend dashboard.
+3. Paste them into `CLICKSEND_USERNAME` and `CLICKSEND_API_KEY` at the top of the script, click **Save**, then **Deploy → Manage deployments → Edit → New version → Deploy**.
+
+Without ClickSend, everything else still works: calendar, your booking emails, and customer emails. Free tip: turn on Gmail and Google Calendar notifications on your phone to get an alert the moment a booking lands.
+
+### What customers get
+- A confirmation as soon as they book (email, or a text if they only gave a phone number).
+- A reminder 48 hours before their collection (email and/or text).
+- Both mention that cancellations less than 24 hours before collection are non-refundable.

@@ -1,73 +1,74 @@
 /**
- * Clean Sweep Rubbish Removals: website bookings -> Google Calendar
+ * Clean Sweep Rubbish Removals: website bookings -> Google Calendar, emails and texts
  *
- * Every booking made on the website is added to your Google Calendar
- * with the customer's name, best contact number and address, and you
- * get an email with the full details.
+ * What it does for every booking made on the website:
+ *   1. Adds it to your Google Calendar in the customer's arrival window, with their
+ *      name, best contact number and pickup address.
+ *   2. Emails you the full booking. Texts you too, once SMS is switched on (below).
+ *   3. Sends the customer a booking confirmation (email, or text if they only gave a phone).
+ *   4. 48 hours before the job, sends the customer a reminder (email and/or text).
  *
- * Setup (about 5 minutes, see SETUP.md):
- *  1. Go to script.google.com while signed in to the Google account whose
- *     calendar you want bookings in, and click "New project".
- *  2. Delete what's there, paste this whole file in, and click Save.
- *  3. Click Deploy > New deployment > type "Web app".
- *     Execute as: Me. Who has access: Anyone. Click Deploy and allow access.
- *  4. Copy the Web app URL and send it to Claude (or paste it into
- *     CALENDAR_URL in index.html).
+ * Setup: see SETUP.md. Do it while signed in to cleansweeprubbishremoval@gmail.com.
  */
 
-// Booking emails go to the Google account that runs this script.
-const NOTIFY_EMAIL = Session.getEffectiveUser().getEmail();
+// ---------------- settings ----------------
+const OWNER_MOBILE = '0493866368';            // you get a text for every new booking (needs SMS below)
+const SEND_CUSTOMER_CONFIRMATION = true;      // confirmation as soon as they book
+const REMINDER_HOURS_BEFORE = 48;
 
-// Arrival windows on the website -> start and end hours (24h, Sydney time)
-const WINDOWS = {
-  'Morning (7–11am)': [7, 11],
-  'Midday (11am–2pm)': [11, 14],
-  'Afternoon (2–5pm)': [14, 17],
-};
+// Text messages: Google can't send texts by itself, so this uses ClickSend
+// (an Australian SMS service, pay as you go, a few cents per text).
+// Make a free account at clicksend.com, then paste your username and API key here.
+// Leave blank to skip texts; emails still work.
+const CLICKSEND_USERNAME = '';
+const CLICKSEND_API_KEY = '';
+// ------------------------------------------
+
+const TZ = 'Australia/Sydney';
+const WINDOWS = { 'Morning (7–11am)': [7, 11], 'Midday (11am–2pm)': [11, 14], 'Afternoon (2–5pm)': [14, 17] };
+const OWNER_EMAIL = () => Session.getEffectiveUser().getEmail();
 
 function doPost(e) {
   const p = (e && e.parameter) || {};
   try {
-    const event = addBooking_(p);
-    notify_(p);
-    return json_({ ok: true, id: event.getId() });
+    const ev = addBooking_(p);
+    notifyOwner_(p);
+    if (SEND_CUSTOMER_CONFIRMATION) confirmCustomer_(p);
+    return json_({ ok: true, id: ev.getId() });
   } catch (err) {
-    MailApp.sendEmail(NOTIFY_EMAIL, 'Website booking needs checking: ' + (p.name || 'unknown'),
-      'A booking came in but could not be added to your calendar.\n\nError: ' + err + '\n\n' + details_(p));
+    MailApp.sendEmail(OWNER_EMAIL(), 'Website booking needs checking: ' + (p.name || 'unknown'),
+      'A booking came in but something went wrong.\n\nError: ' + err + '\n\n' + details_(p));
     return json_({ ok: false, error: String(err) });
   }
 }
 
-// Visiting the web app URL in a browser shows this, so you can check it's live.
-function doGet() {
-  return ContentService.createTextOutput('Clean Sweep booking calendar is running.');
-}
+function doGet() { return ContentService.createTextOutput('Clean Sweep booking calendar is running.'); }
 
+// ---------- calendar ----------
 function addBooking_(p) {
   const [y, m, d] = String(p.date || '').split('-').map(Number);
   if (!y || !m || !d) throw new Error('Missing or invalid date: ' + p.date);
-  const hours = WINDOWS[p.window] || [7, 11];
-  const tz = 'Australia/Sydney';
-  const start = Utilities.parseDate(Utilities.formatString('%04d-%02d-%02d %02d:00', y, m, d, hours[0]), tz, 'yyyy-MM-dd HH:mm');
-  const end = Utilities.parseDate(Utilities.formatString('%04d-%02d-%02d %02d:00', y, m, d, hours[1]), tz, 'yyyy-MM-dd HH:mm');
+  const h = WINDOWS[p.window] || [7, 11];
+  const at = hr => Utilities.parseDate(Utilities.formatString('%04d-%02d-%02d %02d:00', y, m, d, hr), TZ, 'yyyy-MM-dd HH:mm');
   const address = [p.street, p.suburb, 'NSW', p.postcode].filter(String).join(' ');
-  const title = 'Clean Sweep: ' + (p.size || 'Pickup') + ' – ' + (p.name || 'Customer') + ' – ' + (p.phone || '');
-  const cal = CalendarApp.getDefaultCalendar();
-  const ev = cal.createEvent(title, start, end, { location: address, description: details_(p) });
+  const title = 'Clean Sweep: ' + (p.size || 'Pickup') + ' – ' + (p.name || 'Customer') + ' – ' + (p.phone || p.email || '');
+  const ev = CalendarApp.getDefaultCalendar().createEvent(title, at(h[0]), at(h[1]), { location: address, description: details_(p) });
   ev.setColor(CalendarApp.EventColor.GREEN);
   ev.addPopupReminder(24 * 60);
+  // stored on the event so the 48-hour reminder knows who to contact
+  ev.setTag('cs_booking', 'yes');
+  ev.setTag('cs_name', p.name || ''); ev.setTag('cs_phone', p.phone || ''); ev.setTag('cs_email', p.email || '');
+  ev.setTag('cs_ref', p.ref || ''); ev.setTag('cs_window', p.window || ''); ev.setTag('cs_reminded', 'no');
   return ev;
 }
 
 function details_(p) {
   return [
-    'Booking ' + (p.ref || ''),
-    '',
+    'Booking ' + (p.ref || ''), '',
     'Name: ' + (p.name || ''),
-    'Phone: ' + (p.phone || ''),
-    'Email: ' + (p.email || ''),
-    'Address: ' + [p.street, p.suburb, p.postcode].filter(String).join(', '),
-    '',
+    'Phone: ' + (p.phone || 'not given'),
+    'Email: ' + (p.email || 'not given'),
+    'Pickup address: ' + [p.street, p.suburb, p.postcode].filter(String).join(', '), '',
     'Job: ' + (p.job || ''),
     p.extras ? 'Extras: ' + p.extras : '',
     'When: ' + (p.dateLabel || p.date || '') + ', ' + (p.window || ''),
@@ -78,24 +79,95 @@ function details_(p) {
   ].filter(function (l) { return l !== ''; }).join('\n');
 }
 
-function notify_(p) {
-  MailApp.sendEmail(NOTIFY_EMAIL,
-    'New booking: ' + (p.name || '') + ', ' + (p.suburb || '') + ' – ' + (p.dateLabel || p.date || ''),
+// ---------- messages ----------
+function notifyOwner_(p) {
+  MailApp.sendEmail(OWNER_EMAIL(), 'New booking: ' + (p.name || '') + ', ' + (p.suburb || '') + ' – ' + (p.dateLabel || p.date || ''),
     details_(p) + '\n\nIt has been added to your Google Calendar.');
+  sms_(OWNER_MOBILE, 'New Clean Sweep booking ' + (p.ref || '') + ': ' + (p.name || '') + ', ' + (p.phone || p.email || '') + '. ' +
+    (p.size || '') + ' at ' + [p.street, p.suburb].filter(String).join(', ') + ', ' + (p.dateLabel || p.date || '') + ' ' + shortWindow_(p.window) + '.');
 }
 
-function json_(o) {
-  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+function confirmCustomer_(p) {
+  const first = String(p.name || '').split(' ')[0] || 'there';
+  const when = (p.dateLabel || p.date || '') + ', ' + (p.window || '');
+  const where = [p.street, p.suburb, p.postcode].filter(String).join(', ');
+  if (p.email) {
+    MailApp.sendEmail({
+      to: p.email, name: 'Clean Sweep Rubbish Removals', replyTo: OWNER_EMAIL(),
+      subject: 'Your Clean Sweep booking is confirmed (' + (p.ref || '') + ')',
+      body: 'Hi ' + first + ',\n\nThanks for booking with Clean Sweep Rubbish Removals.\n\n' +
+        'When: ' + when + '\nWhere: ' + where + '\nJob: ' + (p.job || '') + (p.extras ? ' + ' + p.extras : '') + '\nEstimated total: ' + (p.total || '') + '\n\n' +
+        "We'll be in touch 48 hours before to confirm. Your final price is confirmed on site before we start loading.\n\n" +
+        'Need to change or cancel? Call or text 0493 866 368. Bookings cancelled less than 24 hours before the collection time are non-refundable.\n\n' +
+        'Cheers,\nLucas\nClean Sweep Rubbish Removals\n0493 866 368 · ABN 55 989 268 862',
+    });
+  } else {
+    sms_(p.phone, 'Hi ' + first + ', your Clean Sweep booking ' + (p.ref || '') + ' is confirmed for ' + when + ' at ' + where +
+      '. Changes or cancellations: 0493 866 368 (less than 24 hrs notice is non-refundable).');
+  }
 }
 
-// Run this once from the editor (select testBooking, click Run) to check
-// everything works. It adds a test booking for tomorrow; delete it after.
+// Runs every hour (see setup()). Sends a reminder to customers whose job is about 48 hours away.
+function sendReminders() {
+  const now = new Date();
+  const from = new Date(now.getTime() + (REMINDER_HOURS_BEFORE - 1) * 3600e3);
+  const to = new Date(now.getTime() + (REMINDER_HOURS_BEFORE + 1) * 3600e3);
+  CalendarApp.getDefaultCalendar().getEvents(from, to).forEach(function (ev) {
+    if (ev.getTag('cs_booking') !== 'yes' || ev.getTag('cs_reminded') === 'yes') return;
+    const name = (ev.getTag('cs_name') || '').split(' ')[0] || 'there';
+    const when = Utilities.formatDate(ev.getStartTime(), TZ, "EEEE d MMMM") + ', ' + (ev.getTag('cs_window') || Utilities.formatDate(ev.getStartTime(), TZ, 'h:mm a'));
+    const where = ev.getLocation();
+    const email = ev.getTag('cs_email'), phone = ev.getTag('cs_phone');
+    if (email) {
+      MailApp.sendEmail({
+        to: email, name: 'Clean Sweep Rubbish Removals', replyTo: OWNER_EMAIL(),
+        subject: 'Reminder: Clean Sweep pickup on ' + Utilities.formatDate(ev.getStartTime(), TZ, 'EEEE d MMMM'),
+        body: 'Hi ' + name + ',\n\nJust a reminder that Clean Sweep is booked to collect your rubbish:\n\n' +
+          'When: ' + when + '\nWhere: ' + where + '\n\n' +
+          "Please leave the rubbish somewhere easy to get to, and let us know about any gates, pets or parking.\n\n" +
+          'Need to change or cancel? Call or text 0493 866 368 now. Cancellations less than 24 hours before the collection time are non-refundable.\n\n' +
+          'Cheers,\nLucas\nClean Sweep Rubbish Removals · 0493 866 368',
+      });
+    }
+    if (phone) sms_(phone, 'Hi ' + name + ', reminder: Clean Sweep is collecting your rubbish ' + when + ' at ' + where +
+      '. Changes or cancellations: 0493 866 368 (less than 24 hrs notice is non-refundable).');
+    ev.setTag('cs_reminded', 'yes');
+  });
+}
+
+// ---------- texts via ClickSend ----------
+function sms_(to, body) {
+  if (!to || !CLICKSEND_USERNAME || !CLICKSEND_API_KEY) return;
+  let num = String(to).replace(/[^\d+]/g, '');
+  if (num.startsWith('0')) num = '+61' + num.slice(1);
+  if (!num.startsWith('+')) num = '+' + num;
+  try {
+    UrlFetchApp.fetch('https://rest.clicksend.com/v3/sms/send', {
+      method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+      headers: { Authorization: 'Basic ' + Utilities.base64Encode(CLICKSEND_USERNAME + ':' + CLICKSEND_API_KEY) },
+      payload: JSON.stringify({ messages: [{ source: 'clean-sweep-website', to: num, body: body.slice(0, 600) }] }),
+    });
+  } catch (err) { console.warn('SMS failed: ' + err); }
+}
+
+function shortWindow_(w) { return String(w || '').replace(/.*\((.*)\)/, '$1'); }
+function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+
+// ---------- run these from the editor ----------
+// Run ONCE after pasting this in: turns on the hourly 48-hour reminder check.
+function setup() {
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'sendReminders') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('sendReminders').timeBased().everyHours(1).create();
+  MailApp.sendEmail(OWNER_EMAIL(), 'Clean Sweep bookings are connected', 'Bookings from your website will now go into your Google Calendar, and 48-hour reminders are switched on.');
+}
+
+// Optional check: adds a test booking for 2 days from now and sends you the emails. Delete the event after.
 function testBooking() {
-  const t = new Date(Date.now() + 24 * 3600 * 1000);
+  const t = new Date(Date.now() + 48 * 3600e3);
   doPost({ parameter: {
-    ref: 'CS-TEST', name: 'Test Customer', phone: '0400 000 000', email: NOTIFY_EMAIL,
+    ref: 'CS-TEST', name: 'Test Customer', phone: '', email: OWNER_EMAIL(),
     street: '1 Test St', suburb: 'Parramatta', postcode: '2150', size: '½ load', job: '½ load ($950)',
-    date: Utilities.formatDate(t, 'Australia/Sydney', 'yyyy-MM-dd'), dateLabel: 'Tomorrow',
+    date: Utilities.formatDate(t, TZ, 'yyyy-MM-dd'), dateLabel: Utilities.formatDate(t, TZ, 'EEEE d MMMM'),
     window: 'Morning (7–11am)', total: '$950', payChoice: 'Deposit', payNow: '$100', notes: 'Test booking, delete me',
   } });
 }

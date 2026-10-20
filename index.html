@@ -382,6 +382,12 @@ form.card{gap:26px}
 .done .paybox{background:var(--paper);border-radius:18px;padding:16px;display:grid;gap:10px}
 .done .paybox .btn{justify-self:start}
 
+.hint{font-size:.85rem;color:var(--ink-soft);margin-top:-4px}
+.req{font-weight:500;color:var(--ink-soft);font-size:.82rem}
+.agree{display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-size:.92rem;background:var(--paper);border-radius:14px;padding:12px 14px;border:2px solid transparent}
+.agree input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--lime-deep)}
+.agree:has(input.bad){border-color:#D2353B}
+
 /* sydney modal */
 .modal{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));background:rgba(8,14,28,.62);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .modal-box{background:var(--card);color:var(--ink);border-radius:26px;padding:clamp(22px,4vw,34px);max-width:440px;width:100%;display:grid;gap:12px;box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
@@ -394,11 +400,15 @@ form.card{gap:26px}
 .modal-msg{color:#D2353B!important;font-weight:600}
 
 /* drive-off */
-.drive{position:fixed;inset:0;z-index:98;background:linear-gradient(180deg,#9FDBFF 0%,#D9F1FF 55%,#EAF5E0 100%);overflow:hidden;cursor:pointer}
-.drive canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.drive{position:fixed;inset:0;z-index:98;background:#dfe7ec;overflow:hidden;cursor:pointer}
+.drive canvas,.drive video{position:absolute;inset:0;width:100%;height:100%;display:block}
+.drive video{object-fit:cover}
+.drive::after{content:"";position:absolute;left:0;right:0;top:0;height:34%;background:linear-gradient(180deg,rgba(236,241,244,.92),rgba(236,241,244,0));pointer-events:none}
+.drive-text{z-index:1}
 .drive-text{position:absolute;left:0;right:0;top:calc(9vh + env(safe-area-inset-top,0px));display:grid;justify-items:center;gap:6px;text-align:center;color:#12203A;padding-inline:16px;pointer-events:none}
-.drive-text b{font:900 italic clamp(2.4rem,7vw,4.6rem)/1 var(--f-display);font-stretch:115%}
-.drive-text span{font:600 1.1rem var(--f-body)}
+.drive-text b{font:900 italic clamp(2rem,5.2vw,3.4rem)/1.02 var(--f-display);font-stretch:110%;letter-spacing:-.01em}
+.drive-text span{font:600 clamp(.95rem,1.6vw,1.1rem) var(--f-body);color:#24324d}
+.drive-text .drive-tag{font:500 .72rem var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:#3d6b10}
 .drive-skip{position:absolute;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:rgba(18,32,58,.85);color:#F3F7EF;border:0;border-radius:999px;padding:.6em 1.1em;font:700 .9rem var(--f-body);cursor:pointer}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:96;background:var(--ink);color:var(--paper);padding:14px 18px;border-radius:16px;box-shadow:0 20px 50px -15px rgba(0,0,0,.5);max-width:calc(100% - 32px);font-size:.95rem}
 .toast b{color:var(--sel-price)}
@@ -777,6 +787,7 @@ footer.site .big span{color:var(--lime-deep)}
         <details><summary>What happens to my rubbish?</summary><p>We sort it before it goes anywhere. Metal, cardboard and e-waste go to recycling, usable items can go to charity, and only what's left goes to a licensed waste facility.</p></details>
         <details><summary>Do you carry heavy items down stairs?</summary><p>Yes. We do all the lifting from anywhere on the property, including upstairs, backyards and under the house. Stairs or a long carry can add a little to the price, and we'll tell you upfront.</p></details>
         <details><summary>How can I pay?</summary><p>When you book online you can pay a $100 deposit or the full price through our secure Stripe checkout, by card, Apple Pay, Google Pay or direct debit from your bank account. Anything left over is settled on the day.</p></details>
+        <details><summary>Can I cancel or change my booking?</summary><p>Yes. Call or text 0493 866 368 at least 24 hours before your collection time and we'll refund your payment or move your booking. Bookings cancelled less than 24 hours before the collection time are non-refundable.</p></details>
       </div>
     </div>
   </section>
@@ -787,7 +798,7 @@ footer.site .big span{color:var(--lime-deep)}
         <div class="quote-side">
           <span class="eyebrow">Book online</span>
           <h2 class="split">Book your pickup.</h2>
-          <p class="lede">Pick your load, choose a day and pay securely online. We'll text you the day before to confirm.</p>
+          <p class="lede">Pick your load, choose a day and pay securely online. We'll confirm 48 hours before we arrive.</p>
           <aside class="sum" id="sum" aria-live="polite">
             <span class="tag">Your booking</span>
             <div class="sum-row"><span>Job</span><b id="sJob">½ load</b></div>
@@ -795,7 +806,7 @@ footer.site .big span{color:var(--lime-deep)}
             <div class="sum-row"><span>When</span><b id="sWhen">Pick a day</b></div>
             <div class="sum-row total"><span>Estimated total</span><b id="sTotal">$950</b></div>
             <div class="sum-row pay"><span id="sPayLabel">Pay today (deposit)</span><b id="sPay">$100</b></div>
-            <p class="sum-note">Final price confirmed on site before we start loading.</p>
+            <p class="sum-note">Final price confirmed on site before we start loading. Cancellations less than 24 hours before collection are non-refundable.</p>
           </aside>
           <div class="contact">
             <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
@@ -856,10 +867,11 @@ footer.site .big span{color:var(--lime-deep)}
               <h3 class="sth" id="st3"><span class="sn">3</span>Your details</h3>
               <div class="two">
                 <div class="field"><label for="q-name">Full name</label><input id="q-name" name="name" autocomplete="name" required></div>
-                <div class="field"><label for="q-phone">Best contact number</label><input id="q-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required></div>
+                <div class="field"><label for="q-phone">Best contact number</label><input id="q-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" aria-describedby="contactHint"></div>
               </div>
-              <div class="field"><label for="q-email">Email <span class="opt">(for your receipt)</span></label><input id="q-email" name="email" type="email" autocomplete="email" required></div>
-              <div class="field"><label for="q-street">Pickup address</label><input id="q-street" name="street" autocomplete="street-address" placeholder="Street number and name" required></div>
+              <div class="field"><label for="q-email">Email</label><input id="q-email" name="email" type="email" autocomplete="email" aria-describedby="contactHint"></div>
+              <p class="hint" id="contactHint">We need a phone number <b>or</b> an email so we can confirm your booking. One is enough.</p>
+              <div class="field"><label for="q-street">Pickup address <span class="req">(required)</span></label><input id="q-street" name="street" autocomplete="street-address" placeholder="Street number and name" required></div>
               <div class="two">
                 <div class="field"><label for="q-suburb">Suburb</label><input id="q-suburb" name="suburb" autocomplete="address-level2" required></div>
                 <div class="field"><label for="q-postcode">Postcode</label><input id="q-postcode" name="postcode" autocomplete="postal-code" inputmode="numeric" maxlength="4" required></div>
@@ -873,6 +885,7 @@ footer.site .big span{color:var(--lime-deep)}
                 <label><input type="radio" name="pay" id="p-dep" value="deposit" checked><span><b>Pay a deposit</b><em id="pDepAmt">$100 today</em><small>The rest on the day, once we've confirmed the load.</small></span></label>
                 <label><input type="radio" name="pay" id="p-full" value="full"><span><b>Pay in full</b><em id="pFullAmt">$950 today</em><small>Any difference is settled on the day.</small></span></label>
               </div>
+              <label class="agree" for="q-agree"><input type="checkbox" id="q-agree" name="agree" value="yes"><span>I understand that bookings cancelled less than 24 hours before the collection time are <b>non-refundable</b>.</span></label>
               <p class="secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Secure checkout by Stripe. Pay by card, Apple Pay, Google Pay or direct debit from your bank account. Mattresses, gas bottles and any change to the load size are settled on the day.</span></p>
             </div>
 
@@ -935,7 +948,8 @@ footer.site .big span{color:var(--lime-deep)}
 
 <div class="drive" id="drive" hidden aria-hidden="true">
   <canvas id="driveCanvas"></canvas>
-  <div class="drive-text"><b>You're booked in!</b><span>We're on our way.</span></div>
+  <video id="driveVideo" muted playsinline preload="none" hidden></video>
+  <div class="drive-text"><span class="drive-tag">Clean Sweep Rubbish Removals</span><b id="driveTitle">You're booked in</b><span id="driveSub">We're on our way.</span></div>
   <button class="drive-skip" type="button" id="driveSkip">Skip</button>
 </div>
 
@@ -1289,12 +1303,16 @@ footer.site .big span{color:var(--lime-deep)}
       total: cash(st.total), payChoice: st.payChoice === 'deposit' ? 'Deposit' : 'Paid in full', payNow: cash(st.payNow),
       items: f.getAll('items'), notes: (f.get('notes') || '').trim(), at: new Date().toISOString()
     };
+    const phoneOk = r.phone.replace(/\D/g, '').length >= 8, emailOk = /^\S+@\S+\.\S+$/.test(r.email);
     const need = [
-      [!r.date, 'a day', '#q-date'], [!r.name, 'your name', '#q-name'], [r.phone.replace(/\D/g, '').length < 8, 'a contact number', '#q-phone'],
-      [!/^\S+@\S+\.\S+$/.test(r.email), 'your email', '#q-email'], [!r.street, 'the pickup address', '#q-street'],
-      [!r.suburb, 'your suburb', '#q-suburb'], [!/^\d{4}$/.test(r.postcode), 'a 4-digit postcode', '#q-postcode']
+      [!r.date, 'a day', '#q-date'], [!r.name, 'your name', '#q-name'],
+      [!phoneOk && !emailOk, 'a phone number or email', !r.phone && r.email ? '#q-email' : '#q-phone'],
+      [r.phone && !phoneOk, 'a full phone number', '#q-phone'], [r.email && !emailOk, 'a valid email', '#q-email'],
+      [!r.street, 'the pickup address', '#q-street'],
+      [!r.suburb, 'your suburb', '#q-suburb'], [!/^\d{4}$/.test(r.postcode), 'a 4-digit postcode', '#q-postcode'],
+      [!$('#q-agree').checked, 'a tick to agree to the cancellation policy', '#q-agree']
     ];
-    $$('.field input', form).forEach(i => i.classList.remove('bad'));
+    $$('.field input, #q-agree', form).forEach(i => i.classList.remove('bad'));
     const missing = need.filter(n => n[0]);
     if (r.date && r.date < dateIn.min) missing.unshift([true, 'a day from tomorrow onwards', '#q-date']);
     if (missing.length) {
@@ -1308,7 +1326,8 @@ footer.site .big span{color:var(--lime-deep)}
     if (!ok) return;
 
     btn.disabled = true; btn.textContent = 'Booking…';
-    const drivePromise = playDrive();
+    const willPay = !!STRIPE_LINKS[st.payChoice === 'deposit' ? 'deposit' : st.jobKey];
+    const drivePromise = willPay ? Promise.resolve() : playDrive("You're booked in", `See you ${r.dateLabel}.`);
     let saved = false;
     try {
       if (CALENDAR_URL) {
@@ -1347,14 +1366,14 @@ footer.site .big span{color:var(--lime-deep)}
 
     const first = esc(r.name.split(' ')[0]);
     const link = STRIPE_LINKS[st.payChoice === 'deposit' ? 'deposit' : st.jobKey];
-    const payUrl = link ? `${link}${link.includes('?') ? '&' : '?'}client_reference_id=${encodeURIComponent(r.ref)}&prefilled_email=${encodeURIComponent(r.email)}` : '';
+    const payUrl = link ? `${link}${link.includes('?') ? '&' : '?'}client_reference_id=${encodeURIComponent(r.ref)}${r.email ? '&prefilled_email=' + encodeURIComponent(r.email) : ''}` : '';
     const text = summary(r);
     const details = `<dl><dt>When</dt><dd>${esc(r.dateLabel)}, ${esc(r.window)}</dd><dt>Where</dt><dd>${esc(r.street)}, ${esc(r.suburb)} ${esc(r.postcode)}</dd><dt>Job</dt><dd>${esc(r.job)}${r.extras ? ' + ' + esc(r.extras) : ''}</dd><dt>Total</dt><dd>${esc(r.total)} estimated</dd></dl>`;
     const payBox = payUrl
       ? `<div class="paybox"><b>Last step: pay ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'now'}</b><span class="note">Secure checkout by Stripe. Card, Apple Pay, Google Pay or direct debit.</span><a class="btn" href="${esc(payUrl)}" rel="noopener">Pay ${esc(r.payNow)} securely</a></div>`
-      : `<div class="paybox"><b>Payment: ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'in full'}</b><span class="note">We'll text a secure payment link to ${esc(r.phone)} shortly.</span></div>`;
+      : `<div class="paybox"><b>Payment: ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'in full'}</b><span class="note">We'll send a secure payment link to ${esc(r.phone || r.email)} shortly.</span></div>`;
     done.innerHTML = saved
-      ? `<span class="ref">Booking ${esc(r.ref)}</span><h3>You're booked in, ${first}!</h3><p>We'll text you on <b>${esc(r.phone)}</b> the day before to confirm.</p>${details}${payBox}<div class="acts"><button class="btn ghost" type="button" id="again">Make another booking</button></div>`
+      ? `<span class="ref">Booking ${esc(r.ref)}</span><h3>You're booked in, ${first}!</h3><p>We'll ${r.phone ? 'text' : 'email'} you at <b>${esc(r.phone || r.email)}</b> 48 hours before to confirm.</p><p class="note">Need to cancel? Let us know at least 24 hours before your collection time, or the booking is non-refundable.</p>${details}${payBox}<div class="acts"><button class="btn ghost" type="button" id="again">Make another booking</button></div>`
       : `<span class="ref">Booking ${esc(r.ref)}</span><h3>Nearly there, ${first}.</h3><p>We couldn't send your booking from here. Copy it below and text it to <b>0493 866 368</b> or email <b>cleansweeprubbishremovals@gmail.com</b>.</p><pre id="sumText">${esc(text)}</pre><div class="acts"><button class="btn" type="button" id="copySum">Copy my booking</button><button class="btn ghost" type="button" id="again">Edit details</button></div>`;
     form.hidden = true; done.hidden = false; btn.disabled = false; btn.textContent = 'Confirm booking';
     if (saved) { form.reset(); qty.mattress = qty.gas = 0; $('#x-mattress').textContent = $('#x-gas').textContent = '0'; refresh(); }
@@ -1370,308 +1389,113 @@ footer.site .big span{color:var(--lime-deep)}
   // Back from Stripe checkout
   try {
     if (new URLSearchParams(location.search).get('paid') === '1') {
-      const t = $('#paidToast'); t.hidden = false; setTimeout(() => t.hidden = true, 7000);
+      const t = $('#paidToast');
+      const show = () => { t.hidden = false; setTimeout(() => t.hidden = true, 7000); };
+      addEventListener('load', () => playDrive('Payment received', "Thanks! You're all booked in.").then(show));
     }
   } catch (e) {}
 
-  // ---- 3D ute + trailer drive-off (Three.js) ----
-  const THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-  let threeP = null;
-  const loadThree = () => threeP || (threeP = new Promise(res => {
-    if (window.THREE) return res(true);
-    const sc = document.createElement('script'); sc.src = THREE_URL; sc.async = true;
-    sc.onload = () => res(!!window.THREE); sc.onerror = () => res(false);
-    document.head.appendChild(sc);
-  }));
-  form.addEventListener('pointerenter', loadThree, { once: true });
-  form.addEventListener('focusin', loadThree, { once: true });
-
-  const brandCanvas = () => {
-    const c = document.createElement('canvas'); c.width = 1024; c.height = 256;
-    const x = c.getContext('2d');
-    x.fillStyle = '#12203A'; x.fillRect(0, 0, 1024, 256);
-    x.fillStyle = '#84C430'; x.fillRect(0, 214, 1024, 18);
-    x.font = 'italic 900 132px Archivo, "Arial Black", sans-serif'; x.textBaseline = 'middle';
-    x.fillStyle = '#F3F7EF'; x.fillText('CLEAN', 40, 108);
-    const w = x.measureText('CLEAN ').width;
-    x.fillStyle = '#84C430'; x.fillText('SWEEP', 40 + w, 108);
-    x.font = '700 36px Figtree, system-ui, sans-serif'; x.fillStyle = '#F3F7EF';
-    x.fillText('RUBBISH REMOVALS · 0493 866 368', 44, 186);
-    return c;
-  };
-
-  function playDrive() {
-    return new Promise(async resolve => {
-      if (reduce) return resolve();
-      const ok = await Promise.race([loadThree(), new Promise(r => setTimeout(() => r(false), 4000))]);
-      if (!ok || !window.THREE) return resolve();
-      const T = window.THREE, wrap = $('#drive'), cv = $('#driveCanvas');
-      let renderer;
-      try { renderer = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: true }); } catch (e) { return resolve(); }
-      wrap.hidden = false; if (lenis) lenis.stop();
-      renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
-      renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
-      const scene = new T.Scene(); scene.fog = new T.Fog(0xd6efff, 45, 150);
-      const cam = new T.PerspectiveCamera(32, 1, .1, 200);
-      const size = () => {
-        const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false);
-        cam.aspect = w / h; const d = Math.max(23, 12.5 / (.573 * cam.aspect));
-        cam.position.set(-1.1 + d * .22, d * .24, d * .94); cam.lookAt(-1.1, 1.2, 0); cam.updateProjectionMatrix();
-      };
-      size(); addEventListener('resize', size);
-
-      scene.add(new T.HemisphereLight(0xeaf6ff, 0x6f9a52, .6));
-      const sun = new T.DirectionalLight(0xffffff, .7); sun.position.set(8, 16, 10); sun.castShadow = true;
-      sun.shadow.mapSize.set(1024, 1024); Object.assign(sun.shadow.camera, { left: -20, right: 20, top: 12, bottom: -12 });
-      scene.add(sun);
-
-      const M = c => new T.MeshStandardMaterial({ color: c, roughness: .55, metalness: .1 });
-      const navy = M(0x12203a), lime = M(0x84c430), black = M(0x111418), grey = M(0x9aa6b8), glass = M(0x7cc8ff), white = M(0xf3f7ef), red = M(0xe5484d), amber = M(0xffd23f);
-      const box = (w, h, d, mat, x, y, z, g) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; (g || scene).add(m); return m; };
-
-      // ground and road
-      const ground = new T.Mesh(new T.PlaneGeometry(400, 400), M(0x8cc06a)); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-      const road = new T.Mesh(new T.PlaneGeometry(400, 7), M(0x4a5263)); road.rotation.x = -Math.PI / 2; road.position.y = .01; road.receiveShadow = true; scene.add(road);
-      for (let i = -60; i < 120; i += 4) { const l = new T.Mesh(new T.PlaneGeometry(2, .18), white); l.rotation.x = -Math.PI / 2; l.position.set(i, .02, 0); scene.add(l); }
-      const kerb = new T.Mesh(new T.BoxGeometry(400, .2, .4), M(0xd9dee6)); kerb.position.set(0, .1, -3.7); scene.add(kerb);
-
-      const rig = new T.Group(); scene.add(rig);
-      const ute = new T.Group(); rig.add(ute);
-      const wheels = [];
-      const wheel = (x, z, g) => {
-        const w = new T.Group(); w.position.set(x, .5, z);
-        const t = new T.Mesh(new T.CylinderGeometry(.5, .5, .38, 28), black); t.rotation.x = Math.PI / 2; t.castShadow = true; w.add(t);
-        const h = new T.Mesh(new T.CylinderGeometry(.24, .24, .4, 16), grey); h.rotation.x = Math.PI / 2; w.add(h);
-        const s = new T.Mesh(new T.BoxGeometry(.08, .3, .42), grey); w.add(s);
-        g.add(w); wheels.push(w); return w;
-      };
-      // ute body (front faces +x)
-      box(5.2, .55, 2, navy, 0, .95, 0, ute);                // chassis / lower body
-      box(1.4, .5, 1.9, navy, 2.0, 1.45, 0, ute);            // bonnet
-      box(1.7, 1.05, 1.9, navy, .55, 1.75, 0, ute);          // cab
-      box(.08, .7, 1.7, glass, 1.42, 1.85, 0, ute).rotation.z = -.35; // windscreen
-      box(1.3, .5, .02, glass, .55, 1.95, .96, ute);         // side window
-      box(.14, .2, 1.9, lime, 2.72, 1.1, 0, ute);            // bumper stripe
-      box(.06, .16, .3, amber, 2.72, 1.42, .7, ute); box(.06, .16, .3, amber, 2.72, 1.42, -.7, ute);
-      // tray
-      box(2.6, .12, 2.05, navy, -1.75, 1.28, 0, ute);
-      box(2.6, .55, .08, navy, -1.75, 1.6, 1.0, ute); box(2.6, .55, .08, navy, -1.75, 1.6, -1.0, ute);
-      box(.08, .55, 2.05, navy, -3.02, 1.6, 0, ute);
-      box(2.6, .1, .1, lime, -1.75, 1.9, 1.02, ute);
-      box(.6, .5, .6, M(0xffffff), -1.0, 1.6, .3, ute); box(.7, .4, .55, amber, -2.1, 1.55, -.3, ute);
-      wheel(1.75, 1.0, ute); wheel(1.75, -1.0, ute); wheel(-1.7, 1.0, ute); wheel(-1.7, -1.0, ute);
-      box(.15, .2, .2, red, -3.08, 1.1, .8, ute); box(.15, .2, .2, red, -3.08, 1.1, -.8, ute);
-
-      // logo on the driver door
-      const img = $('.hero-art .badge');
-      const tex = new T.Texture(img); tex.needsUpdate = true;
-      const door = new T.Mesh(new T.CircleGeometry(.48, 40), new T.MeshBasicMaterial({ map: tex, transparent: true }));
-      door.position.set(.45, 1.2, 1.012); ute.add(door);
-
-      // trailer
-      const tr = new T.Group(); tr.position.x = -6.4; rig.add(tr);
-      box(3.6, .14, 2.1, navy, 0, .95, 0, tr);
-      box(1.8, .1, .1, navy, 2.6, .9, 0, tr);              // drawbar
-      const side = new T.CanvasTexture(brandCanvas());
-      const sideMat = new T.MeshStandardMaterial({ map: side, roughness: .6 });
-      const panel = new T.Mesh(new T.BoxGeometry(3.6, .9, .06), [navy, navy, navy, navy, sideMat, navy]); panel.position.set(0, 1.47, 1.05); panel.castShadow = true; tr.add(panel);
-      box(3.6, .9, .06, navy, 0, 1.47, -1.05, tr);
-      box(.06, .9, 2.1, navy, 1.8, 1.47, 0, tr); box(.06, .9, 2.1, navy, -1.8, 1.47, 0, tr);
-      // cage rails
-      [[0, 2.5, 1.05], [0, 2.5, -1.05]].forEach(p => box(3.6, .07, .07, lime, ...p, tr));
-      [-1.8, -.6, .6, 1.8].forEach(x => { box(.07, 1.1, .07, navy, x, 2.0, 1.05, tr); box(.07, 1.1, .07, navy, x, 2.0, -1.05, tr); });
-      const trLogo = new T.Mesh(new T.CircleGeometry(.36, 40), new T.MeshBasicMaterial({ map: tex, transparent: true }));
-      trLogo.position.set(1.3, 2.05, 1.09); tr.add(trLogo);
-      wheel(0, 1.12, tr); wheel(0, -1.12, tr);
-      box(.12, .2, .2, red, -1.86, 1.05, .85, tr); box(.12, .2, .2, red, -1.86, 1.05, -.85, tr);
-      // rubbish
-      const junk = new T.Group(); tr.add(junk);
-      box(1.5, .55, .9, M(0x3eb4ff), -.9, 1.35, .45, junk); box(1.5, .45, .25, M(0x3eb4ff), -.9, 1.75, .02, junk); // couch
-      box(1.7, .22, 1.3, white, .7, 1.95, -.2, junk).rotation.z = .12;   // mattress
-      box(.7, .7, .7, M(0xffffff), .9, 1.4, .5, junk).rotation.y = .3;   // box
-      box(.6, .55, .6, amber, -.2, 2.25, -.5, junk).rotation.y = -.4;
-      box(.8, .9, .7, M(0xe8ecf2), -1.3, 1.45, -.55, junk);             // washer
-      const greens = new T.Group(); junk.add(greens);
-      [[-.4, 2.55, .3, .55], [.2, 2.7, .1, .45], [-1.1, 2.45, -.2, .5], [.9, 2.45, .3, .4]].forEach(([x, y, z, r]) => {
-        const s = new T.Mesh(new T.IcosahedronGeometry(r, 1), lime); s.position.set(x, y, z); s.castShadow = true; greens.add(s);
-      });
-      const bike = new T.Mesh(new T.TorusGeometry(.32, .05, 8, 24), black); bike.position.set(1.4, 2.4, -.6); bike.rotation.y = .5; junk.add(bike);
-
-      // dust puffs
-      const puffs = [], puffMat = new T.MeshBasicMaterial({ color: 0xe9e4d8, transparent: true, opacity: .5, depthWrite: false });
-      const puff = (x, z) => { const p = new T.Mesh(new T.SphereGeometry(.2, 10, 8), puffMat.clone()); p.position.set(x, .3, z + (Math.random() - .5) * .3); p.userData = { t: 0, v: Math.random() * .6 + .4 }; scene.add(p); puffs.push(p); };
-
-      let x0 = .8, t0 = performance.now(), last = t0, finished = false, raf = 0, dist = 0, prevX = x0;
-      rig.position.x = x0;
-      const DUR = 5.2;
-      const end = () => {
-        if (finished) return; finished = true; cancelAnimationFrame(raf);
-        wrap.style.transition = 'opacity .45s'; wrap.style.opacity = '0';
-        setTimeout(() => {
-          wrap.hidden = true; wrap.style.opacity = ''; wrap.style.transition = '';
-          removeEventListener('resize', size); renderer.dispose(); if (lenis) lenis.start(); resolve();
-        }, 460);
-      };
-      wrap.onclick = end; $('#driveSkip').onclick = e => { e.stopPropagation(); end(); };
-      const text = $('.drive-text');
-      if (hasGsap) gsap.fromTo(text.children, { y: 30, opacity: 0, scale: .8 }, { y: 0, opacity: 1, scale: 1, duration: .7, stagger: .12, ease: 'back.out(2.2)' });
-      const loop = now => {
-        const t = (now - t0) / 1000, dt = Math.min(.05, (now - last) / 1000); last = now;
-        // idle rumble, then accelerate away
-        const go = Math.max(0, t - 1.3);
-        rig.position.x = x0 + .55 * go * go * go + 1.1 * go * go;
-        const dx = rig.position.x - prevX; prevX = rig.position.x; dist += dx;
-        wheels.forEach(w => w.rotation.z = -dist / .5);
-        ute.position.y = t < 1.3 ? Math.sin(t * 60) * .015 : 0;
-        ute.rotation.z = go > 0 && go < .9 ? Math.sin(go / .9 * Math.PI) * .045 : 0;
-        junk.position.y = t < 1.3 ? Math.abs(Math.sin(t * 30)) * .02 : Math.abs(Math.sin(go * 9)) * .05;
-        if (t > .2 && Math.random() < (go > 0 ? .55 : .1)) puff(rig.position.x - 3.2, -.6);
-        if (go > 0 && Math.random() < .35) puff(rig.position.x - 6.4, 1.1);
-        puffs.forEach(p => { p.userData.t += dt; const k = p.userData.t; p.position.y += dt * p.userData.v; p.scale.setScalar(1 + k * 1.8); p.material.opacity = Math.max(0, .5 - k * .45); });
-        renderer.render(scene, cam);
-        if (t > DUR) return end();
-        raf = requestAnimationFrame(loop);
-      };
-      raf = requestAnimationFrame(loop);
-    });
-  }
-
-  // ---- 3D trailer viewer (Three.js): a tandem cage trailer customers can spin ----
-  (() => {
-    const fig = $('.trailer-fig'), svgT = $('.trailer'), box3 = $('#t3d');
-    if (!fig || !box3) return;
-    let started = false;
-    const start = async () => {
-      if (started) return; started = true;
-      const ok = await loadThree();
-      if (!ok || !window.THREE) return;
-      try { t3d = build(window.THREE); } catch (e) { console.warn(e); t3d = null; return; }
-      t3d.setLevel(sel, false);
-      svgT.setAttribute('hidden', ''); box3.hidden = false; $('#t3dCap').textContent = 'Drag to spin the trailer. Tap a price to change the load.';
-      t3d.resize();
+  // ---- Shared 3D kit: photo lighting, real materials, the tandem cage trailer and its load ----
+  function makeKit(T, renderer, opts = {}) {
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const noise3 = (x, y, z) => Math.sin(x * 7.1 + y * 3.3) * Math.sin(y * 5.7 + z * 4.1) * Math.sin(z * 6.3 + x * 2.9);
+    const lin = h => new T.Color(h).convertSRGBToLinear();
+    const std = (c, r = .6, m = 0, extra = {}) => new T.MeshStandardMaterial(Object.assign({ color: lin(c), roughness: r, metalness: m }, extra));
+    const aniso = renderer.capabilities.getMaxAnisotropy();
+    const canvasTex = (w, h, draw, rep, srgb = true) => {
+      const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+      const t = new T.CanvasTexture(c); if (srgb) t.encoding = T.sRGBEncoding;
+      if (rep) { t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rep[0], rep[1]); }
+      t.anisotropy = aniso; return t;
     };
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); start(); } }, { rootMargin: '400px' });
-      io.observe(fig);
-    } else start();
+    const speckle = (base, spread, n) => (x, w, h) => { x.fillStyle = base; x.fillRect(0, 0, w, h); for (let i = 0; i < n; i++) { const v = (rnd() - .5) * spread; x.fillStyle = `rgba(${v > 0 ? '255,255,255' : '0,0,0'},${Math.abs(v)})`; x.fillRect(rnd() * w, rnd() * h, 1 + rnd() * 6, 1 + rnd() * 6); } };
+    const add = (geo, mat, x, y, z, parent, rot) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); if (rot) m.rotation.set(rot[0] || 0, rot[1] || 0, rot[2] || 0); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m; };
+    const B = (w, h, d) => new T.BoxGeometry(w, h, d);
+    const C = (r, h, s = 20) => new T.CylinderGeometry(r, r, h, s);
+    const lumpy = (geo, amt, f = 1) => { const p = geo.attributes.position; for (let i = 0; i < p.count; i++) { const v = new T.Vector3().fromBufferAttribute(p, i); const n = 1 + amt * noise3(v.x * f, v.y * f, v.z * f); p.setXYZ(i, v.x * n, v.y * n, v.z * n); } geo.computeVertexNormals(); return geo; };
 
-    function build(T) {
-      // seeded random so the load looks the same every visit
-      let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-      const noise3 = (x, y, z) => Math.sin(x * 7.1 + y * 3.3) * Math.sin(y * 5.7 + z * 4.1) * Math.sin(z * 6.3 + x * 2.9);
+    renderer.outputEncoding = T.sRGBEncoding;
+    renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = opts.exposure || .95;
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
 
-      const cv = $('#t3dCanvas');
-      const renderer = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
-      renderer.outputEncoding = T.sRGBEncoding;
-      renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = .95;
-      renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
-      const scene = new T.Scene();
-      const cam = new T.PerspectiveCamera(26, 1, .1, 100);
-      const target = new T.Vector3(.4, 1.1, 0);
-
-      // ---------- photographic lighting: sky environment for reflections + low sun ----------
-      const pmrem = new T.PMREMGenerator(renderer);
-      const envScene = new T.Scene();
+    // sky environment for reflections + a low sun
+    const setupLights = (scene, shadowSize = 5, mapSize = 2048) => {
+      const pmrem = new T.PMREMGenerator(renderer), envScene = new T.Scene();
       const skyGeo = new T.SphereGeometry(20, 32, 16), cols = [];
-      const top = new T.Color(0x9cc7ef), hor = new T.Color(0xf4f1ea), gnd = new T.Color(0x6d6a63);
-      for (let i = 0; i < skyGeo.attributes.position.count; i++) {
-        const y = skyGeo.attributes.position.getY(i) / 20, c = y > 0 ? hor.clone().lerp(top, Math.pow(y, .6)) : hor.clone().lerp(gnd, Math.min(1, -y * 3));
-        cols.push(c.r, c.g, c.b);
-      }
+      const top = new T.Color(0x8fbde9), hor = new T.Color(0xf4f1ea), gnd = new T.Color(0x66635c);
+      for (let i = 0; i < skyGeo.attributes.position.count; i++) { const y = skyGeo.attributes.position.getY(i) / 20, c = y > 0 ? hor.clone().lerp(top, Math.pow(y, .6)) : hor.clone().lerp(gnd, Math.min(1, -y * 3)); cols.push(c.r, c.g, c.b); }
       skyGeo.setAttribute('color', new T.Float32BufferAttribute(cols, 3));
       envScene.add(new T.Mesh(skyGeo, new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide })));
-      const sunDisc = new T.Mesh(new T.SphereGeometry(2.2, 16, 8), new T.MeshBasicMaterial({ color: new T.Color(12, 11, 9) }));
-      sunDisc.position.set(9, 12, 8); envScene.add(sunDisc);
+      const sunDisc = new T.Mesh(new T.SphereGeometry(2.2, 16, 8), new T.MeshBasicMaterial({ color: new T.Color(12, 11, 9) })); sunDisc.position.set(9, 12, 8); envScene.add(sunDisc);
       scene.environment = pmrem.fromScene(envScene, .02).texture;
+      const sun = new T.DirectionalLight(0xfff3e2, 2.1); sun.position.set(6, 9, 5); sun.castShadow = true;
+      sun.shadow.mapSize.set(mapSize, mapSize); sun.shadow.bias = -.0004; sun.shadow.normalBias = .02;
+      Object.assign(sun.shadow.camera, { left: -shadowSize, right: shadowSize, top: shadowSize, bottom: -shadowSize, near: 1, far: 40 });
+      scene.add(sun); scene.add(sun.target); scene.add(new T.HemisphereLight(0xdfeaf5, 0x5b5850, .35));
+      return sun;
+    };
 
-      const sunL = new T.DirectionalLight(0xfff3e2, 2.1); sunL.position.set(6, 9, 5); sunL.castShadow = true;
-      sunL.shadow.mapSize.set(2048, 2048); sunL.shadow.bias = -.0004; sunL.shadow.normalBias = .02;
-      Object.assign(sunL.shadow.camera, { left: -5, right: 5, top: 5, bottom: -5, near: 1, far: 30 });
-      scene.add(sunL); scene.add(new T.HemisphereLight(0xdfeaf5, 0x5b5850, .35));
+    const galvTex = canvasTex(256, 256, (x, w, h) => {
+      x.fillStyle = '#aeb6be'; x.fillRect(0, 0, w, h);
+      for (let i = 0; i < 90; i++) { x.fillStyle = `rgba(${rnd() > .5 ? '230,236,242' : '120,128,138'},${.08 + rnd() * .14})`; x.beginPath(); const cx = rnd() * w, cy = rnd() * h, r = 8 + rnd() * 26; for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + rnd() * .5; x.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); } x.fill(); }
+    }, [2, 2]);
+    const galv = new T.MeshStandardMaterial({ color: lin(0xd4dbe2), map: galvTex, roughness: .38, metalness: .85 });
+    const galvDull = new T.MeshStandardMaterial({ color: lin(0xb3bcc5), map: galvTex, roughness: .55, metalness: .7 });
+    const steelDark = std(0x2b2e33, .6, .5), rubber = std(0x17181a, .92, 0);
+    const rimMat = new T.MeshStandardMaterial({ color: lin(0xe3e7eb), roughness: .25, metalness: .9 });
+    const rimDish = new T.MeshStandardMaterial({ color: lin(0xb7bec6), roughness: .35, metalness: .85 });
+    const treadTex = canvasTex(512, 64, (x, w, h) => { x.fillStyle = '#1b1c1e'; x.fillRect(0, 0, w, h); x.fillStyle = '#0c0c0d'; for (let i = 0; i < w; i += 16) { x.fillRect(i, 0, 6, h * .42); x.fillRect(i + 8, h * .58, 6, h * .42); } x.fillRect(0, h * .47, w, h * .06); }, [3, 1]);
+    const tyreMat = new T.MeshStandardMaterial({ map: treadTex, color: lin(0x3a3b3e), roughness: .9 });
+    const plateTex = canvasTex(256, 256, (x, w) => {
+      x.fillStyle = '#9aa2aa'; x.fillRect(0, 0, w, w);
+      for (let r = 0; r < 10; r++) for (let c = 0; c < 10; c++) { x.save(); x.translate(c * 25.6 + 12.8 + (r % 2 ? 6 : -6), r * 25.6 + 12.8); x.rotate(r % 2 ? .78 : -.78); x.fillStyle = '#c7cdd3'; x.fillRect(-8, -1.8, 16, 3.6); x.fillStyle = '#6d747c'; x.fillRect(-8, 1.8, 16, 1.2); x.restore(); }
+    }, [10, 5]);
+    const badge = $('.hero-art .badge');
 
-      // ---------- helpers ----------
-      const lin = h => new T.Color(h).convertSRGBToLinear();
-      const std = (c, r = .6, m = 0, extra = {}) => new T.MeshStandardMaterial(Object.assign({ color: lin(c), roughness: r, metalness: m }, extra));
-      const canvasTex = (w, h, draw, rep, srgb = true) => {
-        const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
-        const t = new T.CanvasTexture(c); if (srgb) t.encoding = T.sRGBEncoding;
-        if (rep) { t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rep[0], rep[1]); }
-        t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t;
-      };
-      const speckle = (base, spread, n) => (x, w, h) => { x.fillStyle = base; x.fillRect(0, 0, w, h); for (let i = 0; i < n; i++) { const v = (rnd() - .5) * spread; x.fillStyle = `rgba(${v > 0 ? '255,255,255' : '0,0,0'},${Math.abs(v)})`; x.fillRect(rnd() * w, rnd() * h, 1 + rnd() * 6, 1 + rnd() * 6); } };
-      const galvTex = canvasTex(256, 256, (x, w, h) => {
-        x.fillStyle = '#aeb6be'; x.fillRect(0, 0, w, h);
-        for (let i = 0; i < 90; i++) { x.fillStyle = `rgba(${rnd() > .5 ? '230,236,242' : '120,128,138'},${.08 + rnd() * .14})`; x.beginPath(); const cx = rnd() * w, cy = rnd() * h, r = 8 + rnd() * 26; for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + rnd() * .5; x.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); } x.fill(); }
-      }, [2, 2]);
-      const galv = new T.MeshStandardMaterial({ color: lin(0xd4dbe2), map: galvTex, roughness: .38, metalness: .85 });
-      const galvDull = new T.MeshStandardMaterial({ color: lin(0xb3bcc5), map: galvTex, roughness: .55, metalness: .7 });
-      const steelDark = std(0x2b2e33, .6, .5), rubber = std(0x17181a, .92, 0);
+    // a road-going wheel: tyre, rim, dish, hub, studs
+    const makeWheel = (R, width, studs, parent, x, y, z, side, rimColor) => {
+      const g = new T.Group(); g.position.set(x, y, z); parent.add(g);
+      const tube = width / 2;
+      add(new T.TorusGeometry(R - tube, tube, 18, 44), tyreMat, 0, 0, 0, g);
+      add(C(R - tube - .01, width * .95, 40), rimColor || rimMat, 0, 0, 0, g, [Math.PI / 2, 0, 0]);
+      add(C(R - tube - .06, width * .97, 40), rimDish, 0, 0, side * .002, g, [Math.PI / 2, 0, 0]);
+      add(C(.055, width * 1.1, 20), rimMat, 0, 0, 0, g, [Math.PI / 2, 0, 0]);
+      for (let i = 0; i < studs; i++) { const a = i / studs * Math.PI * 2; add(C(.012, width * 1.12, 6), steelDark, Math.cos(a) * .085, Math.sin(a) * .085, 0, g, [Math.PI / 2, 0, 0]); }
+      return g;
+    };
 
-      const add = (geo, mat, x, y, z, parent, rot) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); if (rot) m.rotation.set(rot[0] || 0, rot[1] || 0, rot[2] || 0); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m; };
-      const B = (w, h, d) => new T.BoxGeometry(w, h, d);
-      const C = (r, h, s = 20) => new T.CylinderGeometry(r, r, h, s);
-      const lumpy = (geo, amt, f = 1) => { const p = geo.attributes.position; for (let i = 0; i < p.count; i++) { const v = new T.Vector3().fromBufferAttribute(p, i); const n = 1 + amt * noise3(v.x * f, v.y * f, v.z * f); p.setXYZ(i, v.x * n, v.y * n, v.z * n); } geo.computeVertexNormals(); return geo; };
-
-      // ground: concrete driveway pad that fades out
-      const groundTex = canvasTex(512, 512, speckle('#b9b4aa', .16, 5000));
-      const groundAlpha = canvasTex(256, 256, (x, w, h) => { const g = x.createRadialGradient(w / 2, h / 2, w * .2, w / 2, h / 2, w / 2); g.addColorStop(0, '#fff'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, w, h); }, null, false);
-      const ground = new T.Mesh(new T.CircleGeometry(7.5, 64), new T.MeshStandardMaterial({ map: groundTex, alphaMap: groundAlpha, transparent: true, roughness: .95, depthWrite: false }));
-      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-
-      // ---------- trailer (1 unit = 1 m). Bed 4 m x 2 m, cage 2 m high, tandem axle ----------
-      const trailer = new T.Group(); scene.add(trailer);
+    // ---------- the tandem cage trailer (1 unit = 1 m; bed 4 x 2 m, cage 2 m) ----------
+    function makeTrailer() {
+      const trailer = new T.Group(), wheels = [];
       const L = 4, W = 2, H = 2, FLOOR = .66, X0 = -L / 2, Z0 = -W / 2, SHS = .05;
-      // chassis rails, crossmembers, checker-plate floor
       [Z0 + .04, -Z0 - .04].forEach(z => add(B(L, .1, .075), galv, 0, FLOOR - .1, z, trailer));
       for (let i = 0; i <= 6; i++) add(B(.05, .075, W - .1), galvDull, X0 + .03 + i * (L - .06) / 6, FLOOR - .09, 0, trailer);
-      const plateTex = canvasTex(256, 256, (x, w) => {
-        x.fillStyle = '#9aa2aa'; x.fillRect(0, 0, w, w);
-        for (let r = 0; r < 10; r++) for (let c = 0; c < 10; c++) { x.save(); x.translate(c * 25.6 + 12.8 + (r % 2 ? 6 : -6), r * 25.6 + 12.8); x.rotate(r % 2 ? .78 : -.78); x.fillStyle = '#c7cdd3'; x.fillRect(-8, -1.8, 16, 3.6); x.fillStyle = '#6d747c'; x.fillRect(-8, 1.8, 16, 1.2); x.restore(); }
-      }, [10, 5]);
       add(B(L, .03, W), new T.MeshStandardMaterial({ map: plateTex, roughness: .42, metalness: .8 }), 0, FLOOR - .015, 0, trailer);
-
-      // A-frame drawbar, coupling, safety chains, jockey wheel
+      // A-frame drawbar, coupling, chains, jockey wheel
       const nose = L / 2 + 1.45;
       [1, -1].forEach(s => { const dx = nose - L / 2 + .2, dz = W / 2 - .06, a = Math.atan2(dz, dx), len = Math.hypot(dx, dz); add(B(len, .1, .075), galv, (L / 2 - .2 + nose) / 2, FLOOR - .1, s * dz / 2, trailer, [0, s * a, 0]); });
       add(B(.38, .1, .1), galv, nose, FLOOR - .1, 0, trailer);
       add(B(.3, .09, .11), steelDark, nose + .28, FLOOR - .07, 0, trailer);
-      add(new T.SphereGeometry(.055, 16, 12), steelDark, nose + .4, FLOOR - .07, 0, trailer);
       [.05, -.05].forEach(z => { for (let i = 0; i < 8; i++) add(new T.TorusGeometry(.018, .005, 6, 10), galvDull, nose + .1 + i * .035, FLOOR - .2 - Math.sin(i / 7 * Math.PI) * .07, z, trailer, [0, Math.PI / 2 * (i % 2), 0]); });
-      add(C(.035, .55), galv, nose - .35, FLOOR - .32, .16, trailer);
-      add(C(.04, .12), galv, nose - .35, FLOOR - .02, .16, trailer);
-      add(C(.07, .05, 20), rubber, nose - .35, .07, .16, trailer, [Math.PI / 2, 0, 0]);
-
-      // tandem axles, leaf springs, wheels
+      const jockey = new T.Group(); trailer.add(jockey);
+      add(C(.035, .55), galv, nose - .35, FLOOR - .32, .16, jockey); add(C(.04, .12), galv, nose - .35, FLOOR - .02, .16, jockey);
+      add(C(.07, .05, 20), rubber, nose - .35, .07, .16, jockey, [Math.PI / 2, 0, 0]);
+      // tandem axles on leaf springs
       const R = .3, AXLES = [-.18, .7];
       AXLES.forEach(ax => add(C(.035, W + .36), steelDark, ax, R, 0, trailer, [Math.PI / 2, 0, 0]));
       [Z0 + .04, -Z0 - .04].forEach(z => {
         for (let k = 0; k < 4; k++) add(B(1.5 - k * .22, .014, .05), steelDark, (AXLES[0] + AXLES[1]) / 2, R + .05 + k * .016, z, trailer);
         AXLES.forEach(ax => add(B(.08, .14, .07), galvDull, ax, R + .12, z, trailer));
       });
-      const treadTex = canvasTex(512, 64, (x, w, h) => { x.fillStyle = '#1b1c1e'; x.fillRect(0, 0, w, h); x.fillStyle = '#0c0c0d'; for (let i = 0; i < w; i += 16) { x.fillRect(i, 0, 6, h * .42); x.fillRect(i + 8, h * .58, 6, h * .42); } x.fillRect(0, h * .47, w, h * .06); }, [3, 1]);
-      const tyreMat = new T.MeshStandardMaterial({ map: treadTex, color: lin(0x3a3b3e), roughness: .9 });
-      const rimMat = new T.MeshStandardMaterial({ color: lin(0xe3e7eb), roughness: .25, metalness: .9 });
-      const rimDish = new T.MeshStandardMaterial({ color: lin(0xb7bec6), roughness: .35, metalness: .85 });
-      const wheel = (x, z, side) => {
-        const g = new T.Group(); g.position.set(x, R, z); trailer.add(g);
-        add(new T.TorusGeometry(R - .09, .09, 18, 40), tyreMat, 0, 0, 0, g);
-        add(C(R - .1, .17, 36), rimMat, 0, 0, 0, g, [Math.PI / 2, 0, 0]);
-        add(C(R - .16, .175, 36), rimDish, 0, 0, side * .002, g, [Math.PI / 2, 0, 0]);
-        add(C(.055, .2, 20), rimMat, 0, 0, 0, g, [Math.PI / 2, 0, 0]);
-        for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; add(C(.012, .2, 6), steelDark, Math.cos(a) * .085, Math.sin(a) * .085, 0, g, [Math.PI / 2, 0, 0]); }
-      };
-      AXLES.forEach(ax => { wheel(ax, W / 2 + .19, 1); wheel(ax, -W / 2 - .19, -1); });
-      // one-piece tandem mudguards (checker plate), like the real ones
-      const gx0 = AXLES[0] - .42, gx1 = AXLES[1] + .42;
-      const gs = new T.Shape();
+      AXLES.forEach(ax => { wheels.push(makeWheel(R, .18, 5, trailer, ax, R, W / 2 + .19, 1)); wheels.push(makeWheel(R, .18, 5, trailer, ax, R, -W / 2 - .19, -1)); });
+      // one-piece tandem guards
+      const gx0 = AXLES[0] - .42, gx1 = AXLES[1] + .42, gs = new T.Shape();
       gs.moveTo(gx0, R + .02); gs.quadraticCurveTo(gx0, R + .43, gx0 + .38, R + .43); gs.lineTo(gx1 - .38, R + .43); gs.quadraticCurveTo(gx1, R + .43, gx1, R + .02);
       gs.lineTo(gx1 - .03, R + .02); gs.quadraticCurveTo(gx1 - .03, R + .4, gx1 - .38, R + .4); gs.lineTo(gx0 + .38, R + .4); gs.quadraticCurveTo(gx0 + .03, R + .4, gx0 + .03, R + .02); gs.closePath();
       const guardGeo = new T.ExtrudeGeometry(gs, { depth: .3, bevelEnabled: false, curveSegments: 18 });
       const guardMat = new T.MeshStandardMaterial({ color: lin(0xc9d0d7), map: galvTex, roughness: .4, metalness: .82 });
       [W / 2 + .04, -W / 2 - .34].forEach(z => { const m = new T.Mesh(guardGeo, guardMat); m.position.z = z; m.castShadow = m.receiveShadow = true; trailer.add(m); });
-
-      // lights, reflectors, number plate
+      // lights + plate
       const lensRed = std(0xb3121b, .2, 0, { emissive: lin(0x3a0306) });
       [Z0 + .18, -Z0 - .18].forEach(z => {
         add(B(.04, .11, .24), steelDark, X0 - .03, FLOOR - .11, z, trailer);
@@ -1681,8 +1505,7 @@ footer.site .big span{color:var(--lime-deep)}
       });
       const plateNo = canvasTex(256, 96, (x, w, h) => { x.fillStyle = '#f5f5ef'; x.fillRect(0, 0, w, h); x.strokeStyle = '#1a1a1a'; x.lineWidth = 5; x.strokeRect(4, 4, w - 8, h - 8); x.fillStyle = '#1a1a1a'; x.font = '700 50px "Arial Narrow", Arial, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('TC·48·SW', w / 2, h / 2 + 8); x.font = '700 14px Arial'; x.fillText('NSW', w / 2, 16); });
       add(B(.012, .13, .37), [steelDark, new T.MeshStandardMaterial({ map: plateNo, roughness: .5 }), steelDark, steelDark, steelDark, steelDark], X0 - .045, FLOOR - .26, 0, trailer);
-
-      // cage: square hollow section frame
+      // cage frame
       const LOWER = .32;
       const post = (x, z) => add(B(SHS, H, SHS), galv, x, FLOOR + H / 2, z, trailer);
       for (let i = 0; i <= 4; i++) [Z0 + SHS / 2, -Z0 - SHS / 2].forEach(z => post(X0 + SHS / 2 + i * (L - SHS) / 4, z));
@@ -1691,11 +1514,9 @@ footer.site .big span{color:var(--lime-deep)}
         [Z0 + SHS / 2, -Z0 - SHS / 2].forEach(z => add(B(L, SHS, SHS), galv, 0, y, z, trailer));
         if (j !== 2) [X0 + SHS / 2, -X0 - SHS / 2].forEach(x => add(B(SHS, SHS, W), galv, x, y, 0, trailer));
       });
-      // rear gate hinges + latches
       [-.6, .6].forEach(z => { add(C(.02, .1), steelDark, X0 - .02, FLOOR + .12, z, trailer); add(B(.05, .04, .1), steelDark, X0 - .02, FLOOR + H - .3, z, trailer); });
-      // lower sides: galvanised sheet
       [[0, Z0 + .01, B(L, LOWER, .012)], [0, -Z0 - .01, B(L, LOWER, .012)], [X0 + .01, 0, B(.012, LOWER, W)], [-X0 - .01, 0, B(.012, LOWER, W)]].forEach(([x, z, g]) => add(g, galvDull, x, FLOOR + LOWER / 2, z, trailer));
-      // welded mesh: real wires on a 75 mm grid
+      // welded mesh (real wires, 75 mm grid)
       const wireMat = new T.MeshStandardMaterial({ color: lin(0xc9d0d7), roughness: .35, metalness: .9 });
       const wires = [], dummy = new T.Object3D(), mh = H - LOWER - SHS, my = FLOOR + LOWER + mh / 2, G = .075, WIRE = .006;
       const panel = (len, cx, cz, alongX) => {
@@ -1706,14 +1527,11 @@ footer.site .big span{color:var(--lime-deep)}
       const inst = new T.InstancedMesh(B(1, 1, 1), wireMat, wires.length);
       wires.forEach((w, i) => { dummy.position.set(w[0], w[1], w[2]); dummy.scale.set(w[3], w[4], w[5]); dummy.updateMatrix(); inst.setMatrixAt(i, dummy.matrix); });
       inst.castShadow = true; trailer.add(inst);
-
-      // business sign cable-tied to the cage (both sides)
-      const badge = $('.hero-art .badge');
+      // business sign on the cage + vinyl lettering
       const signTex = canvasTex(1024, 420, (x, w, h) => {
-        x.fillStyle = '#ffffff'; x.fillRect(0, 0, w, h);
-        x.fillStyle = '#12203A'; x.fillRect(0, 0, w, 16); x.fillRect(0, h - 16, w, 16);
+        x.fillStyle = '#ffffff'; x.fillRect(0, 0, w, h); x.fillStyle = '#12203A'; x.fillRect(0, 0, w, 16); x.fillRect(0, h - 16, w, 16);
         try { x.save(); x.beginPath(); x.arc(205, h / 2, 170, 0, Math.PI * 2); x.clip(); x.drawImage(badge, 35, h / 2 - 170, 340, 340); x.restore(); } catch (e) {}
-        x.fillStyle = '#12203A'; x.font = 'italic 900 112px Archivo, "Arial Black", sans-serif'; x.textBaseline = 'alphabetic'; x.fillText('CLEAN', 410, 160);
+        x.fillStyle = '#12203A'; x.font = 'italic 900 112px Archivo, "Arial Black", sans-serif'; x.fillText('CLEAN', 410, 160);
         x.fillStyle = '#5b9a1c'; x.fillText('SWEEP', 410, 268);
         x.fillStyle = '#12203A'; x.font = '700 40px Figtree, Arial, sans-serif'; x.fillText('RUBBISH REMOVALS', 414, 322); x.font = '800 46px Figtree, Arial, sans-serif'; x.fillText('0493 866 368', 414, 378);
       });
@@ -1721,16 +1539,18 @@ footer.site .big span{color:var(--lime-deep)}
       [[-Z0 - .03 + .014, 0], [Z0 + .03 - .014, Math.PI]].forEach(([z, ry]) => {
         const sy = FLOOR + LOWER + .62, out = ry ? -1 : 1;
         add(B(1.27, .53, .006), std(0xe9ecef, .5), .55, sy, z - out * .004, trailer);
-        const s = add(new T.PlaneGeometry(1.25, .51), signMat, .55, sy, z, trailer, [0, ry, 0]); s.castShadow = false;
+        add(new T.PlaneGeometry(1.25, .51), signMat, .55, sy, z, trailer, [0, ry, 0]).castShadow = false;
         [[-.58, .22], [.58, .22], [-.58, -.22], [.58, -.22]].forEach(([dx, dy]) => add(B(.006, .03, .012), std(0x111111, .7), .55 + dx, sy + dy, z + out * .004, trailer));
       });
-      // vinyl lettering on the lower side sheets
-      const decal = canvasTex(1024, 96, (x, w, h) => { x.clearRect(0, 0, w, h); x.font = 'italic 900 64px Archivo, "Arial Black", sans-serif'; x.textBaseline = 'middle'; x.fillStyle = '#12203A'; x.fillText('CLEAN', 20, 50); const cw = x.measureText('CLEAN ').width; x.fillStyle = '#4f8a17'; x.fillText('SWEEP', 20 + cw, 50); const sw = x.measureText('SWEEP').width; x.font = '800 40px Figtree, Arial, sans-serif'; x.fillStyle = '#12203A'; x.fillText('0493 866 368', 60 + cw + sw, 52); });
+      const decal = canvasTex(1024, 96, (x) => { x.font = 'italic 900 64px Archivo, "Arial Black", sans-serif'; x.textBaseline = 'middle'; x.fillStyle = '#12203A'; x.fillText('CLEAN', 20, 50); const cw = x.measureText('CLEAN ').width; x.fillStyle = '#4f8a17'; x.fillText('SWEEP', 20 + cw, 50); const sw = x.measureText('SWEEP').width; x.font = '800 40px Figtree, Arial, sans-serif'; x.fillStyle = '#12203A'; x.fillText('0493 866 368', 60 + cw + sw, 52); });
       const decalMat = new T.MeshStandardMaterial({ map: decal, transparent: true, roughness: .4, metalness: .1, polygonOffset: true, polygonOffsetFactor: -2 });
       add(new T.PlaneGeometry(3.4, .32), decalMat, -.05, FLOOR + LOWER / 2, -Z0 - .002, trailer).castShadow = false;
       add(new T.PlaneGeometry(3.4, .32), decalMat, -.05, FLOOR + LOWER / 2, Z0 + .002, trailer, [0, Math.PI, 0]).castShadow = false;
+      return { group: trailer, wheels, jockey, L, W, FLOOR, couplingX: nose + .4, couplingY: FLOOR - .07 };
+    }
 
-      // ---------- the load (real-world colours) ----------
+    // ---------- the load, in real-world colours: four 0.5 m layers ----------
+    function makeLoads(trailer, FLOOR) {
       const cardboardTex = canvasTex(128, 128, speckle('#b58a5a', .12, 600));
       const box = (w, h, d) => { const g = new T.Group(); const m = std(0xffffff, .92); m.map = cardboardTex; add(B(w, h, d), m, 0, h / 2, 0, g); add(B(w * 1.002, .005, .06), std(0xcdb48a, .35), 0, h + .002, 0, g); return g; };
       const bag = r => { const g = new T.Group(); const m = add(lumpy(new T.SphereGeometry(r, 24, 16), .13, 5), std(0x16181b, .32, 0), 0, r * .78, 0, g); m.scale.set(1, .8, 1.05); add(lumpy(new T.ConeGeometry(r * .22, r * .45, 10), .2, 9), std(0x16181b, .32), 0, r * 1.5, 0, g); return g; };
@@ -1754,7 +1574,6 @@ footer.site .big span{color:var(--lime-deep)}
       const chair = () => { const g = new T.Group(), w = std(0x6e4b33, .65); add(B(.44, .04, .44), w, 0, .45, 0, g); add(B(.44, .4, .03), w, 0, .66, -.2, g); [-.19, .19].forEach(x => [-.19, .19].forEach(z => add(B(.035, .45, .035), w, x, .225, z, g))); return g; };
       const tv = () => { const g = new T.Group(); add(B(.98, .58, .06), std(0x111214, .35, .2), 0, .29, 0, g); add(B(.92, .52, .005), std(0x050607, .05, .1), 0, .3, .031, g); return g; };
       const bucket = () => { const g = new T.Group(); add(new T.CylinderGeometry(.15, .12, .32, 20, 1, true), std(0x2b2d30, .5, 0, { side: T.DoubleSide }), 0, .16, 0, g); return g; };
-
       const PLACE = [
         [[couch(), -.95, .5, 0], [fridgeDown(), 1.1, .5, 0], [washer(), -1.6, -.52, .15], [box(.5, .46, .5), -.95, -.5, .3], [box(.56, .42, .44), -.35, -.48, -.15],
          [box(.44, .38, .42), .25, -.58, .1], [bag(.3), .9, -.45, 0], [bag(.28), 1.6, -.48, 0], [bag(.25), .15, .48, 0], [bucket(), 1.75, .35, 0]],
@@ -1763,18 +1582,273 @@ footer.site .big span{color:var(--lime-deep)}
         [[greens(70, 1.8, 1.7, .45), -1.0, 0, 0], [timber(), .75, -.3, .06], [chair(), 1.45, .45, .5], [box(.54, .44, .5), .35, .45, -.25], [bag(.3), 1.6, -.5, 0]],
         [[greens(80, 2.0, 1.75, .5), .95, 0, 0], [mattress(true), -1.0, 0, -.1], [tv(), -1.35, -.3, .25], [box(.5, .42, .48), -.5, .42, .4], [bag(.29), -1.6, .5, 0], [box(.44, .4, .44), -.15, -.5, -.3]],
       ];
-      const loads = PLACE.map((layer, q) => {
+      return PLACE.map((layer, q) => {
         const grp = new T.Group(); trailer.add(grp);
         layer.forEach(([obj, x, z, ry]) => { obj.position.set(x, FLOOR + q * .5, z); obj.rotation.y = ry; obj.userData.home = obj.position.clone(); obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } }); grp.add(obj); });
-        grp.visible = false; return grp;
+        return grp;
       });
+    }
 
-      // fill level: soft tint + level line
+    // ---------- a navy single-cab tray-back ute (front faces +x) ----------
+    function makeUte() {
+      const ute = new T.Group(), body = new T.Group(), wheels = [];
+      ute.add(body);
+      const WB = 1.75, WIDTH = 1.8, RF = .37;
+      const paint = new T.MeshPhysicalMaterial({ color: lin(0x1b2a47), roughness: .3, metalness: .5, clearcoat: 1, clearcoatRoughness: .07 });
+      const trim = std(0x16171a, .55, .1), chrome = new T.MeshStandardMaterial({ color: lin(0xdfe3e8), roughness: .15, metalness: 1 });
+      const glass = new T.MeshStandardMaterial({ color: lin(0x0e1622), roughness: .04, metalness: .9, side: T.DoubleSide });
+      // cab + bonnet: extruded side profile with real wheel arch, rounded edges
+      const s = new T.Shape(), fx = 2.0;
+      s.moveTo(.32, .48); s.lineTo(fx - .5, .48);
+      s.absarc(fx, .37, .5, Math.PI - .2, .2, true);
+      s.lineTo(2.78, .48); s.quadraticCurveTo(2.86, .5, 2.86, .66); s.lineTo(2.86, .92); s.quadraticCurveTo(2.84, 1.06, 2.66, 1.1);
+      s.lineTo(1.72, 1.19); s.quadraticCurveTo(1.58, 1.21, 1.52, 1.28);
+      s.lineTo(1.08, 1.74); s.quadraticCurveTo(1.0, 1.8, .88, 1.8); s.lineTo(.46, 1.8); s.quadraticCurveTo(.36, 1.8, .35, 1.7);
+      s.lineTo(.32, .48);
+      const depth = WIDTH - .12;
+      const bodyGeo = new T.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: .06, bevelSize: .05, bevelSegments: 4, curveSegments: 24 });
+      bodyGeo.translate(0, 0, -depth / 2);
+      const shell = new T.Mesh(bodyGeo, paint); shell.castShadow = shell.receiveShadow = true; body.add(shell);
+      const sideZ = WIDTH / 2 + .002;
+      // side windows (door glass), windscreen, rear window
+      const win = new T.Shape(); win.moveTo(.45, 1.27); win.lineTo(1.45, 1.27); win.lineTo(1.07, 1.7); win.quadraticCurveTo(1.0, 1.74, .9, 1.74); win.lineTo(.5, 1.74); win.lineTo(.45, 1.68); win.closePath();
+      const winGeo = new T.ShapeGeometry(win);
+      [1, -1].forEach(sd => { const m = new T.Mesh(winGeo, glass); m.position.z = sd * sideZ; body.add(m); });
+      const wsG = new T.Group(); wsG.position.set(1.3, 1.51, 0); wsG.rotation.z = -Math.atan2(.46, .44); body.add(wsG);
+      const ws = new T.Mesh(new T.PlaneGeometry(.66, WIDTH - .24), glass); ws.rotation.x = -Math.PI / 2; ws.position.y = .056; wsG.add(ws);
+      const rw = new T.Mesh(new T.PlaneGeometry(WIDTH - .5, .34), glass); rw.position.set(.262, 1.47, 0); rw.rotation.y = -Math.PI / 2; body.add(rw);
+      // door shut lines, handles, mirrors
+      [1, -1].forEach(sd => {
+        add(B(.006, .78, .004), trim, 1.47, .88, sd * (sideZ + .001), body); add(B(.006, .78, .004), trim, .42, .88, sd * (sideZ + .001), body);
+        add(B(.14, .03, .02), trim, .6, 1.15, sd * (sideZ + .01), body);
+        const mirror = add(B(.18, .14, .06), trim, 1.42, 1.32, sd * (sideZ + .1), body); add(B(.08, .03, .1), trim, 1.47, 1.28, sd * (sideZ + .04), body);
+      });
+      // grille, headlights, bumper, plate
+      add(B(.04, .26, 1.1), trim, 2.87, .9, 0, body);
+      for (let i = 0; i < 5; i++) add(B(.045, .012, 1.06), std(0x2a2c30, .4, .4), 2.88, .8 + i * .05, 0, body);
+      add(B(.06, .06, .4), chrome, 2.9, 1.04, 0, body);
+      [.62, -.62].forEach(z => { add(B(.06, .12, .32), std(0xf6f8fa, .05, 0, { emissive: lin(0x8c8c80), emissiveIntensity: .6 }), 2.84, .98, z, body); add(B(.04, .05, .2), std(0xffa31a, .2, 0, { emissive: lin(0x402800) }), 2.86, .86, z * 1.1, body); });
+      add(B(.12, .22, WIDTH - .02), std(0x2a2c30, .65, .1), 2.9, .58, 0, body);
+      const plate = canvasTex(256, 96, (x, w, h) => { x.fillStyle = '#f5f5ef'; x.fillRect(0, 0, w, h); x.strokeStyle = '#1a1a1a'; x.lineWidth = 5; x.strokeRect(4, 4, w - 8, h - 8); x.fillStyle = '#1a1a1a'; x.font = '700 50px "Arial Narrow", Arial, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('CS·55·UTE', w / 2, h / 2 + 8); x.font = '700 14px Arial'; x.fillText('NSW', w / 2, 16); });
+      add(B(.01, .12, .36), [trim, trim, trim, trim, trim, trim].map((m, i) => i === 0 ? new T.MeshStandardMaterial({ map: plate, roughness: .5 }) : m), 2.965, .6, 0, body);
+      // chassis + alloy tray with headboard and drop sides
+      add(B(4.6, .16, .9), std(0x1a1b1e, .7, .3), .2, .5, 0, ute);
+      const alloyTex = canvasTex(256, 64, (x, w, h) => { x.fillStyle = '#c4c9ce'; x.fillRect(0, 0, w, h); for (let i = 0; i < 160; i++) { x.fillStyle = `rgba(${rnd() > .5 ? '255,255,255' : '90,96,104'},${rnd() * .12})`; x.fillRect(0, rnd() * h, w, 1); } }, [2, 1]);
+      const alloy = new T.MeshStandardMaterial({ color: lin(0xe6e9ec), map: alloyTex, roughness: .32, metalness: .9 });
+      const TRX0 = -2.15, TRX1 = .27, TRY = .95, TL = TRX1 - TRX0;
+      add(B(TL, .06, WIDTH + .06), alloy, (TRX0 + TRX1) / 2, TRY, 0, ute);
+      [1, -1].forEach(sd => add(B(TL, .3, .03), alloy, (TRX0 + TRX1) / 2, TRY + .18, sd * (WIDTH / 2 + .02), ute));
+      add(B(.03, .3, WIDTH + .06), alloy, TRX0, TRY + .18, 0, ute);
+      add(B(.05, .95, WIDTH + .06), alloy, TRX1, TRY + .5, 0, ute);
+      for (let i = 0; i < 7; i++) add(B(.02, .02, WIDTH), alloy, TRX1 + .01, TRY + .38 + i * .08, 0, ute);
+      [1, -1].forEach(sd => {
+        add(B(.04, .04, .04), steelDark, TRX0 + .2, TRY + .3, sd * (WIDTH / 2 + .04), ute);
+        add(B(.02, .25, .2), std(0x111111, .9), TRX0 + .25, .38, sd * (WIDTH / 2 - .05), ute);
+        add(B(.03, .1, .18), std(0xb3121b, .2, 0, { emissive: lin(0x3a0306) }), TRX0 - .02, TRY - .1, sd * (WIDTH / 2 - .15), ute);
+      });
+      // tool box under tray + towbar
+      [1, -1].forEach(sd => add(B(.9, .35, .3), alloy, -.4, .72, sd * (WIDTH / 2 - .18), ute));
+      add(B(.6, .07, .07), steelDark, TRX0 - .25, .5, 0, ute);
+      add(new T.SphereGeometry(.05, 16, 12), chrome, TRX0 - .55, .58, 0, ute);
+      add(C(.02, .1), chrome, TRX0 - .55, .52, 0, ute);
+      // wheels (6-stud alloys)
+      const alloyRim = new T.MeshStandardMaterial({ color: lin(0xcfd4da), roughness: .22, metalness: .95 });
+      [[fx, 1], [fx, -1], [fx - 3.1, 1], [fx - 3.1, -1]].forEach(([x, sd]) => wheels.push(makeWheel(RF, .26, 6, ute, x, RF, sd * (WIDTH / 2 - .02), sd, alloyRim)));
+      // signwriting on the doors: logo roundel + name + phone
+      const doorTex = canvasTex(1024, 360, (x, w, h) => {
+        x.clearRect(0, 0, w, h);
+        try { x.save(); x.beginPath(); x.arc(170, 180, 160, 0, Math.PI * 2); x.clip(); x.drawImage(badge, 10, 20, 320, 320); x.restore(); } catch (e) {}
+        x.font = 'italic 900 118px Archivo, "Arial Black", sans-serif'; x.textBaseline = 'alphabetic'; x.fillStyle = '#ffffff'; x.fillText('CLEAN', 360, 150); x.fillStyle = '#8fd13d'; x.fillText('SWEEP', 360, 258);
+        x.font = '800 44px Figtree, Arial, sans-serif'; x.fillStyle = '#ffffff'; x.fillText('0493 866 368', 364, 318);
+      });
+      const doorMat = new T.MeshStandardMaterial({ map: doorTex, transparent: true, roughness: .3, metalness: .2, polygonOffset: true, polygonOffsetFactor: -2 });
+      [1, -1].forEach(sd => { const m = new T.Mesh(new T.PlaneGeometry(1.05, .37), doorMat); m.position.set(.95, .85, sd * (sideZ + .004)); if (sd < 0) m.rotation.y = Math.PI; body.add(m); });
+      // tray side lettering
+      const trayTex = canvasTex(1024, 96, (x) => { x.font = 'italic 900 70px Archivo, "Arial Black", sans-serif'; x.textBaseline = 'middle'; x.fillStyle = '#12203A'; x.fillText('CLEAN SWEEP', 24, 52); x.font = '800 40px Figtree, Arial, sans-serif'; x.fillText('RUBBISH REMOVALS', 560, 54); });
+      const trayMat = new T.MeshStandardMaterial({ map: trayTex, transparent: true, roughness: .4, polygonOffset: true, polygonOffsetFactor: -2 });
+      [1, -1].forEach(sd => { const m = new T.Mesh(new T.PlaneGeometry(2.2, .2), trayMat); m.position.set((TRX0 + TRX1) / 2, TRY + .18, sd * (WIDTH / 2 + .037)); if (sd < 0) m.rotation.y = Math.PI; ute.add(m); });
+      return { group: ute, body, wheels, towX: TRX0 - .55, towY: .58, R: RF };
+    }
+
+    return { rnd, lin, std, canvasTex, speckle, add, B, C, setupLights, makeTrailer, makeLoads, makeUte, galvTex };
+  }
+
+  // ---- 3D ute + tandem trailer drive-off (Three.js) ----
+  const THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  let threeP = null;
+  const loadThree = () => threeP || (threeP = new Promise(res => {
+    if (window.THREE) return res(true);
+    const sc = document.createElement('script'); sc.src = THREE_URL; sc.async = true;
+    sc.onload = () => res(!!window.THREE); sc.onerror = () => res(false);
+    document.head.appendChild(sc);
+  }));
+  form.addEventListener('pointerenter', loadThree, { once: true });
+  form.addEventListener('focusin', loadThree, { once: true });
+
+  // Real footage beats 3D: put the file name of a short clip of the ute + trailer driving off here (e.g. 'drive-off.mp4').
+  const DRIVE_VIDEO = '';
+  function playVideo(title, sub) {
+    return new Promise(resolve => {
+      const wrap = $('#drive'), v = $('#driveVideo');
+      $('#driveTitle').textContent = title; $('#driveSub').textContent = sub;
+      $('#driveCanvas').hidden = true; v.hidden = false; v.src = DRIVE_VIDEO;
+      wrap.hidden = false; if (lenis) lenis.stop();
+      let done = false;
+      const end = () => { if (done) return; done = true; v.pause(); wrap.hidden = true; v.hidden = true; $('#driveCanvas').hidden = false; if (lenis) lenis.start(); resolve(); };
+      v.onended = end; v.onerror = end; wrap.onclick = end; $('#driveSkip').onclick = e => { e.stopPropagation(); end(); };
+      v.play().catch(end); setTimeout(end, 15000);
+    });
+  }
+  function playDrive(title, sub) {
+    if (DRIVE_VIDEO && !reduce) return playVideo(title || "You're booked in", sub || "We're on our way.");
+    return new Promise(async resolve => { try {
+      if (reduce) return resolve();
+      const ok = await Promise.race([loadThree(), new Promise(r => setTimeout(() => r(false), 5000))]);
+      if (!ok || !window.THREE) return resolve();
+      const T = window.THREE, wrap = $('#drive'), cv = $('#driveCanvas');
+      let renderer;
+      try { renderer = new T.WebGLRenderer({ canvas: cv, antialias: true }); } catch (e) { return resolve(); }
+      $('#driveTitle').textContent = title || "You're booked in!";
+      $('#driveSub').textContent = sub || "We're on our way.";
+      const small = Math.min(innerWidth, innerHeight) < 700;
+      renderer.setPixelRatio(Math.min(small ? 1.75 : 2, devicePixelRatio || 1));
+      const kit = makeKit(T, renderer, { exposure: .92 });
+      const { add, B, canvasTex, speckle, std, lin, rnd } = kit;
+      const scene = new T.Scene();
+      const sun = kit.setupLights(scene, 13, small ? 1024 : 2048);
+      sun.position.set(8, 11, 9);
+
+      // sky + haze
+      const skyGeo = new T.SphereGeometry(160, 32, 16), cols = [];
+      const top = new T.Color(0x7fb2e2).convertSRGBToLinear(), hor = new T.Color(0xe8eef2).convertSRGBToLinear();
+      for (let i = 0; i < skyGeo.attributes.position.count; i++) { const y = Math.max(0, skyGeo.attributes.position.getY(i) / 160); const c = hor.clone().lerp(top, Math.pow(y, .5)); cols.push(c.r, c.g, c.b); }
+      skyGeo.setAttribute('color', new T.Float32BufferAttribute(cols, 3));
+      scene.add(new T.Mesh(skyGeo, new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide, fog: false })));
+      scene.fog = new T.Fog(lin(0xdde5ea), 16, 70);
+
+      // suburban street: asphalt, line marking, kerbs, footpath, grass, fence, trees
+      const asphalt = canvasTex(512, 512, speckle('#4b4d50', .22, 9000), [40, 2]);
+      const road = add(new T.PlaneGeometry(400, 7.4), new T.MeshStandardMaterial({ map: asphalt, roughness: .92 }), 0, 0, 1.6, scene, [-Math.PI / 2, 0, 0]); road.castShadow = false;
+      const lineMat = std(0xf2f0ea, .6);
+      for (let x = -200; x < 200; x += 6) add(new T.PlaneGeometry(3, .1), lineMat, x, .005, 1.85, scene, [-Math.PI / 2, 0, 0]).castShadow = false;
+      const concrete = canvasTex(256, 256, speckle('#bdb8ae', .14, 3000), [80, 1]);
+      const conc = new T.MeshStandardMaterial({ map: concrete, roughness: .9 });
+      [[-2.12, -1], [5.32, 1]].forEach(([z, s]) => { add(B(400, .15, .3), conc, 0, .075, z, scene).castShadow = false; });
+      add(new T.PlaneGeometry(400, 1.5), conc, 0, .151, -3.0, scene, [-Math.PI / 2, 0, 0]).castShadow = false;
+      const grassTex = canvasTex(256, 256, speckle('#6f8a45', .3, 6000), [120, 6]);
+      const grass = new T.MeshStandardMaterial({ map: grassTex, roughness: 1 });
+      add(new T.PlaneGeometry(400, 30), grass, 0, .14, -18.75, scene, [-Math.PI / 2, 0, 0]).castShadow = false;
+      add(new T.PlaneGeometry(400, 30), grass, 0, .14, 20.5, scene, [-Math.PI / 2, 0, 0]).castShadow = false;
+      add(new T.PlaneGeometry(400, .9), grass, 0, .145, -4.2, scene, [-Math.PI / 2, 0, 0]).castShadow = false;
+      const paling = canvasTex(256, 128, (x, w, h) => { for (let i = 0; i < w; i += 16) { x.fillStyle = `rgb(${120 + rnd() * 30},${92 + rnd() * 20},${66 + rnd() * 15})`; x.fillRect(i, 0, 15, h); x.fillStyle = 'rgba(0,0,0,.25)'; x.fillRect(i + 15, 0, 1, h); } }, [100, 1]);
+      add(new T.PlaneGeometry(400, 1.8), new T.MeshStandardMaterial({ map: paling, roughness: .9 }), 0, 1.04, -5.2, scene);
+      // the rig: ute towing the tandem cage trailer, full to the top
+      const rig = new T.Group(); scene.add(rig);
+      const ute = kit.makeUte(); rig.add(ute.group);
+      const tr = kit.makeTrailer(); rig.add(tr.group);
+      tr.group.position.x = ute.towX - tr.couplingX; tr.group.position.y = ute.towY - tr.couplingY;
+      tr.jockey.rotation.x = 0; tr.jockey.position.y = .32; // jockey wheel wound up for towing
+      const loads = kit.makeLoads(tr.group, tr.FLOOR);
+
+      // camera: low three-quarter front, like a photographer on the footpath
+      const cam = new T.PerspectiveCamera(30, 1, .1, 400);
+      let x0 = 0;
+      const frame = () => {
+        const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); cam.aspect = w / h;
+        x0 = .3;
+        if (cam.aspect < 1) { cam.fov = 36; cam.position.set(x0 + 12.5, 1.75, 10.5); cam.lookAt(x0 - 2.6, 1.3, 0); }
+        else { const k = Math.max(1, 1.6 / cam.aspect); cam.fov = 30; cam.position.set(x0 + .6 * k, 1.6 + .3 * k, 15.5 * k); cam.lookAt(x0 - 2.9, 1.3, 0); }
+        const d = cam.position.length(); scene.fog.near = d + 6; scene.fog.far = d + 75;
+        cam.updateProjectionMatrix();
+      };
+      frame(); addEventListener('resize', frame);
+      rig.position.x = x0;
+
+      // exhaust puffs
+      const puffs = [], puffMat = new T.MeshStandardMaterial({ color: lin(0xb9b9b4), transparent: true, opacity: .32, depthWrite: false, roughness: 1 });
+      const puff = () => { const p = new T.Mesh(new T.SphereGeometry(.08, 10, 8), puffMat.clone()); p.position.set(rig.position.x - 1.95, .3, -.55); p.userData = { t: 0, vx: -.25 - rnd() * .3, vy: .12 + rnd() * .15 }; scene.add(p); puffs.push(p); };
+
+      wrap.hidden = false; wrap.style.opacity = '0'; if (lenis) lenis.stop();
+      requestAnimationFrame(() => { wrap.style.transition = 'opacity .35s'; wrap.style.opacity = '1'; });
+      const text = $('.drive-text');
+      if (hasGsap) gsap.fromTo(text.children, { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: .8, stagger: .12, ease: 'power3.out', delay: .25 });
+
+      try { renderer.compile(scene, cam); } catch (e) {}
+      let t = 0, last = 0, finished = false, raf = 0, prevX = x0, distU = 0;
+      const DUR = 5.6, GO = 1.4;
+      const end = () => {
+        if (finished) return; finished = true; cancelAnimationFrame(raf);
+        wrap.style.transition = 'opacity .5s'; wrap.style.opacity = '0';
+        setTimeout(() => {
+          wrap.hidden = true; wrap.style.opacity = ''; wrap.style.transition = '';
+          removeEventListener('resize', frame); renderer.dispose(); if (lenis) lenis.start(); resolve();
+        }, 520);
+      };
+      wrap.onclick = end; $('#driveSkip').onclick = e => { e.stopPropagation(); end(); };
+      const loop = now => {
+        const dt = last ? Math.min(1 / 30, (now - last) / 1000) : 0; last = now; t += dt;
+        const go = Math.max(0, t - GO);
+        rig.position.x = x0 + .42 * go * go * go + 1.25 * go * go;
+        const dx = rig.position.x - prevX; prevX = rig.position.x; distU += dx;
+        ute.wheels.forEach(w => w.rotation.z = -distU / ute.R);
+        tr.wheels.forEach(w => w.rotation.z = -distU / .3);
+        // engine idle shake, then squat under acceleration and settle
+        const accel = go > 0 && go < 1.4 ? Math.sin(go / 1.4 * Math.PI) : 0;
+        ute.body.position.y = t < GO ? Math.sin(t * 70) * .0035 : Math.sin(go * 11) * .004 * (1 - Math.min(1, go / 3));
+        ute.body.rotation.z = accel * .018;
+        loads.forEach((g, q) => { g.position.y = go > 0 ? Math.abs(Math.sin(go * 9 + q)) * .012 : 0; });
+        if (rnd() < (t < GO ? .25 : .6)) puff();
+        for (let i = puffs.length - 1; i >= 0; i--) { const p = puffs[i], u = p.userData; u.t += dt; p.position.x += u.vx * dt; p.position.y += u.vy * dt; p.scale.setScalar(1 + u.t * 5); p.material.opacity = Math.max(0, .32 - u.t * .22); if (u.t > 1.5) { scene.remove(p); puffs.splice(i, 1); } }
+        renderer.render(scene, cam);
+        if (t > DUR) return end();
+        raf = requestAnimationFrame(loop);
+      };
+      raf = requestAnimationFrame(loop);
+    } catch (err) { console.error('drive-off', err); const w = $('#drive'); w.hidden = true; if (lenis) lenis.start(); resolve(); } });
+  }
+
+
+  // ---- 3D trailer viewer (Three.js): the tandem cage trailer customers can spin ----
+  (() => {
+    const fig = $('.trailer-fig'), svgT = $('.trailer'), box3 = $('#t3d');
+    if (!fig || !box3) return;
+    let started = false;
+    const start = async () => {
+      if (started) return; started = true;
+      const ok = await loadThree();
+      if (!ok || !window.THREE) return;
+      try { t3d = build(window.THREE); } catch (e) { console.warn(e); t3d = null; return; }
+      t3d.setLevel(sel, false);
+      svgT.setAttribute('hidden', ''); box3.hidden = false; $('#t3dCap').textContent = 'Drag to spin the trailer. Tap a price to change the load.';
+      t3d.resize();
+    };
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); start(); } }, { rootMargin: '400px' });
+      io.observe(fig);
+    } else start();
+
+    function build(T) {
+      const cv = $('#t3dCanvas');
+      const renderer = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+      const kit = makeKit(T, renderer), { lin, canvasTex, speckle, B } = kit;
+      const scene = new T.Scene();
+      const cam = new T.PerspectiveCamera(26, 1, .1, 100);
+      const target = new T.Vector3(.4, 1.1, 0);
+      kit.setupLights(scene);
+      // concrete driveway pad that fades out
+      const groundTex = canvasTex(512, 512, speckle('#b9b4aa', .16, 5000));
+      const groundAlpha = canvasTex(256, 256, (x, w, h) => { const g = x.createRadialGradient(w / 2, h / 2, w * .2, w / 2, h / 2, w / 2); g.addColorStop(0, '#fff'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, w, h); }, null, false);
+      const ground = new T.Mesh(new T.CircleGeometry(7.5, 64), new T.MeshStandardMaterial({ map: groundTex, alphaMap: groundAlpha, transparent: true, roughness: .95, depthWrite: false }));
+      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+      const tr = kit.makeTrailer(), FLOOR = tr.FLOOR, L = tr.L, W = tr.W;
+      scene.add(tr.group);
+      const loads = kit.makeLoads(tr.group, FLOOR); loads.forEach(g => g.visible = false);
       const fill = new T.Mesh(B(L - .1, 1, W - .1), new T.MeshBasicMaterial({ color: lin(0x84c430), transparent: true, opacity: .1, depthWrite: false }));
-      fill.position.set(0, FLOOR, 0); fill.scale.y = .001; trailer.add(fill);
+      fill.position.set(0, FLOOR, 0); fill.scale.y = .001; tr.group.add(fill);
       const ring = new T.LineSegments(new T.EdgesGeometry(new T.PlaneGeometry(L - .06, W - .06)), new T.LineBasicMaterial({ color: lin(0x6db32a) }));
-      ring.rotation.x = -Math.PI / 2; ring.position.y = FLOOR + 1; trailer.add(ring);
-
+      ring.rotation.x = -Math.PI / 2; ring.position.y = FLOOR + 1; tr.group.add(ring);
       // ---------- camera orbit ----------
       let az = .78, el = .3, dist = 12, autoSpin = !reduce, dragging = false, vAz = 0, lastX = 0, lastY = 0, visible = true, raf = 0;
       const place = () => { cam.position.set(target.x + dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az)); cam.lookAt(target); };
