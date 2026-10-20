@@ -162,7 +162,7 @@ function sheet_() {
     m.getRange('A1:B4').setValues([
       ['Send each month?', 'NO'],
       ['Subject', 'Spring clean? Clean Sweep is here to help'],
-      ['Message', 'Hi {name},\n\nGot a shed, garage or backyard that needs clearing? Clean Sweep Rubbish Removals can take it all away, from old furniture and mattresses to green waste.\n\nBook online at cleansweeprubbishremovals.netlify.app or call/text Lucas on 0493 866 368.\n\nCheers,\nLucas'],
+      ['Message', 'Hi {name},\n\nGot a shed, garage or backyard that needs clearing? Clean Sweep Rubbish Removals can take it all away, from old furniture and mattresses to green waste.\n\nBook online at cleansweeprubbishremoval.com or call/text Lucas on 0493 866 368.\n\nCheers,\nLucas'],
       ['How to use', 'Change the subject and message, then set B1 to YES. It sends on the 1st of each month at 9am to everyone with Status "subscribed". {name} becomes their first name.'],
     ]);
     m.setColumnWidth(1, 150); m.setColumnWidth(2, 620); m.getRange('B3').setWrap(true); m.getRange('A1:A4').setFontWeight('bold');
