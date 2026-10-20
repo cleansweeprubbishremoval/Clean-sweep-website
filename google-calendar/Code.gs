@@ -7,6 +7,9 @@
  *   2. Emails you the full booking. Texts you too, once SMS is switched on (below).
  *   3. Sends the customer a booking confirmation (email, or text if they only gave a phone).
  *   4. 48 hours before the job, sends the customer a reminder (email and/or text).
+ *   5. Customers who tick "Email me offers" go on a private Google Sheet in your Drive
+ *      ("Clean Sweep customer list"). On the 1st of each month at 9am they get your
+ *      monthly email, with a working unsubscribe link (required by the Spam Act).
  *
  * Setup: see SETUP.md. Do it while signed in to cleansweeprubbishremoval@gmail.com.
  */
@@ -34,6 +37,7 @@ function doPost(e) {
     const ev = addBooking_(p);
     notifyOwner_(p);
     if (SEND_CUSTOMER_CONFIRMATION) confirmCustomer_(p);
+    if (p.marketing === 'yes' && p.email) addSubscriber_(p);
     return json_({ ok: true, id: ev.getId() });
   } catch (err) {
     MailApp.sendEmail(OWNER_EMAIL(), 'Website booking needs checking: ' + (p.name || 'unknown'),
@@ -42,7 +46,16 @@ function doPost(e) {
   }
 }
 
-function doGet() { return ContentService.createTextOutput('Clean Sweep booking calendar is running.'); }
+function doGet(e) {
+  const t = e && e.parameter && e.parameter.unsub;
+  if (t) {
+    const ok = unsubscribe_(t);
+    return HtmlService.createHtmlOutput('<div style="font-family:Arial,sans-serif;max-width:480px;margin:60px auto;text-align:center;color:#12203A">' +
+      '<h2>' + (ok ? "You're unsubscribed" : 'Already unsubscribed') + '</h2><p>You won\'t get any more offer emails from Clean Sweep Rubbish Removals.</p>' +
+      '<p>Bookings and reminders for jobs you book still come through.</p></div>').setTitle('Unsubscribed');
+  }
+  return ContentService.createTextOutput('Clean Sweep booking calendar is running.');
+}
 
 // ---------- calendar ----------
 function addBooking_(p) {
@@ -135,6 +148,72 @@ function sendReminders() {
   });
 }
 
+// ---------- private customer list + monthly email ----------
+function sheet_() {
+  const props = PropertiesService.getScriptProperties();
+  let id = props.getProperty('LIST_ID'), ss;
+  if (id) { try { ss = SpreadsheetApp.openById(id); } catch (e) { ss = null; } }
+  if (!ss) {
+    ss = SpreadsheetApp.create('Clean Sweep customer list');
+    const list = ss.getSheets()[0]; list.setName('Customers');
+    list.appendRow(['Name', 'Email', 'Suburb', 'Joined', 'Last booking', 'Status', 'Unsubscribe code']);
+    list.setFrozenRows(1); list.getRange('A1:G1').setFontWeight('bold');
+    const m = ss.insertSheet('Monthly email');
+    m.getRange('A1:B4').setValues([
+      ['Send each month?', 'NO'],
+      ['Subject', 'Spring clean? Clean Sweep is here to help'],
+      ['Message', 'Hi {name},\n\nGot a shed, garage or backyard that needs clearing? Clean Sweep Rubbish Removals can take it all away, from old furniture and mattresses to green waste.\n\nBook online at cleansweeprubbishremovals.netlify.app or call/text Lucas on 0493 866 368.\n\nCheers,\nLucas'],
+      ['How to use', 'Change the subject and message, then set B1 to YES. It sends on the 1st of each month at 9am to everyone with Status "subscribed". {name} becomes their first name.'],
+    ]);
+    m.setColumnWidth(1, 150); m.setColumnWidth(2, 620); m.getRange('B3').setWrap(true); m.getRange('A1:A4').setFontWeight('bold');
+    props.setProperty('LIST_ID', ss.getId());
+  }
+  return ss;
+}
+
+function addSubscriber_(p) {
+  const list = sheet_().getSheetByName('Customers');
+  const email = String(p.email).trim().toLowerCase();
+  const rows = list.getDataRange().getValues();
+  const today = Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd');
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][1]).toLowerCase() === email) { list.getRange(i + 1, 5).setValue(today); return; } // keep their existing status
+  }
+  list.appendRow([p.name || '', email, p.suburb || '', today, today, 'subscribed', Utilities.getUuid()]);
+}
+
+function unsubscribe_(code) {
+  const list = sheet_().getSheetByName('Customers'), rows = list.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][6] === code) { if (rows[i][5] === 'unsubscribed') return false; list.getRange(i + 1, 6).setValue('unsubscribed'); return true; }
+  }
+  return false;
+}
+
+// Runs on the 1st of each month at 9am (see setup()).
+function sendMonthlyEmail() {
+  const ss = sheet_(), m = ss.getSheetByName('Monthly email');
+  if (String(m.getRange('B1').getValue()).trim().toUpperCase() !== 'YES') return;
+  const subject = m.getRange('B2').getValue(), message = String(m.getRange('B3').getValue());
+  const base = ScriptApp.getService().getUrl();
+  const rows = ss.getSheetByName('Customers').getDataRange().getValues();
+  let sent = 0;
+  for (let i = 1; i < rows.length; i++) {
+    const [name, email, , , , status, code] = rows[i];
+    if (status !== 'subscribed' || !email) continue;
+    if (MailApp.getRemainingDailyQuota() < 2) { MailApp.sendEmail(OWNER_EMAIL(), 'Monthly email paused', 'Gmail\'s daily sending limit was reached after ' + sent + ' emails. The rest were not sent this month.'); break; }
+    const first = String(name || '').split(' ')[0] || 'there';
+    const unsub = base + '?unsub=' + encodeURIComponent(code);
+    MailApp.sendEmail({
+      to: email, name: 'Clean Sweep Rubbish Removals', replyTo: OWNER_EMAIL(), subject: subject,
+      body: message.replace(/\{name\}/g, first) + '\n\n--\nClean Sweep Rubbish Removals · 0493 866 368 · ABN 55 989 268 862\n' +
+        'You are getting this because you asked for offers when you booked with us.\nUnsubscribe: ' + unsub,
+    });
+    sent++;
+  }
+  MailApp.sendEmail(OWNER_EMAIL(), 'Monthly email sent to ' + sent + ' customers', 'Subject: ' + subject);
+}
+
 // ---------- texts via ClickSend ----------
 function sms_(to, body) {
   if (!to || !CLICKSEND_USERNAME || !CLICKSEND_API_KEY) return;
@@ -158,7 +237,11 @@ function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).se
 function setup() {
   ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'sendReminders') ScriptApp.deleteTrigger(t); });
   ScriptApp.newTrigger('sendReminders').timeBased().everyHours(1).create();
-  MailApp.sendEmail(OWNER_EMAIL(), 'Clean Sweep bookings are connected', 'Bookings from your website will now go into your Google Calendar, and 48-hour reminders are switched on.');
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'sendMonthlyEmail') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('sendMonthlyEmail').timeBased().onMonthDay(1).atHour(9).inTimezone(TZ).create();
+  const list = sheet_();
+  MailApp.sendEmail(OWNER_EMAIL(), 'Clean Sweep bookings are connected', 'Bookings from your website will now go into your Google Calendar, and 48-hour reminders are switched on.\n\n' +
+    'Your private customer list (for the monthly email) is here: ' + list.getUrl());
 }
 
 // Optional check: adds a test booking for 2 days from now and sends you the emails. Delete the event after.

@@ -48,3 +48,14 @@ Without ClickSend, everything else still works: calendar, your booking emails, a
 - A confirmation as soon as they book (email, or a text if they only gave a phone number).
 - A reminder 48 hours before their collection (email and/or text).
 - Both mention that cancellations less than 24 hours before collection are non-refundable.
+
+## 3. Your private customer list and monthly email
+
+When a customer ticks **"Email me Clean Sweep offers"** while booking (and gives an email), they're added to a Google Sheet called **Clean Sweep customer list** in your Google Drive. Only you can see it. Running **setup** emails you its link.
+
+- **Customers** tab: name, email, suburb, date joined, last booking, and status (`subscribed` or `unsubscribed`).
+- **Monthly email** tab: write your subject and message there, then change **B1** from `NO` to `YES`. It sends at 9am on the 1st of every month to everyone marked `subscribed`. `{name}` becomes each customer's first name.
+- Every email includes your business name, phone and ABN, plus an unsubscribe link. Anyone who clicks it is marked `unsubscribed` automatically, as Australia's Spam Act requires. Don't add people who didn't tick the box.
+- Gmail can send to about 100 people a day this way. When your list gets bigger than that, move to a mailing service like Mailchimp (export the sheet to CSV).
+
+If you'd already set up the script, paste in the new `Code.gs`, click **Save**, run **setup** again, then **Deploy → Manage deployments → Edit → New version → Deploy**.

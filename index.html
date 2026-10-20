@@ -387,6 +387,7 @@ form.card{gap:26px}
 .agree{display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-size:.92rem;background:var(--paper);border-radius:14px;padding:12px 14px;border:2px solid transparent}
 .agree input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--lime-deep)}
 .agree:has(input.bad){border-color:#D2353B}
+.agree.optin{background:transparent;padding:4px 0;font-size:.88rem;color:var(--ink-soft)}
 
 /* sydney modal */
 .modal{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));background:rgba(8,14,28,.62);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
@@ -819,7 +820,7 @@ footer.site .big span{color:var(--lime-deep)}
         <div>
           <form class="card" id="qform" name="quote" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
             <input type="hidden" name="form-name" value="quote">
-            <input type="hidden" name="ref"><input type="hidden" name="size"><input type="hidden" name="extras"><input type="hidden" name="dateLabel"><input type="hidden" name="total"><input type="hidden" name="payChoice"><input type="hidden" name="payNow"><input type="hidden" name="at">
+            <input type="hidden" name="ref"><input type="hidden" name="size"><input type="hidden" name="extras"><input type="hidden" name="dateLabel"><input type="hidden" name="total"><input type="hidden" name="payChoice"><input type="hidden" name="payNow"><input type="hidden" name="at"><input type="hidden" name="marketing">
             <p hidden><label>Leave this empty <input name="bot-field"></label></p>
             <div class="stepf" role="group" aria-labelledby="st1">
               <h3 class="sth" id="st1"><span class="sn">1</span>What are we taking?</h3>
@@ -871,6 +872,7 @@ footer.site .big span{color:var(--lime-deep)}
               </div>
               <div class="field"><label for="q-email">Email</label><input id="q-email" name="email" type="email" autocomplete="email" aria-describedby="contactHint"></div>
               <p class="hint" id="contactHint">We need a phone number <b>or</b> an email so we can confirm your booking. One is enough.</p>
+              <label class="agree optin" for="q-offers"><input type="checkbox" id="q-offers" name="offers" value="yes"><span>Email me Clean Sweep offers and reminders, about once a month. Unsubscribe anytime.</span></label>
               <div class="field"><label for="q-street">Pickup address <span class="req">(required)</span></label><input id="q-street" name="street" autocomplete="street-address" placeholder="Street number and name" required></div>
               <div class="two">
                 <div class="field"><label for="q-suburb">Suburb</label><input id="q-suburb" name="suburb" autocomplete="address-level2" required></div>
@@ -1309,7 +1311,8 @@ footer.site .big span{color:var(--lime-deep)}
       extras: Object.keys(qty).filter(k => qty[k]).map(k => `${qty[k]} × ${EXTRAS[k].name} (+${cash(qty[k] * EXTRAS[k].price)})`).join(', '),
       date: f.get('date') || '', dateLabel: niceDate(f.get('date')), window: f.get('window') || '',
       total: cash(st.total), payChoice: st.payChoice === 'deposit' ? 'Deposit' : 'Paid in full', payNow: cash(st.payNow),
-      items: f.getAll('items'), notes: (f.get('notes') || '').trim(), at: new Date().toISOString()
+      items: f.getAll('items'), notes: (f.get('notes') || '').trim(), at: new Date().toISOString(),
+      marketing: $('#q-offers').checked && (f.get('email') || '').trim() ? 'yes' : 'no'
     };
     const phoneOk = r.phone.replace(/\D/g, '').length >= 8, emailOk = /^\S+@\S+\.\S+$/.test(r.email);
     const need = [
