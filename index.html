@@ -641,8 +641,9 @@ footer.site .big span{color:var(--lime-deep)}
           <path class="dbar thin" d="M46 262v28"/><circle class="jockey" cx="46" cy="297" r="8"/>
           <rect class="chassis" x="84" y="250" width="412" height="14" rx="3"/>
           <rect class="light" x="490" y="252" width="9" height="10" rx="2"/>
-          <path class="guard" d="M258 290a32 32 0 0 1 64 0"/>
-          <circle class="tyre" cx="290" cy="290" r="22"/><circle class="hub" cx="290" cy="290" r="8"/>
+          <path class="guard" d="M228 290a30 30 0 0 1 30-30h64a30 30 0 0 1 30 30"/>
+          <circle class="tyre" cx="258" cy="290" r="22"/><circle class="hub" cx="258" cy="290" r="8"/>
+          <circle class="tyre" cx="322" cy="290" r="22"/><circle class="hub" cx="322" cy="290" r="8"/>
           <!-- tap targets -->
           <rect class="band" data-i="3" x="90" y="50" width="400" height="50"/>
           <rect class="band" data-i="2" x="90" y="100" width="400" height="50"/>
@@ -1535,7 +1536,7 @@ footer.site .big span{color:var(--lime-deep)}
     });
   }
 
-  // ---- 3D trailer viewer (Three.js): spin it to see each load ----
+  // ---- 3D trailer viewer (Three.js): a tandem cage trailer customers can spin ----
   (() => {
     const fig = $('.trailer-fig'), svgT = $('.trailer'), box3 = $('#t3d');
     if (!fig || !box3) return;
@@ -1555,163 +1556,250 @@ footer.site .big span{color:var(--lime-deep)}
     } else start();
 
     function build(T) {
+      // seeded random so the load looks the same every visit
+      let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const noise3 = (x, y, z) => Math.sin(x * 7.1 + y * 3.3) * Math.sin(y * 5.7 + z * 4.1) * Math.sin(z * 6.3 + x * 2.9);
+
       const cv = $('#t3dCanvas');
       const renderer = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+      renderer.outputEncoding = T.sRGBEncoding;
+      renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = .95;
       renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
       const scene = new T.Scene();
-      const cam = new T.PerspectiveCamera(30, 1, .1, 100);
-      const target = new T.Vector3(.35, 1.15, 0);
+      const cam = new T.PerspectiveCamera(26, 1, .1, 100);
+      const target = new T.Vector3(.4, 1.1, 0);
 
-      scene.add(new T.HemisphereLight(0xf2f8ff, 0x9aa88a, .75));
-      const sunL = new T.DirectionalLight(0xffffff, .75); sunL.position.set(5, 9, 6); sunL.castShadow = true;
-      sunL.shadow.mapSize.set(1024, 1024); Object.assign(sunL.shadow.camera, { left: -5, right: 5, top: 5, bottom: -5, near: 1, far: 30 });
-      scene.add(sunL);
-      const fillL = new T.DirectionalLight(0xdfeeff, .25); fillL.position.set(-6, 4, -5); scene.add(fillL);
+      // ---------- photographic lighting: sky environment for reflections + low sun ----------
+      const pmrem = new T.PMREMGenerator(renderer);
+      const envScene = new T.Scene();
+      const skyGeo = new T.SphereGeometry(20, 32, 16), cols = [];
+      const top = new T.Color(0x9cc7ef), hor = new T.Color(0xf4f1ea), gnd = new T.Color(0x6d6a63);
+      for (let i = 0; i < skyGeo.attributes.position.count; i++) {
+        const y = skyGeo.attributes.position.getY(i) / 20, c = y > 0 ? hor.clone().lerp(top, Math.pow(y, .6)) : hor.clone().lerp(gnd, Math.min(1, -y * 3));
+        cols.push(c.r, c.g, c.b);
+      }
+      skyGeo.setAttribute('color', new T.Float32BufferAttribute(cols, 3));
+      envScene.add(new T.Mesh(skyGeo, new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide })));
+      const sunDisc = new T.Mesh(new T.SphereGeometry(2.2, 16, 8), new T.MeshBasicMaterial({ color: new T.Color(12, 11, 9) }));
+      sunDisc.position.set(9, 12, 8); envScene.add(sunDisc);
+      scene.environment = pmrem.fromScene(envScene, .02).texture;
 
-      // ground shadow catcher
-      const ground = new T.Mesh(new T.PlaneGeometry(30, 30), new T.ShadowMaterial({ opacity: .22 }));
-      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+      const sunL = new T.DirectionalLight(0xfff3e2, 2.1); sunL.position.set(6, 9, 5); sunL.castShadow = true;
+      sunL.shadow.mapSize.set(2048, 2048); sunL.shadow.bias = -.0004; sunL.shadow.normalBias = .02;
+      Object.assign(sunL.shadow.camera, { left: -5, right: 5, top: 5, bottom: -5, near: 1, far: 30 });
+      scene.add(sunL); scene.add(new T.HemisphereLight(0xdfeaf5, 0x5b5850, .35));
 
-      // ---------- materials ----------
-      const std = (c, r = .55, m = .05, extra = {}) => new T.MeshStandardMaterial(Object.assign({ color: c, roughness: r, metalness: m }, extra));
-      const galv = std(0xc3cbd4, .42, .3), galvDark = std(0x8e98a4, .5, .3);
-      const navy = std(0x12203a, .5, .25), black = std(0x15171b, .85, 0), rubber = std(0x1d1f23, .9, 0);
-      const red = std(0xe5484d, .4, 0, { emissive: 0x5a0d10 }), amber = std(0xffb020, .4, 0, { emissive: 0x4a3000 });
-      const canvasTex = (w, h, draw, rep) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new T.CanvasTexture(c); if (rep) { t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rep[0], rep[1]); } t.anisotropy = 4; return t; };
-      const meshTex = (rx, ry) => canvasTex(128, 128, (x, w) => { x.clearRect(0, 0, w, w); x.strokeStyle = '#d3d9e0'; x.lineWidth = 4; for (let i = 0; i <= w; i += 32) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, w); x.stroke(); x.beginPath(); x.moveTo(0, i); x.lineTo(w, i); x.stroke(); } }, [rx, ry]);
-      const meshMat = (rx, ry) => new T.MeshStandardMaterial({ map: meshTex(rx, ry), transparent: true, alphaTest: .4, side: T.DoubleSide, metalness: .15, roughness: .5 });
-      const plateTex = canvasTex(256, 256, (x, w) => {
-        x.fillStyle = '#7d8793'; x.fillRect(0, 0, w, w);
-        for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-          x.save(); x.translate(c * 32 + 16 + (r % 2 ? 8 : -8), r * 32 + 16); x.rotate(r % 2 ? .7 : -.7);
-          x.fillStyle = '#a3adb8'; x.fillRect(-11, -2.5, 22, 5); x.fillStyle = '#5f6873'; x.fillRect(-11, 2.5, 22, 1.5); x.restore();
-        }
-      }, [8, 4]);
-      const plate = new T.MeshStandardMaterial({ map: plateTex, metalness: .2, roughness: .55 });
+      // ---------- helpers ----------
+      const lin = h => new T.Color(h).convertSRGBToLinear();
+      const std = (c, r = .6, m = 0, extra = {}) => new T.MeshStandardMaterial(Object.assign({ color: lin(c), roughness: r, metalness: m }, extra));
+      const canvasTex = (w, h, draw, rep, srgb = true) => {
+        const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+        const t = new T.CanvasTexture(c); if (srgb) t.encoding = T.sRGBEncoding;
+        if (rep) { t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rep[0], rep[1]); }
+        t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t;
+      };
+      const speckle = (base, spread, n) => (x, w, h) => { x.fillStyle = base; x.fillRect(0, 0, w, h); for (let i = 0; i < n; i++) { const v = (rnd() - .5) * spread; x.fillStyle = `rgba(${v > 0 ? '255,255,255' : '0,0,0'},${Math.abs(v)})`; x.fillRect(rnd() * w, rnd() * h, 1 + rnd() * 6, 1 + rnd() * 6); } };
+      const galvTex = canvasTex(256, 256, (x, w, h) => {
+        x.fillStyle = '#aeb6be'; x.fillRect(0, 0, w, h);
+        for (let i = 0; i < 90; i++) { x.fillStyle = `rgba(${rnd() > .5 ? '230,236,242' : '120,128,138'},${.08 + rnd() * .14})`; x.beginPath(); const cx = rnd() * w, cy = rnd() * h, r = 8 + rnd() * 26; for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + rnd() * .5; x.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); } x.fill(); }
+      }, [2, 2]);
+      const galv = new T.MeshStandardMaterial({ color: lin(0xd4dbe2), map: galvTex, roughness: .38, metalness: .85 });
+      const galvDull = new T.MeshStandardMaterial({ color: lin(0xb3bcc5), map: galvTex, roughness: .55, metalness: .7 });
+      const steelDark = std(0x2b2e33, .6, .5), rubber = std(0x17181a, .92, 0);
 
       const add = (geo, mat, x, y, z, parent, rot) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); if (rot) m.rotation.set(rot[0] || 0, rot[1] || 0, rot[2] || 0); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m; };
       const B = (w, h, d) => new T.BoxGeometry(w, h, d);
-      const C = (r, h, s = 16) => new T.CylinderGeometry(r, r, h, s);
+      const C = (r, h, s = 20) => new T.CylinderGeometry(r, r, h, s);
+      const lumpy = (geo, amt, f = 1) => { const p = geo.attributes.position; for (let i = 0; i < p.count; i++) { const v = new T.Vector3().fromBufferAttribute(p, i); const n = 1 + amt * noise3(v.x * f, v.y * f, v.z * f); p.setXYZ(i, v.x * n, v.y * n, v.z * n); } geo.computeVertexNormals(); return geo; };
 
-      // ---------- trailer (1 unit = 1 metre; bed is 4 m x 2 m, cage 2 m high) ----------
+      // ground: concrete driveway pad that fades out
+      const groundTex = canvasTex(512, 512, speckle('#b9b4aa', .16, 5000));
+      const groundAlpha = canvasTex(256, 256, (x, w, h) => { const g = x.createRadialGradient(w / 2, h / 2, w * .2, w / 2, h / 2, w / 2); g.addColorStop(0, '#fff'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, w, h); }, null, false);
+      const ground = new T.Mesh(new T.CircleGeometry(7.5, 64), new T.MeshStandardMaterial({ map: groundTex, alphaMap: groundAlpha, transparent: true, roughness: .95, depthWrite: false }));
+      ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+      // ---------- trailer (1 unit = 1 m). Bed 4 m x 2 m, cage 2 m high, tandem axle ----------
       const trailer = new T.Group(); scene.add(trailer);
-      const L = 4, W = 2, H = 2, FLOOR = .62, X0 = -L / 2, Z0 = -W / 2;
-      // chassis
-      add(B(L + .1, .12, .1), galv, 0, FLOOR - .1, Z0 + .05, trailer); add(B(L + .1, .12, .1), galv, 0, FLOOR - .1, -Z0 - .05, trailer);
-      for (let i = 0; i <= 4; i++) add(B(.08, .08, W), galvDark, X0 + .05 + i * (L - .1) / 4, FLOOR - .12, 0, trailer);
-      add(new T.BoxGeometry(L, .04, W), plate, 0, FLOOR - .02, 0, trailer);
-      // drawbar A-frame, coupling, jockey wheel
-      const dbar = (z) => { const len = 1.75, g = add(B(len, .09, .09), galv, 0, 0, 0, trailer); g.position.set(L / 2 + .75, FLOOR - .12, z * .48); g.rotation.y = z * .5; return g; };
-      dbar(1); dbar(-1);
-      add(B(.32, .14, .16), galvDark, L / 2 + 1.55, FLOOR - .1, 0, trailer);
-      add(new T.SphereGeometry(.06, 12, 10), galvDark, L / 2 + 1.72, FLOOR - .06, 0, trailer);
-      add(C(.035, .55), galv, L / 2 + 1.05, FLOOR - .32, .2, trailer);
-      add(C(.075, .05, 18), rubber, L / 2 + 1.05, .075, .2, trailer, [Math.PI / 2, 0, 0]);
-      // axle, wheels, mudguards
-      const AX = .15;
-      add(C(.04, W + .3), galvDark, AX, .33, 0, trailer, [Math.PI / 2, 0, 0]);
-      const wheel = z => {
-        const g = new T.Group(); g.position.set(AX, .33, z); trailer.add(g);
-        add(new T.TorusGeometry(.25, .09, 14, 28), rubber, 0, 0, 0, g);
-        add(C(.2, .2, 24), galv, 0, 0, 0, g, [Math.PI / 2, 0, 0]);
-        add(C(.07, .24, 12), galvDark, 0, 0, 0, g, [Math.PI / 2, 0, 0]);
-        for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; add(C(.015, .23, 8), galvDark, Math.cos(a) * .12, Math.sin(a) * .12, 0, g, [Math.PI / 2, 0, 0]); }
-        const guard = new T.Mesh(new T.CylinderGeometry(.42, .42, .3, 24, 1, true, Math.PI / 2, Math.PI), galv.clone());
-        guard.rotation.set(Math.PI / 2, 0, 0); guard.position.set(AX, .36, z); guard.material.side = T.DoubleSide; guard.castShadow = true; trailer.add(guard);
+      const L = 4, W = 2, H = 2, FLOOR = .66, X0 = -L / 2, Z0 = -W / 2, SHS = .05;
+      // chassis rails, crossmembers, checker-plate floor
+      [Z0 + .04, -Z0 - .04].forEach(z => add(B(L, .1, .075), galv, 0, FLOOR - .1, z, trailer));
+      for (let i = 0; i <= 6; i++) add(B(.05, .075, W - .1), galvDull, X0 + .03 + i * (L - .06) / 6, FLOOR - .09, 0, trailer);
+      const plateTex = canvasTex(256, 256, (x, w) => {
+        x.fillStyle = '#9aa2aa'; x.fillRect(0, 0, w, w);
+        for (let r = 0; r < 10; r++) for (let c = 0; c < 10; c++) { x.save(); x.translate(c * 25.6 + 12.8 + (r % 2 ? 6 : -6), r * 25.6 + 12.8); x.rotate(r % 2 ? .78 : -.78); x.fillStyle = '#c7cdd3'; x.fillRect(-8, -1.8, 16, 3.6); x.fillStyle = '#6d747c'; x.fillRect(-8, 1.8, 16, 1.2); x.restore(); }
+      }, [10, 5]);
+      add(B(L, .03, W), new T.MeshStandardMaterial({ map: plateTex, roughness: .42, metalness: .8 }), 0, FLOOR - .015, 0, trailer);
+
+      // A-frame drawbar, coupling, safety chains, jockey wheel
+      const nose = L / 2 + 1.45;
+      [1, -1].forEach(s => { const dx = nose - L / 2 + .2, dz = W / 2 - .06, a = Math.atan2(dz, dx), len = Math.hypot(dx, dz); add(B(len, .1, .075), galv, (L / 2 - .2 + nose) / 2, FLOOR - .1, s * dz / 2, trailer, [0, s * a, 0]); });
+      add(B(.38, .1, .1), galv, nose, FLOOR - .1, 0, trailer);
+      add(B(.3, .09, .11), steelDark, nose + .28, FLOOR - .07, 0, trailer);
+      add(new T.SphereGeometry(.055, 16, 12), steelDark, nose + .4, FLOOR - .07, 0, trailer);
+      [.05, -.05].forEach(z => { for (let i = 0; i < 8; i++) add(new T.TorusGeometry(.018, .005, 6, 10), galvDull, nose + .1 + i * .035, FLOOR - .2 - Math.sin(i / 7 * Math.PI) * .07, z, trailer, [0, Math.PI / 2 * (i % 2), 0]); });
+      add(C(.035, .55), galv, nose - .35, FLOOR - .32, .16, trailer);
+      add(C(.04, .12), galv, nose - .35, FLOOR - .02, .16, trailer);
+      add(C(.07, .05, 20), rubber, nose - .35, .07, .16, trailer, [Math.PI / 2, 0, 0]);
+
+      // tandem axles, leaf springs, wheels
+      const R = .3, AXLES = [-.18, .7];
+      AXLES.forEach(ax => add(C(.035, W + .36), steelDark, ax, R, 0, trailer, [Math.PI / 2, 0, 0]));
+      [Z0 + .04, -Z0 - .04].forEach(z => {
+        for (let k = 0; k < 4; k++) add(B(1.5 - k * .22, .014, .05), steelDark, (AXLES[0] + AXLES[1]) / 2, R + .05 + k * .016, z, trailer);
+        AXLES.forEach(ax => add(B(.08, .14, .07), galvDull, ax, R + .12, z, trailer));
+      });
+      const treadTex = canvasTex(512, 64, (x, w, h) => { x.fillStyle = '#1b1c1e'; x.fillRect(0, 0, w, h); x.fillStyle = '#0c0c0d'; for (let i = 0; i < w; i += 16) { x.fillRect(i, 0, 6, h * .42); x.fillRect(i + 8, h * .58, 6, h * .42); } x.fillRect(0, h * .47, w, h * .06); }, [3, 1]);
+      const tyreMat = new T.MeshStandardMaterial({ map: treadTex, color: lin(0x3a3b3e), roughness: .9 });
+      const rimMat = new T.MeshStandardMaterial({ color: lin(0xe3e7eb), roughness: .25, metalness: .9 });
+      const rimDish = new T.MeshStandardMaterial({ color: lin(0xb7bec6), roughness: .35, metalness: .85 });
+      const wheel = (x, z, side) => {
+        const g = new T.Group(); g.position.set(x, R, z); trailer.add(g);
+        add(new T.TorusGeometry(R - .09, .09, 18, 40), tyreMat, 0, 0, 0, g);
+        add(C(R - .1, .17, 36), rimMat, 0, 0, 0, g, [Math.PI / 2, 0, 0]);
+        add(C(R - .16, .175, 36), rimDish, 0, 0, side * .002, g, [Math.PI / 2, 0, 0]);
+        add(C(.055, .2, 20), rimMat, 0, 0, 0, g, [Math.PI / 2, 0, 0]);
+        for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; add(C(.012, .2, 6), steelDark, Math.cos(a) * .085, Math.sin(a) * .085, 0, g, [Math.PI / 2, 0, 0]); }
       };
-      wheel(W / 2 + .18); wheel(-W / 2 - .18);
-      // lights + number plate
-      [Z0 + .2, -Z0 - .2].forEach(z => { add(B(.05, .1, .2), red, X0 - .04, FLOOR - .08, z, trailer); add(B(.05, .06, .08), amber, X0 - .04, FLOOR - .08, z + (z > 0 ? -.15 : .15), trailer); });
-      const plateNo = canvasTex(256, 96, (x, w, h) => { x.fillStyle = '#f7f7f2'; x.fillRect(0, 0, w, h); x.strokeStyle = '#12203a'; x.lineWidth = 6; x.strokeRect(3, 3, w - 6, h - 6); x.fillStyle = '#12203a'; x.font = '900 54px Archivo, Arial Black, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('CLN·SWP', w / 2, h / 2 + 3); });
-      const pm = new T.MeshStandardMaterial({ map: plateNo, roughness: .5 });
-      add(B(.02, .12, .34), [navy, pm, navy, navy, navy, navy], X0 - .06, FLOOR - .1, 0, trailer);
+      AXLES.forEach(ax => { wheel(ax, W / 2 + .19, 1); wheel(ax, -W / 2 - .19, -1); });
+      // one-piece tandem mudguards (checker plate), like the real ones
+      const gx0 = AXLES[0] - .42, gx1 = AXLES[1] + .42;
+      const gs = new T.Shape();
+      gs.moveTo(gx0, R + .02); gs.quadraticCurveTo(gx0, R + .43, gx0 + .38, R + .43); gs.lineTo(gx1 - .38, R + .43); gs.quadraticCurveTo(gx1, R + .43, gx1, R + .02);
+      gs.lineTo(gx1 - .03, R + .02); gs.quadraticCurveTo(gx1 - .03, R + .4, gx1 - .38, R + .4); gs.lineTo(gx0 + .38, R + .4); gs.quadraticCurveTo(gx0 + .03, R + .4, gx0 + .03, R + .02); gs.closePath();
+      const guardGeo = new T.ExtrudeGeometry(gs, { depth: .3, bevelEnabled: false, curveSegments: 18 });
+      const guardMat = new T.MeshStandardMaterial({ color: lin(0xc9d0d7), map: galvTex, roughness: .4, metalness: .82 });
+      [W / 2 + .04, -W / 2 - .34].forEach(z => { const m = new T.Mesh(guardGeo, guardMat); m.position.z = z; m.castShadow = m.receiveShadow = true; trailer.add(m); });
 
-      // cage: posts, rails, mesh, painted lower panels with branding
-      const postG = B(.06, H, .06);
-      [X0, X0 + 1, X0 + 2, X0 + 3, -X0].forEach(x => { [Z0, -Z0].forEach(z => add(postG, galv, x, FLOOR + H / 2, z, trailer)); });
-      [1 / 3, 2 / 3].forEach(k => add(postG, galv, -X0, FLOOR + H / 2, Z0 + k * W, trailer));
-      add(postG, galv, X0, FLOOR + H / 2, 0, trailer);
-      const rail = (len, x, y, z, alongZ) => add(alongZ ? B(.06, .06, len) : B(len, .06, .06), galv, x, y, z, trailer);
-      [FLOOR + .38, FLOOR + H].forEach(y => { rail(L, 0, y, Z0); rail(L, 0, y, -Z0); rail(W, X0, y, 0, true); rail(W, -X0, y, 0, true); });
-      const LOWER = .38;
-      const sideTex = new T.CanvasTexture(brandCanvas());
-      const sideMat = new T.MeshStandardMaterial({ map: sideTex, roughness: .5, metalness: .2 });
-      const panel = (z, flip) => { const m = new T.Mesh(B(L, LOWER, .025), [navy, navy, navy, navy, flip ? navy : sideMat, flip ? sideMat : navy]); m.position.set(0, FLOOR + LOWER / 2, z); m.castShadow = m.receiveShadow = true; trailer.add(m); };
-      panel(-Z0, false); panel(Z0, true);
-      add(B(.025, LOWER, W), navy, X0, FLOOR + LOWER / 2, 0, trailer); add(B(.025, LOWER, W), navy, -X0, FLOOR + LOWER / 2, 0, trailer);
-      const mh = H - LOWER;
-      const meshPanel = (w, x, z, ry) => { const m = new T.Mesh(new T.PlaneGeometry(w, mh), meshMat(w / .45, mh / .45)); m.position.set(x, FLOOR + LOWER + mh / 2, z); m.rotation.y = ry; m.receiveShadow = true; trailer.add(m); };
-      meshPanel(L, 0, -Z0, 0); meshPanel(L, 0, Z0, 0); meshPanel(W, X0, 0, Math.PI / 2); meshPanel(W, -X0, 0, Math.PI / 2);
-      // logo roundel on the front of each side
-      const tex = new T.Texture($('.hero-art .badge')); tex.needsUpdate = true;
-      const roundel = (z, s) => { const m = new T.Mesh(new T.CircleGeometry(.3, 40), new T.MeshBasicMaterial({ map: tex, transparent: true })); m.position.set(1.35, FLOOR + LOWER + .42, z + s * .016); if (s < 0) m.rotation.y = Math.PI; trailer.add(m); add(new T.CircleGeometry(.33, 40), navy, 1.35, FLOOR + LOWER + .42, z + s * .012, trailer, [0, s < 0 ? Math.PI : 0, 0]); };
-      roundel(-Z0, 1); roundel(Z0, -1);
+      // lights, reflectors, number plate
+      const lensRed = std(0xb3121b, .2, 0, { emissive: lin(0x3a0306) });
+      [Z0 + .18, -Z0 - .18].forEach(z => {
+        add(B(.04, .11, .24), steelDark, X0 - .03, FLOOR - .11, z, trailer);
+        add(B(.012, .085, .1), lensRed, X0 - .056, FLOOR - .11, z - .05, trailer);
+        add(B(.012, .085, .05), std(0xff9a1f, .2, 0, { emissive: lin(0x3a2000) }), X0 - .056, FLOOR - .11, z + .045, trailer);
+        add(B(.012, .085, .05), std(0xf2f2f2, .2), X0 - .056, FLOOR - .11, z + .1, trailer);
+      });
+      const plateNo = canvasTex(256, 96, (x, w, h) => { x.fillStyle = '#f5f5ef'; x.fillRect(0, 0, w, h); x.strokeStyle = '#1a1a1a'; x.lineWidth = 5; x.strokeRect(4, 4, w - 8, h - 8); x.fillStyle = '#1a1a1a'; x.font = '700 50px "Arial Narrow", Arial, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('TC·48·SW', w / 2, h / 2 + 8); x.font = '700 14px Arial'; x.fillText('NSW', w / 2, 16); });
+      add(B(.012, .13, .37), [steelDark, new T.MeshStandardMaterial({ map: plateNo, roughness: .5 }), steelDark, steelDark, steelDark, steelDark], X0 - .045, FLOOR - .26, 0, trailer);
 
-      // ---------- the load ----------
-      const RB = (w, h, d, c, r = .7) => { const g = new T.Group(); add(B(w, h, d), std(c, r), 0, h / 2, 0, g); return g; };
-      const cardboard = (w, h, d) => { const g = RB(w, h, d, 0xc49a6c, .9); add(B(w + .002, .03, .08), std(0xe7d3b0, .6), 0, h - .005, 0, g); return g; };
-      const bag = (r) => { const g = new T.Group(); const m = add(new T.SphereGeometry(r, 14, 10), std(0x22262c, .3, .1), 0, r * .8, 0, g); m.scale.set(1, .8, 1); add(new T.ConeGeometry(r * .25, r * .5, 8), std(0x22262c, .3, .1), 0, r * 1.55, 0, g); return g; };
-      const couch = () => { const g = new T.Group(), c = std(0x3a6ea5, .85); add(B(1.8, .26, .85), c, 0, .13 + .08, 0, g); add(B(1.8, .4, .2), c, 0, .4, -.33, g); add(B(.18, .34, .85), c, -.81, .3, 0, g); add(B(.18, .34, .85), c, .81, .3, 0, g); [-.8, .8].forEach(x => [-.35, .35].forEach(z => add(B(.06, .08, .06), std(0x3b2b1f), x, .04, z, g))); return g; };
-      const fridgeDown = () => { const g = RB(1.6, .65, .62, 0xeef1f4, .35); add(B(.8, .04, .04), galv, .3, .67, .2, g); return g; };
-      const washer = () => { const g = RB(.6, .62, .6, 0xf2f4f6, .4); add(C(.18, .03, 24), std(0x9fb8cc, .2, .3), .31, .36, 0, g, [0, 0, Math.PI / 2]); return g; };
-      const mattress = (c = 0xf4f1ea) => { const g = RB(1.9, .2, 1.35, c, .95); add(B(1.92, .03, 1.37), std(0x5a86c4, .8), 0, .1, 0, g); return g; };
-      const bike = () => { const g = new T.Group(), f = std(0xe5484d, .4, .3); [-.38, .38].forEach(x => add(new T.TorusGeometry(.28, .03, 8, 24), black, x, .31, 0, g)); add(C(.025, .62), f, 0, .45, 0, g, [0, 0, Math.PI / 2.6]); add(C(.025, .5), f, -.12, .48, 0, g, [0, 0, -.9]); add(C(.02, .3), galv, .32, .66, 0, g); add(B(.06, .03, .4), black, .32, .8, 0, g); return g; };
-      const greens = (n, sx, sz) => { const g = new T.Group(), shades = [0x5f9a2c, 0x76b33a, 0x4d8424, 0x8cc04a]; for (let i = 0; i < n; i++) { const r = .16 + Math.random() * .17; const lf = add(new T.IcosahedronGeometry(r, 0), std(shades[i % 4], .95, 0, { flatShading: true }), (Math.random() - .5) * sx, r * .7 + Math.random() * .2, (Math.random() - .5) * sz, g, [Math.random() * 3, Math.random() * 3, 0]); lf.scale.set(1 + Math.random() * .5, .7 + Math.random() * .3, 1 + Math.random() * .4); } for (let i = 0; i < 4; i++) add(C(.025, .9, 6), std(0x6b4a2b, .9), (Math.random() - .5) * sx * .8, .35, (Math.random() - .5) * sz * .8, g, [Math.random() - .5, 0, 1.2 + Math.random() * .6]); return g; };
-      const timber = () => { const g = new T.Group(), w = std(0xc8a06a, .8); for (let i = 0; i < 4; i++) add(B(2.1, .045, .14), w, 0, .03 + i * .05, -.2 + i * .13, g, [0, .06 * i, 0]); return g; };
-      const chair = () => { const g = new T.Group(), w = std(0x8a5a3b, .7); add(B(.45, .05, .45), w, 0, .45, 0, g); add(B(.45, .45, .05), w, 0, .7, -.2, g); [-.19, .19].forEach(x => [-.19, .19].forEach(z => add(B(.04, .45, .04), w, x, .22, z, g))); return g; };
-      const tv = () => { const g = RB(.95, .58, .07, 0x111316, .3); add(B(.88, .5, .01), std(0x2a4d6b, .15, .4), 0, .29, .04, g); return g; };
+      // cage: square hollow section frame
+      const LOWER = .32;
+      const post = (x, z) => add(B(SHS, H, SHS), galv, x, FLOOR + H / 2, z, trailer);
+      for (let i = 0; i <= 4; i++) [Z0 + SHS / 2, -Z0 - SHS / 2].forEach(z => post(X0 + SHS / 2 + i * (L - SHS) / 4, z));
+      [-1 / 3, 1 / 3].forEach(k => { post(-X0 - SHS / 2, k * W); post(X0 + SHS / 2, k * W); });
+      [FLOOR + LOWER, FLOOR + H - SHS / 2, FLOOR + LOWER + (H - LOWER) / 2].forEach((y, j) => {
+        [Z0 + SHS / 2, -Z0 - SHS / 2].forEach(z => add(B(L, SHS, SHS), galv, 0, y, z, trailer));
+        if (j !== 2) [X0 + SHS / 2, -X0 - SHS / 2].forEach(x => add(B(SHS, SHS, W), galv, x, y, 0, trailer));
+      });
+      // rear gate hinges + latches
+      [-.6, .6].forEach(z => { add(C(.02, .1), steelDark, X0 - .02, FLOOR + .12, z, trailer); add(B(.05, .04, .1), steelDark, X0 - .02, FLOOR + H - .3, z, trailer); });
+      // lower sides: galvanised sheet
+      [[0, Z0 + .01, B(L, LOWER, .012)], [0, -Z0 - .01, B(L, LOWER, .012)], [X0 + .01, 0, B(.012, LOWER, W)], [-X0 - .01, 0, B(.012, LOWER, W)]].forEach(([x, z, g]) => add(g, galvDull, x, FLOOR + LOWER / 2, z, trailer));
+      // welded mesh: real wires on a 75 mm grid
+      const wireMat = new T.MeshStandardMaterial({ color: lin(0xc9d0d7), roughness: .35, metalness: .9 });
+      const wires = [], dummy = new T.Object3D(), mh = H - LOWER - SHS, my = FLOOR + LOWER + mh / 2, G = .075, WIRE = .006;
+      const panel = (len, cx, cz, alongX) => {
+        for (let a = -len / 2 + G; a < len / 2 - .01; a += G) wires.push([alongX ? cx + a : cx, my, alongX ? cz : cz + a, WIRE, mh, WIRE]);
+        for (let b = -mh / 2 + G; b < mh / 2 - .01; b += G) wires.push([cx, my + b, cz, alongX ? len : WIRE, WIRE, alongX ? WIRE : len]);
+      };
+      panel(L, 0, Z0 + .03, true); panel(L, 0, -Z0 - .03, true); panel(W, X0 + .03, 0, false); panel(W, -X0 - .03, 0, false);
+      const inst = new T.InstancedMesh(B(1, 1, 1), wireMat, wires.length);
+      wires.forEach((w, i) => { dummy.position.set(w[0], w[1], w[2]); dummy.scale.set(w[3], w[4], w[5]); dummy.updateMatrix(); inst.setMatrixAt(i, dummy.matrix); });
+      inst.castShadow = true; trailer.add(inst);
+
+      // business sign cable-tied to the cage (both sides)
+      const badge = $('.hero-art .badge');
+      const signTex = canvasTex(1024, 420, (x, w, h) => {
+        x.fillStyle = '#ffffff'; x.fillRect(0, 0, w, h);
+        x.fillStyle = '#12203A'; x.fillRect(0, 0, w, 16); x.fillRect(0, h - 16, w, 16);
+        try { x.save(); x.beginPath(); x.arc(205, h / 2, 170, 0, Math.PI * 2); x.clip(); x.drawImage(badge, 35, h / 2 - 170, 340, 340); x.restore(); } catch (e) {}
+        x.fillStyle = '#12203A'; x.font = 'italic 900 112px Archivo, "Arial Black", sans-serif'; x.textBaseline = 'alphabetic'; x.fillText('CLEAN', 410, 160);
+        x.fillStyle = '#5b9a1c'; x.fillText('SWEEP', 410, 268);
+        x.fillStyle = '#12203A'; x.font = '700 40px Figtree, Arial, sans-serif'; x.fillText('RUBBISH REMOVALS', 414, 322); x.font = '800 46px Figtree, Arial, sans-serif'; x.fillText('0493 866 368', 414, 378);
+      });
+      const signMat = new T.MeshStandardMaterial({ map: signTex, roughness: .55 });
+      [[-Z0 - .03 + .014, 0], [Z0 + .03 - .014, Math.PI]].forEach(([z, ry]) => {
+        const sy = FLOOR + LOWER + .62, out = ry ? -1 : 1;
+        add(B(1.27, .53, .006), std(0xe9ecef, .5), .55, sy, z - out * .004, trailer);
+        const s = add(new T.PlaneGeometry(1.25, .51), signMat, .55, sy, z, trailer, [0, ry, 0]); s.castShadow = false;
+        [[-.58, .22], [.58, .22], [-.58, -.22], [.58, -.22]].forEach(([dx, dy]) => add(B(.006, .03, .012), std(0x111111, .7), .55 + dx, sy + dy, z + out * .004, trailer));
+      });
+      // vinyl lettering on the lower side sheets
+      const decal = canvasTex(1024, 96, (x, w, h) => { x.clearRect(0, 0, w, h); x.font = 'italic 900 64px Archivo, "Arial Black", sans-serif'; x.textBaseline = 'middle'; x.fillStyle = '#12203A'; x.fillText('CLEAN', 20, 50); const cw = x.measureText('CLEAN ').width; x.fillStyle = '#4f8a17'; x.fillText('SWEEP', 20 + cw, 50); const sw = x.measureText('SWEEP').width; x.font = '800 40px Figtree, Arial, sans-serif'; x.fillStyle = '#12203A'; x.fillText('0493 866 368', 60 + cw + sw, 52); });
+      const decalMat = new T.MeshStandardMaterial({ map: decal, transparent: true, roughness: .4, metalness: .1, polygonOffset: true, polygonOffsetFactor: -2 });
+      add(new T.PlaneGeometry(3.4, .32), decalMat, -.05, FLOOR + LOWER / 2, -Z0 - .002, trailer).castShadow = false;
+      add(new T.PlaneGeometry(3.4, .32), decalMat, -.05, FLOOR + LOWER / 2, Z0 + .002, trailer, [0, Math.PI, 0]).castShadow = false;
+
+      // ---------- the load (real-world colours) ----------
+      const cardboardTex = canvasTex(128, 128, speckle('#b58a5a', .12, 600));
+      const box = (w, h, d) => { const g = new T.Group(); const m = std(0xffffff, .92); m.map = cardboardTex; add(B(w, h, d), m, 0, h / 2, 0, g); add(B(w * 1.002, .005, .06), std(0xcdb48a, .35), 0, h + .002, 0, g); return g; };
+      const bag = r => { const g = new T.Group(); const m = add(lumpy(new T.SphereGeometry(r, 24, 16), .13, 5), std(0x16181b, .32, 0), 0, r * .78, 0, g); m.scale.set(1, .8, 1.05); add(lumpy(new T.ConeGeometry(r * .22, r * .45, 10), .2, 9), std(0x16181b, .32), 0, r * 1.5, 0, g); return g; };
+      const fabric = canvasTex(64, 64, speckle('#6f6a63', .14, 400));
+      const couch = () => { const g = new T.Group(), c = std(0xffffff, .97); c.map = fabric; add(B(1.85, .2, .88), c, 0, .2, 0, g); [-.45, .45].forEach(x => add(B(.88, .12, .8), c, x, .36, .03, g)); add(B(1.85, .42, .2), c, 0, .45, -.34, g); [-.84, .84].forEach(x => add(B(.17, .34, .88), c, x, .3, 0, g)); [-.82, .82].forEach(x => [-.36, .36].forEach(z => add(C(.025, .1, 8), std(0x2a1d14, .6), x, .05, z, g))); return g; };
+      const fridgeDown = () => { const g = new T.Group(); add(B(1.62, .66, .64), std(0xe8e6e1, .22), 0, .33, 0, g); add(B(.01, .62, .6), std(0xcfccc6, .3), -.25, .33, 0, g); add(B(.5, .03, .04), std(0x8f949a, .3, .8), .2, .67, .22, g); return g; };
+      const washer = () => { const g = new T.Group(); add(B(.6, .62, .6), std(0xeeeeec, .3), 0, .31, 0, g); add(C(.17, .02, 32), std(0x7f8f9c, .1, .4), .305, .34, 0, g, [0, 0, Math.PI / 2]); add(B(.02, .07, .5), std(0xd7d7d4, .4), .305, .56, 0, g); return g; };
+      const quilt = canvasTex(256, 256, (x, w) => { x.fillStyle = '#ece8df'; x.fillRect(0, 0, w, w); x.strokeStyle = 'rgba(150,140,125,.35)'; x.lineWidth = 2; for (let i = -w; i < 2 * w; i += 32) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i + w / 2, w); x.stroke(); x.beginPath(); x.moveTo(i, 0); x.lineTo(i - w / 2, w); x.stroke(); } x.fillStyle = 'rgba(150,140,125,.18)'; for (let i = 0; i < 1500; i++) x.fillRect(rnd() * w, rnd() * w, 2, 2); }, [3, 2]);
+      const mattress = stain => { const g = new T.Group(); const m = std(0xffffff, .95); m.map = quilt; add(B(1.88, .22, 1.36), m, 0, .11, 0, g); add(B(1.9, .05, 1.38), std(stain ? 0x6b7f99 : 0x8a99ad, .9), 0, .11, 0, g); return g; };
+      const bike = () => { const g = new T.Group(), f = std(0x1f4e79, .35, .6); [-.4, .4].forEach(x => { add(new T.TorusGeometry(.29, .022, 8, 32), rubber, x, .31, 0, g); add(new T.TorusGeometry(.26, .006, 6, 32), rimMat, x, .31, 0, g); }); add(C(.018, .66, 8), f, 0, .47, 0, g, [0, 0, Math.PI / 2.4]); add(C(.018, .52, 8), f, -.14, .5, 0, g, [0, 0, -.85]); add(C(.016, .44, 8), f, .3, .55, 0, g, [0, 0, .3]); add(B(.05, .025, .42), rubber, .36, .8, 0, g); add(B(.2, .04, .08), rubber, -.18, .74, 0, g); return g; };
+      const leafMats = [0x3a5726, 0x47652c, 0x557334, 0x62803a, 0x6f6a38].map(c => std(c, .82, 0));
+      const bark = std(0x5a4430, .95);
+      const greens = (n, sx, sz, hh) => {
+        const g = new T.Group();
+        for (let i = 0; i < 7; i++) { const len = .8 + rnd() * .9; add(C(.02 + rnd() * .02, len, 6), bark, (rnd() - .5) * sx * .8, .15 + rnd() * hh * .6, (rnd() - .5) * sz * .8, g, [rnd() - .5, rnd() * 3, Math.PI / 2 + (rnd() - .5) * .8]); }
+        for (let i = 0; i < n; i++) { const r = .09 + rnd() * .13; const lf = add(lumpy(new T.IcosahedronGeometry(r, 2), .38, 11), leafMats[i % 5], (rnd() - .5) * sx, rnd() * hh, (rnd() - .5) * sz, g, [rnd() * 3, rnd() * 3, 0]); lf.scale.set(1.3, .6 + rnd() * .4, 1.1); }
+        return g;
+      };
+      const pine = canvasTex(256, 32, (x, w, h) => { x.fillStyle = '#c9a777'; x.fillRect(0, 0, w, h); for (let i = 0; i < 18; i++) { x.strokeStyle = `rgba(120,80,40,${.15 + rnd() * .2})`; x.lineWidth = 1 + rnd() * 1.5; x.beginPath(); const y = rnd() * h; x.moveTo(0, y); for (let k = 0; k <= w; k += 16) x.lineTo(k, y + Math.sin(k / 30 + i) * 3); x.stroke(); } });
+      const timber = () => { const g = new T.Group(), m = new T.MeshStandardMaterial({ map: pine, roughness: .85 }); for (let i = 0; i < 5; i++) add(B(2.2, .045, .14), m, 0, .025 + (i % 3) * .046, -.28 + i * .14, g, [0, .05 * (i - 2), 0]); return g; };
+      const chair = () => { const g = new T.Group(), w = std(0x6e4b33, .65); add(B(.44, .04, .44), w, 0, .45, 0, g); add(B(.44, .4, .03), w, 0, .66, -.2, g); [-.19, .19].forEach(x => [-.19, .19].forEach(z => add(B(.035, .45, .035), w, x, .225, z, g))); return g; };
+      const tv = () => { const g = new T.Group(); add(B(.98, .58, .06), std(0x111214, .35, .2), 0, .29, 0, g); add(B(.92, .52, .005), std(0x050607, .05, .1), 0, .3, .031, g); return g; };
+      const bucket = () => { const g = new T.Group(); add(new T.CylinderGeometry(.15, .12, .32, 20, 1, true), std(0x2b2d30, .5, 0, { side: T.DoubleSide }), 0, .16, 0, g); return g; };
 
       const PLACE = [
-        [ // ¼ load: floor layer
-          [couch(), -1.0, .5, 0], [fridgeDown(), 1.05, .52, 0], [washer(), -1.55, -.5, .2], [cardboard(.5, .48, .5), -.85, -.48, .3],
-          [cardboard(.55, .45, .45), -.25, -.5, -.2], [cardboard(.45, .4, .45), .3, -.55, .1], [bag(.3), .95, -.45, 0], [bag(.28), 1.6, -.5, 0], [bag(.26), .1, .45, 0]],
-        [ // ½ load
-          [mattress(), -.95, .05, .04], [cardboard(.5, .45, .5), -1.45, .3, .3], [cardboard(.45, .4, .45), -.6, -.45, -.2],
-          [bike(), .85, .45, .1], [bag(.3), 1.55, -.45, 0], [bag(.28), .95, -.5, 0], [cardboard(.5, .45, .5), .25, -.5, .15], [bag(.27), .2, .35, 0]],
-        [ // ¾ load
-          [greens(14, 1.7, 1.6), -1.0, 0, 0], [timber(), .75, -.35, .08], [chair(), 1.45, .45, .6], [cardboard(.55, .45, .5), .4, .45, -.25], [bag(.3), 1.55, -.45, 0]],
-        [ // full load
-          [greens(16, 1.9, 1.7), .95, 0, 0], [mattress(0xece8df), -1.0, 0, -.12], [tv(), -1.3, -.35, .3], [cardboard(.5, .42, .5), -.55, .45, .4], [bag(.3), -1.6, .5, 0], [cardboard(.45, .4, .45), -.2, -.5, -.3]],
+        [[couch(), -.95, .5, 0], [fridgeDown(), 1.1, .5, 0], [washer(), -1.6, -.52, .15], [box(.5, .46, .5), -.95, -.5, .3], [box(.56, .42, .44), -.35, -.48, -.15],
+         [box(.44, .38, .42), .25, -.58, .1], [bag(.3), .9, -.45, 0], [bag(.28), 1.6, -.48, 0], [bag(.25), .15, .48, 0], [bucket(), 1.75, .35, 0]],
+        [[mattress(), -.95, .03, .03], [box(.48, .42, .46), -1.45, .28, .3], [box(.44, .38, .42), -.55, -.42, -.25], [bike(), .85, .45, .08],
+         [bag(.3), 1.55, -.45, 0], [bag(.27), .95, -.52, 0], [box(.5, .44, .48), .2, -.5, .2], [bag(.26), .2, .38, 0]],
+        [[greens(70, 1.8, 1.7, .45), -1.0, 0, 0], [timber(), .75, -.3, .06], [chair(), 1.45, .45, .5], [box(.54, .44, .5), .35, .45, -.25], [bag(.3), 1.6, -.5, 0]],
+        [[greens(80, 2.0, 1.75, .5), .95, 0, 0], [mattress(true), -1.0, 0, -.1], [tv(), -1.35, -.3, .25], [box(.5, .42, .48), -.5, .42, .4], [bag(.29), -1.6, .5, 0], [box(.44, .4, .44), -.15, -.5, -.3]],
       ];
       const loads = PLACE.map((layer, q) => {
         const grp = new T.Group(); trailer.add(grp);
-        layer.forEach(([obj, x, z, ry]) => { obj.position.set(x, FLOOR + q * .5, z); obj.rotation.y = ry; obj.userData.home = obj.position.clone(); grp.add(obj); });
+        layer.forEach(([obj, x, z, ry]) => { obj.position.set(x, FLOOR + q * .5, z); obj.rotation.y = ry; obj.userData.home = obj.position.clone(); obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } }); grp.add(obj); });
         grp.visible = false; return grp;
       });
 
-      // fill volume + level ring
-      const fillMat = new T.MeshBasicMaterial({ color: 0x84c430, transparent: true, opacity: .14, depthWrite: false });
-      const fill = new T.Mesh(B(L - .06, 1, W - .06), fillMat); fill.position.set(0, FLOOR, 0); fill.scale.y = .001; trailer.add(fill);
-      const ring = new T.LineSegments(new T.EdgesGeometry(new T.PlaneGeometry(L - .02, W - .02)), new T.LineBasicMaterial({ color: 0x5f9a1c }));
+      // fill level: soft tint + level line
+      const fill = new T.Mesh(B(L - .1, 1, W - .1), new T.MeshBasicMaterial({ color: lin(0x84c430), transparent: true, opacity: .1, depthWrite: false }));
+      fill.position.set(0, FLOOR, 0); fill.scale.y = .001; trailer.add(fill);
+      const ring = new T.LineSegments(new T.EdgesGeometry(new T.PlaneGeometry(L - .06, W - .06)), new T.LineBasicMaterial({ color: lin(0x6db32a) }));
       ring.rotation.x = -Math.PI / 2; ring.position.y = FLOOR + 1; trailer.add(ring);
 
       // ---------- camera orbit ----------
-      let az = .75, el = .36, dist = 9.2, autoSpin = !reduce, dragging = false, vAz = 0, lastX = 0, lastY = 0, visible = true, raf = 0;
-      const tween = { az: null };
+      let az = .78, el = .3, dist = 12, autoSpin = !reduce, dragging = false, vAz = 0, lastX = 0, lastY = 0, visible = true, raf = 0;
       const place = () => { cam.position.set(target.x + dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az)); cam.lookAt(target); };
-      const resize = () => { const r = box3.getBoundingClientRect(); if (!r.width) return; renderer.setSize(r.width, r.height, false); cam.aspect = r.width / r.height; dist = 11.4 / Math.min(1, cam.aspect / 1.15) ** .55; cam.updateProjectionMatrix(); place(); };
+      const resize = () => { const r = box3.getBoundingClientRect(); if (!r.width) return; renderer.setSize(r.width, r.height, false); cam.aspect = r.width / r.height; dist = 13 / Math.min(1, cam.aspect / 1.15) ** .55; cam.updateProjectionMatrix(); place(); };
       addEventListener('resize', resize);
       const stopAuto = () => { autoSpin = false; box3.classList.add('used'); };
+      const view = { get az() { return az; }, set az(v) { az = v; }, get el() { return el; }, set el(v) { el = v; } };
       cv.addEventListener('pointerdown', e => { dragging = true; stopAuto(); lastX = e.clientX; lastY = e.clientY; vAz = 0; cv.setPointerCapture(e.pointerId); if (hasGsap) gsap.killTweensOf(view); });
       cv.addEventListener('pointermove', e => {
         if (!dragging) return;
         const dx = e.clientX - lastX, dy = e.clientY - lastY; lastX = e.clientX; lastY = e.clientY;
         vAz = -dx * .009; az += vAz;
-        if (e.pointerType === 'mouse') el = Math.max(.06, Math.min(1.35, el + dy * .006));
+        if (e.pointerType === 'mouse') el = Math.max(.05, Math.min(1.35, el + dy * .006));
       });
       const up = () => { dragging = false; };
       cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-      cv.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') { stopAuto(); az += .2; } if (e.key === 'ArrowRight') { stopAuto(); az -= .2; } if (e.key === 'ArrowUp') el = Math.min(1.35, el + .1); if (e.key === 'ArrowDown') el = Math.max(.06, el - .1); });
-
-      const view = { get az() { return az; }, set az(v) { az = v; }, get el() { return el; }, set el(v) { el = v; } };
+      cv.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') { stopAuto(); az += .2; } if (e.key === 'ArrowRight') { stopAuto(); az -= .2; } if (e.key === 'ArrowUp') el = Math.min(1.35, el + .1); if (e.key === 'ArrowDown') el = Math.max(.05, el - .1); });
       const goView = (a, e) => {
         stopAuto(); const tgtA = az + ((((a - az) % (Math.PI * 2)) + Math.PI * 3) % (Math.PI * 2) - Math.PI);
         if (hasGsap && !reduce) gsap.to(view, { az: tgtA, el: e, duration: .9, ease: 'power3.inOut' }); else { az = tgtA; el = e; }
       };
       $$('.t3d-ctl [data-view]').forEach(b => b.addEventListener('click', () => {
         const v = b.dataset.view;
-        if (v === 'side') goView(0, .22); if (v === 'back') goView(-Math.PI / 2, .3); if (v === 'top') goView(az, 1.32); if (v === 'spin') { autoSpin = !reduce; box3.classList.remove('used'); goView(.75, .36); setTimeout(() => autoSpin = !reduce, 950); }
+        if (v === 'side') goView(0, .14); if (v === 'back') goView(-Math.PI / 2, .22); if (v === 'top') goView(az, 1.3);
+        if (v === 'spin') { box3.classList.remove('used'); goView(.78, .3); setTimeout(() => autoSpin = !reduce, 950); }
       }));
 
       const io2 = new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); if (visible && !raf) raf = requestAnimationFrame(loop); }, { threshold: 0 });
@@ -1719,7 +1807,7 @@ footer.site .big span{color:var(--lime-deep)}
       let last = performance.now();
       function loop(now) {
         const dt = Math.min(.05, (now - last) / 1000); last = now;
-        if (!dragging) { if (Math.abs(vAz) > .0005) { az += vAz; vAz *= .92; } else if (autoSpin) az += dt * .28; }
+        if (!dragging) { if (Math.abs(vAz) > .0005) { az += vAz; vAz *= .92; } else if (autoSpin) az += dt * .24; }
         place(); renderer.render(scene, cam);
         raf = visible ? requestAnimationFrame(loop) : 0;
       }
@@ -1733,7 +1821,7 @@ footer.site .big span{color:var(--lime-deep)}
           g.userData.on = on;
           if (on && !was) {
             g.visible = true;
-            g.children.forEach((o, k) => { const h = o.userData.home; if (anim) gsap.fromTo(o.position, { y: h.y + 2.4 + k * .15 }, { y: h.y, duration: .75, ease: 'bounce.out', delay: Math.max(0, q - curLevel - 1) * .2 + k * .05 }); else o.position.copy(h); });
+            g.children.forEach((o, k) => { const h = o.userData.home; if (anim) gsap.fromTo(o.position, { y: h.y + 2.4 + k * .12 }, { y: h.y, duration: .7, ease: 'bounce.out', delay: Math.max(0, q - curLevel - 1) * .2 + k * .05 }); else o.position.copy(h); });
           } else if (!on && was) {
             if (anim) g.children.forEach((o, k) => gsap.to(o.position, { y: o.userData.home.y + 2.6, duration: .35, ease: 'power2.in', delay: k * .02, onComplete: () => { if (!g.userData.on) g.visible = false; } }));
             else g.visible = false;
