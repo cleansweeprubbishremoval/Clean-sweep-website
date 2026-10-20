@@ -59,3 +59,17 @@ When a customer ticks **"Email me Clean Sweep offers"** while booking (and gives
 - Gmail can send to about 100 people a day this way. When your list gets bigger than that, move to a mailing service like Mailchimp (export the sheet to CSV).
 
 If you'd already set up the script, paste in the new `Code.gs`, click **Save**, run **setup** again, then **Deploy → Manage deployments → Edit → New version → Deploy**.
+
+## 4. Income records (Stripe payments → Google Sheet)
+
+Every hour the script copies new Stripe payments into a private Google Sheet called **Clean Sweep income** (link emailed to you when you run **setup**).
+
+- **Payments** tab: date, booking number, customer, email, what it was for, card or direct debit, amount, Stripe's fee, and what you receive.
+- **Totals** tab: income by month, plus Australian financial-year totals (1 July – 30 June) for tax and BAS time.
+- Paid cash or bank transfer on the day? Add a row on the Payments tab yourself (Source: Cash) and it's included in the totals.
+
+To switch it on:
+1. In Stripe, go to **Developers → API keys → Create restricted key**. Name it "Google income sheet" and set every permission to **Read** (nothing on Write). Create it and copy the key (starts with `rk_live_`).
+2. Paste it into `STRIPE_READ_KEY` at the top of the script, click **Save**, and run **setup** again.
+
+The key can only read, so it can't move money or change anything in Stripe. Still, keep it private, and never put it on your website.

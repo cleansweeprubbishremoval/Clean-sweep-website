@@ -10,6 +10,8 @@
  *   5. Customers who tick "Email me offers" go on a private Google Sheet in your Drive
  *      ("Clean Sweep customer list"). On the 1st of each month at 9am they get your
  *      monthly email, with a working unsubscribe link (required by the Spam Act).
+ *   6. Every hour it copies new Stripe payments into a private Google Sheet
+ *      ("Clean Sweep income") with monthly and financial-year totals.
  *
  * Setup: see SETUP.md. Do it while signed in to cleansweeprubbishremoval@gmail.com.
  */
@@ -25,6 +27,11 @@ const REMINDER_HOURS_BEFORE = 48;
 // Leave blank to skip texts; emails still work.
 const CLICKSEND_USERNAME = '';
 const CLICKSEND_API_KEY = '';
+
+// Income records: paste a Stripe *restricted* key with read-only access (starts with rk_live_).
+// Stripe dashboard > Developers > API keys > Create restricted key > set everything to "Read".
+// Keep this script private. Leave blank to skip.
+const STRIPE_READ_KEY = '';
 // ------------------------------------------
 
 const TZ = 'Australia/Sydney';
@@ -214,6 +221,73 @@ function sendMonthlyEmail() {
   MailApp.sendEmail(OWNER_EMAIL(), 'Monthly email sent to ' + sent + ' customers', 'Subject: ' + subject);
 }
 
+// ---------- income records (Stripe -> Google Sheet) ----------
+const PAY_LABELS = { deposit: 'Booking deposit', q1: '¼ load', q2: '½ load', q3: '¾ load', full: 'Full load', sweep: 'The Big Sweep', bin: 'Bin collection' };
+
+function incomeSheet_() {
+  const props = PropertiesService.getScriptProperties();
+  let id = props.getProperty('INCOME_ID'), ss;
+  if (id) { try { ss = SpreadsheetApp.openById(id); } catch (e) { ss = null; } }
+  if (!ss) {
+    ss = SpreadsheetApp.create('Clean Sweep income');
+    const pay = ss.getSheets()[0]; pay.setName('Payments');
+    pay.appendRow(['Date', 'Booking ref', 'Customer', 'Email', 'For', 'Paid by', 'Amount', 'Stripe fee', 'You receive', 'Source', 'Stripe ID']);
+    pay.setFrozenRows(1); pay.getRange('A1:K1').setFontWeight('bold');
+    pay.getRange('A:A').setNumberFormat('yyyy-mm-dd hh:mm'); pay.getRange('G:I').setNumberFormat('$#,##0.00');
+    const t = ss.insertSheet('Totals');
+    t.getRange('A1').setValue('By month').setFontWeight('bold');
+    t.getRange('A2').setFormula('=IFERROR(QUERY(Payments!A2:I, "select year(A), month(A)+1, sum(G), sum(H), sum(I) where A is not null group by year(A), month(A)+1 order by year(A) desc, month(A)+1 desc label year(A) \'Year\', month(A)+1 \'Month\', sum(G) \'Income\', sum(H) \'Fees\', sum(I) \'You receive\'", 0), "No payments yet")');
+    t.getRange('G1').setValue('Financial year (1 July – 30 June)').setFontWeight('bold');
+    t.getRange('G2:J2').setValues([['Financial year', 'Income', 'Fees', 'You receive']]).setFontWeight('bold');
+    for (let i = 0; i < 6; i++) {
+      const r = 3 + i, start = 2025 + i;
+      t.getRange(r, 7).setValue(start + '–' + String(start + 1).slice(2));
+      ['G', 'H', 'I'].forEach((col, k) => t.getRange(r, 8 + k).setFormula('=SUMIFS(Payments!' + col + ':' + col + ', Payments!A:A, ">="&DATE(' + start + ',7,1), Payments!A:A, "<"&DATE(' + (start + 1) + ',7,1))'));
+    }
+    t.getRange('H3:J8').setNumberFormat('$#,##0.00');
+    t.getRange('A12').setValue('Cash or bank transfer on the day? Add a row on the Payments tab yourself (Source: Cash) and it is included in the totals.');
+    props.setProperty('INCOME_ID', ss.getId());
+  }
+  return ss;
+}
+
+function stripe_(path) {
+  const res = UrlFetchApp.fetch('https://api.stripe.com/v1/' + path, { headers: { Authorization: 'Bearer ' + STRIPE_READ_KEY }, muteHttpExceptions: true });
+  const body = JSON.parse(res.getContentText());
+  if (res.getResponseCode() >= 300) throw new Error('Stripe: ' + (body.error && body.error.message));
+  return body;
+}
+
+// Runs every hour (see setup()). Adds paid Stripe checkouts from the last 30 days that aren't recorded yet.
+function syncStripePayments() {
+  if (!STRIPE_READ_KEY) return;
+  const pay = incomeSheet_().getSheetByName('Payments');
+  const seen = new Set(pay.getRange(1, 11, Math.max(1, pay.getLastRow()), 1).getValues().map(r => r[0]));
+  const since = Math.floor(Date.now() / 1000) - 30 * 86400;
+  let after = '', rows = [];
+  for (let page = 0; page < 10; page++) {
+    const list = stripe_('checkout/sessions?limit=100&created[gte]=' + since + (after ? '&starting_after=' + after : ''));
+    list.data.forEach(cs => {
+      if (cs.payment_status !== 'paid' || seen.has(cs.id)) return;
+      let fee = '', net = '', method = '';
+      try {
+        const pi = stripe_('payment_intents/' + cs.payment_intent + '?expand[]=latest_charge.balance_transaction');
+        const ch = pi.latest_charge || {}, bt = ch.balance_transaction || {};
+        method = (ch.payment_method_details && ch.payment_method_details.type || '').replace('au_becs_debit', 'Direct debit').replace('card', 'Card');
+        if (bt.fee != null) { fee = bt.fee / 100; net = bt.net / 100; }
+      } catch (e) {}
+      const d = cs.customer_details || {};
+      rows.push([new Date(cs.created * 1000), cs.client_reference_id || '', d.name || '', d.email || '',
+        PAY_LABELS[(cs.metadata || {}).site_key] || 'Payment', method, cs.amount_total / 100, fee, net, 'Stripe', cs.id]);
+    });
+    if (!list.has_more || !list.data.length) break;
+    after = list.data[list.data.length - 1].id;
+  }
+  if (!rows.length) return;
+  rows.sort((a, b) => a[0] - b[0]);
+  pay.getRange(pay.getLastRow() + 1, 1, rows.length, 11).setValues(rows);
+}
+
 // ---------- texts via ClickSend ----------
 function sms_(to, body) {
   if (!to || !CLICKSEND_USERNAME || !CLICKSEND_API_KEY) return;
@@ -239,9 +313,12 @@ function setup() {
   ScriptApp.newTrigger('sendReminders').timeBased().everyHours(1).create();
   ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'sendMonthlyEmail') ScriptApp.deleteTrigger(t); });
   ScriptApp.newTrigger('sendMonthlyEmail').timeBased().onMonthDay(1).atHour(9).inTimezone(TZ).create();
-  const list = sheet_();
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'syncStripePayments') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('syncStripePayments').timeBased().everyHours(1).create();
+  const list = sheet_(), income = incomeSheet_();
   MailApp.sendEmail(OWNER_EMAIL(), 'Clean Sweep bookings are connected', 'Bookings from your website will now go into your Google Calendar, and 48-hour reminders are switched on.\n\n' +
-    'Your private customer list (for the monthly email) is here: ' + list.getUrl());
+    'Your private customer list (for the monthly email) is here: ' + list.getUrl() + '\n\n' +
+    'Your income records are here: ' + income.getUrl() + (STRIPE_READ_KEY ? '' : '\n(Add your Stripe read-only key at the top of the script to start filling it in.)'));
 }
 
 // Optional check: adds a test booking for 2 days from now and sends you the emails. Delete the event after.
