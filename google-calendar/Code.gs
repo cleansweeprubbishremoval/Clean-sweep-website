@@ -5,7 +5,9 @@
  *   1. Adds it to your Google Calendar in the customer's arrival window, with their
  *      name, best contact number and pickup address.
  *   2. Emails you the full booking. Texts you too, once SMS is switched on (below).
- *   3. Sends the customer a booking confirmation (email, or text if they only gave a phone).
+ *   3. Emails the customer their booking confirmation with a branded invoice (in the email and
+ *      as a PDF), and saves a copy of each invoice to "Clean Sweep invoices" in your Google Drive.
+ *      Customers who only gave a phone number get a text confirmation instead.
  *   4. 48 hours before the job, sends the customer a reminder (email and/or text).
  *   5. Customers who tick "Email me offers" go on a private Google Sheet in your Drive
  *      ("Clean Sweep customer list"). On the 1st of each month at 9am they get your
@@ -19,6 +21,10 @@
 // ---------------- settings ----------------
 const OWNER_MOBILE = '0493866368';            // you get a text for every new booking (needs SMS below)
 const SEND_CUSTOMER_CONFIRMATION = true;      // confirmation as soon as they book
+const SEND_INVOICE = true;                    // attach a branded invoice to the confirmation email
+const GST_REGISTERED = false;                 // set to true once you're registered for GST: invoices become "Tax invoice" and show the GST included
+const WEBSITE = 'cleansweeprubbishremovals.netlify.app';
+const LOGO_URL = 'https://cleansweeprubbishremovals.netlify.app/logo-email.png';
 const REMINDER_HOURS_BEFORE = 48;
 
 // Text messages: Google can't send texts by itself, so this uses ClickSend
@@ -112,6 +118,11 @@ function confirmCustomer_(p) {
   const when = (p.dateLabel || p.date || '') + ', ' + (p.window || '');
   const where = [p.street, p.suburb, p.postcode].filter(String).join(', ');
   if (p.email) {
+    if (SEND_INVOICE) {
+      try { sendInvoice_(p); return; } catch (err) {
+        MailApp.sendEmail(OWNER_EMAIL(), 'Invoice not sent for booking ' + (p.ref || ''), 'The booking confirmation went out without an invoice.\n\nError: ' + err + '\n\n' + details_(p));
+      }
+    }
     MailApp.sendEmail({
       to: p.email, name: 'Clean Sweep Rubbish Removals', replyTo: OWNER_EMAIL(),
       subject: 'Your Clean Sweep booking is confirmed (' + (p.ref || '') + ')',
@@ -125,6 +136,113 @@ function confirmCustomer_(p) {
     sms_(p.phone, 'Hi ' + first + ', your Clean Sweep booking ' + (p.ref || '') + ' is confirmed for ' + when + ' at ' + where +
       '. Changes or cancellations: 0493 866 368 (less than 24 hrs notice is non-refundable).');
   }
+}
+
+// ---------- invoices ----------
+function nextInvoiceNo_() {
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const n = Number(props.getProperty('INVOICE_NO') || 0) + 1;
+    props.setProperty('INVOICE_NO', String(n));
+    return 'INV-' + ('000' + n).slice(-4);
+  } finally { lock.releaseLock(); }
+}
+
+const money_ = n => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num_ = v => Number(String(v || '').replace(/[^\d.]/g, '')) || 0;
+const esc_ = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+// Works out the invoice figures from what the website sent.
+function invoiceData_(p) {
+  let lines = [];
+  try { lines = JSON.parse(p.lines || '[]'); } catch (e) { lines = []; }
+  lines = lines.filter(l => l && l.d).map(l => ({ d: String(l.d), q: Number(l.q) || 1, u: Number(l.u) || 0 }));
+  if (!lines.length) lines = [{ d: p.job || p.size || 'Rubbish removal', q: 1, u: num_(p.total) }];
+  const total = lines.reduce((t, l) => t + l.q * l.u, 0);
+  const deposit = /deposit/i.test(p.payChoice || '');
+  const payNow = Math.min(total, num_(p.payNow) || total);
+  return { lines, total, deposit, payNow, balance: Math.max(0, total - payNow), gst: GST_REGISTERED ? total / 11 : 0 };
+}
+
+// The invoice itself, as HTML. logoSrc is a cid: or data: image.
+function invoiceHtml_(p, no, issued, logoSrc) {
+  const d = invoiceData_(p);
+  const navy = '#12203A', lime = '#84C430', soft = '#5B6577', line = '#E3E8DD';
+  const cell = 'padding:10px 8px;border-bottom:1px solid ' + line + ';font-size:14px;';
+  const rows = d.lines.map(l =>
+    '<tr><td style="' + cell + '">' + esc_(l.d) + '</td><td style="' + cell + 'text-align:center">' + l.q + '</td>' +
+    '<td style="' + cell + 'text-align:right">' + money_(l.u) + '</td><td style="' + cell + 'text-align:right;font-weight:700">' + money_(l.q * l.u) + '</td></tr>').join('');
+  const sumRow = (label, value, strong) => '<tr><td style="padding:6px 8px;font-size:' + (strong ? 16 : 14) + 'px;' + (strong ? 'font-weight:800;color:' + navy : 'color:' + soft) + '">' + label + '</td>' +
+    '<td style="padding:6px 8px;text-align:right;font-size:' + (strong ? 16 : 14) + 'px;font-weight:' + (strong ? 800 : 600) + ';color:' + navy + '">' + value + '</td></tr>';
+  const pay = d.deposit
+    ? sumRow('Deposit, payable online at booking', money_(d.payNow)) + sumRow('Balance due on collection day', money_(d.balance), true)
+    : sumRow('Payable online at booking', money_(d.payNow)) + (d.balance ? sumRow('Extras due on collection day', money_(d.balance), true) : '');
+  const addr = [p.street, [p.suburb, 'NSW', p.postcode].filter(String).join(' ')].filter(String).map(esc_).join('<br>');
+  const contact = [p.phone, p.email].filter(String).map(esc_).join('<br>');
+  const label = 'font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:' + soft + ';font-weight:700;margin:0 0 6px';
+  return '<div style="background:#F3F7EF;padding:24px 12px;font-family:Arial,Helvetica,sans-serif;color:' + navy + '">' +
+  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid ' + line + '">' +
+  '<tr><td style="background:' + navy + ';padding:22px 24px;border-bottom:5px solid ' + lime + '">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' +
+    '<td style="vertical-align:middle;width:84px">' + (logoSrc ? '<img src="' + logoSrc + '" width="72" height="72" alt="Clean Sweep" style="display:block;border-radius:50%">' : '') + '</td>' +
+    '<td style="vertical-align:middle;color:#ffffff"><div style="font-size:20px;font-weight:800;font-style:italic">CLEAN <span style="color:' + lime + '">SWEEP</span> RUBBISH REMOVALS</div>' +
+    '<div style="font-size:12px;color:#C9D4E6;margin-top:4px">ABN 55 989 268 862 · 0493 866 368 · Fully insured</div></td>' +
+    '<td style="vertical-align:middle;text-align:right;color:#ffffff"><div style="font-size:22px;font-weight:800;letter-spacing:.04em">' + (GST_REGISTERED ? 'TAX INVOICE' : 'INVOICE') + '</div>' +
+    '<div style="font-size:13px;color:#C9D4E6;margin-top:4px">' + esc_(no) + '</div></td></tr></table></td></tr>' +
+  '<tr><td style="padding:22px 24px 6px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' +
+    '<td style="vertical-align:top;width:50%;padding-right:12px"><p style="' + label + '">Bill to</p><div style="font-size:14px;line-height:1.5"><b>' + esc_(p.name) + '</b><br>' + addr + (contact ? '<br>' + contact : '') + '</div></td>' +
+    '<td style="vertical-align:top;width:50%"><p style="' + label + '">Details</p><div style="font-size:14px;line-height:1.6">' +
+      'Invoice date: <b>' + esc_(issued) + '</b><br>Booking: <b>' + esc_(p.ref) + '</b><br>Collection: <b>' + esc_(p.dateLabel || p.date) + '</b><br>Preferred time: <b>' + esc_(p.window) + '</b></div></td>' +
+  '</tr></table></td></tr>' +
+  '<tr><td style="padding:14px 24px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">' +
+    '<tr><th align="left" style="' + label + 'padding:8px;border-bottom:2px solid ' + navy + '">Description</th><th style="' + label + 'padding:8px;border-bottom:2px solid ' + navy + ';text-align:center">Qty</th>' +
+    '<th style="' + label + 'padding:8px;border-bottom:2px solid ' + navy + ';text-align:right">Price</th><th style="' + label + 'padding:8px;border-bottom:2px solid ' + navy + ';text-align:right">Amount</th></tr>' + rows + '</table></td></tr>' +
+  '<tr><td style="padding:10px 24px 4px"><table role="presentation" cellpadding="0" cellspacing="0" style="margin-left:auto;min-width:300px">' +
+    sumRow('Total', money_(d.total), true) + (GST_REGISTERED ? sumRow('Includes GST of', money_(d.gst)) : '') + pay + '</table></td></tr>' +
+  '<tr><td style="padding:14px 24px 22px"><div style="background:#F3F7EF;border-radius:10px;padding:14px 16px;font-size:12.5px;line-height:1.6;color:' + soft + '">' +
+    '<b style="color:' + navy + '">Good to know</b><br>' +
+    'Your final price is confirmed on site before we start loading. Online payments are made through our secure Stripe checkout, and Stripe emails your receipt.<br>' +
+    'If you paid in full, any extra rubbish not included in this booking won\'t be picked up unless the price difference is paid.<br>' +
+    'Bookings cancelled less than 24 hours before the collection time are non-refundable. To change or cancel, call or text 0493 866 368.' +
+  '</div><p style="font-size:12px;color:' + soft + ';text-align:center;margin:16px 0 0">Clean Sweep Rubbish Removals · ABN 55 989 268 862 · 0493 866 368 · ' + esc_(WEBSITE) + '</p></td></tr>' +
+  '</table></div>';
+}
+
+function invoiceFolder_() {
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty('INVOICE_FOLDER');
+  if (id) { try { return DriveApp.getFolderById(id); } catch (e) {} }
+  const f = DriveApp.createFolder('Clean Sweep invoices');
+  props.setProperty('INVOICE_FOLDER', f.getId());
+  return f;
+}
+
+function sendInvoice_(p) {
+  const first = String(p.name || '').split(' ')[0] || 'there';
+  const no = nextInvoiceNo_();
+  const issued = Utilities.formatDate(new Date(), TZ, 'd MMMM yyyy');
+  let logo = null;
+  try { logo = UrlFetchApp.fetch(LOGO_URL, { muteHttpExceptions: true }); logo = logo.getResponseCode() === 200 ? logo.getBlob().setName('logo.png') : null; } catch (e) { logo = null; }
+  const pdfHtml = '<html><body style="margin:0">' + invoiceHtml_(p, no, issued, logo ? 'data:image/png;base64,' + Utilities.base64Encode(logo.getBytes()) : '') + '</body></html>';
+  const pdf = Utilities.newBlob(pdfHtml, 'text/html', 'invoice.html').getAs('application/pdf').setName('Clean Sweep ' + no + ' (' + (p.ref || '') + ').pdf');
+  try { invoiceFolder_().createFile(pdf.copyBlob()); } catch (e) { console.warn('Could not save invoice to Drive: ' + e); }
+  const intro = '<div style="max-width:640px;margin:0 auto;padding:20px 12px 0;font-family:Arial,Helvetica,sans-serif;color:#12203A;font-size:15px;line-height:1.55">' +
+    '<p>Hi ' + esc_(first) + ',</p><p>Thanks for booking with Clean Sweep Rubbish Removals. You\'re booked in for <b>' + esc_(p.dateLabel || p.date) + '</b>, around <b>' + esc_(p.window) + '</b>, at ' +
+    esc_([p.street, p.suburb].filter(String).join(', ')) + '. We\'ll be in touch 48 hours before to confirm.</p><p>Your invoice is below and attached as a PDF.</p></div>';
+  const outro = '<div style="max-width:640px;margin:0 auto;padding:0 12px 24px;font-family:Arial,Helvetica,sans-serif;color:#12203A;font-size:15px;line-height:1.55"><p>Cheers,<br>Lucas<br>Clean Sweep Rubbish Removals · 0493 866 368</p></div>';
+  const d = invoiceData_(p);
+  const opts = {
+    to: p.email, bcc: OWNER_EMAIL(), name: 'Clean Sweep Rubbish Removals', replyTo: OWNER_EMAIL(),
+    subject: 'Booking confirmed + invoice ' + no + ' (' + (p.ref || '') + ')',
+    body: 'Hi ' + first + ',\n\nThanks for booking with Clean Sweep Rubbish Removals. You\'re booked in for ' + (p.dateLabel || p.date || '') + ', around ' + (p.window || '') + '.\n\n' +
+      'Invoice ' + no + ' is attached. Total: ' + money_(d.total) + (d.balance ? '. Due on collection day: ' + money_(d.balance) : '') + '.\n\n' +
+      'Bookings cancelled less than 24 hours before the collection time are non-refundable. Call or text 0493 866 368 to change or cancel.\n\nCheers,\nLucas',
+    htmlBody: intro + invoiceHtml_(p, no, issued, logo ? 'cid:logo' : '') + outro,
+    attachments: [pdf],
+  };
+  if (logo) opts.inlineImages = { logo: logo };
+  MailApp.sendEmail(opts);
 }
 
 // Runs every hour (see setup()). Sends a reminder to customers whose job is about 48 hours away.
@@ -324,7 +442,8 @@ function setup() {
   ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'syncStripePayments') ScriptApp.deleteTrigger(t); });
   ScriptApp.newTrigger('syncStripePayments').timeBased().everyHours(1).create();
   const list = sheet_(), income = incomeSheet_();
-  MailApp.sendEmail(OWNER_EMAIL(), 'Clean Sweep bookings are connected', 'Bookings from your website will now go into your Google Calendar, and 48-hour reminders are switched on.\n\n' +
+  invoiceFolder_();
+  MailApp.sendEmail(OWNER_EMAIL(), 'Clean Sweep bookings are connected', 'Bookings from your website will now go into your Google Calendar, customers get an invoice by email, and 48-hour reminders are switched on.\n\n' +
     'Your private customer list (for the monthly email) is here: ' + list.getUrl() + '\n\n' +
     'Your income records are here: ' + income.getUrl() + (STRIPE_READ_KEY ? '' : '\n(Add your Stripe read-only key at the top of the script to start filling it in.)'));
 }
@@ -336,6 +455,7 @@ function testBooking() {
     ref: 'CS-TEST', name: 'Test Customer', phone: '', email: OWNER_EMAIL(),
     street: '1 Test St', suburb: 'Parramatta', postcode: '2150', size: '½ load', job: '½ load ($950)',
     date: Utilities.formatDate(t, TZ, 'yyyy-MM-dd'), dateLabel: Utilities.formatDate(t, TZ, 'EEEE d MMMM'),
-    window: 'Morning (7–11am)', total: '$950', payChoice: 'Deposit', payNow: '$100', notes: 'Test booking, delete me',
+    window: '10am', total: '$1,070', payChoice: 'Deposit', payNow: '$100', notes: 'Test booking, delete me',
+    lines: JSON.stringify([{ d: '½ trailer load (about 8 m³)', q: 1, u: 950 }, { d: 'Mattress (extra)', q: 1, u: 120 }]),
   } });
 }

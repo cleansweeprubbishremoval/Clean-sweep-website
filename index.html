@@ -1414,7 +1414,13 @@ footer.site .big span{color:var(--lime-deep)}
       date: f.get('date') || '', dateLabel: niceDate(f.get('date')), window: f.get('window') || '',
       total: cash(st.total), payChoice: st.payChoice === 'deposit' ? 'Deposit' : 'Paid in full', payNow: cash(st.payNow),
       items: f.getAll('items'), notes: (f.get('notes') || '').trim(), at: new Date().toISOString(),
-      marketing: $('#q-offers').checked && (f.get('email') || '').trim() ? 'yes' : 'no'
+      marketing: $('#q-offers').checked && (f.get('email') || '').trim() ? 'yes' : 'no',
+      // invoice lines for the emailed invoice: d = description, q = quantity, u = unit price
+      lines: JSON.stringify([
+        st.jobKey === 'bin' ? { d: 'Bin collection (standard wheelie bin)', q: bins, u: JOBS.bin.price }
+          : { d: ({ q1: '¼ trailer load (about 4 m³)', q2: '½ trailer load (about 8 m³)', q3: '¾ trailer load (about 12 m³)', full: 'Full trailer load (about 16 m³)', sweep: 'The Big Sweep (kerbside pile)' })[st.jobKey] || st.job.name, q: 1, u: st.job.price },
+        ...Object.keys(qty).filter(k => qty[k]).map(k => ({ d: EXTRAS[k].name + ' (extra)', q: qty[k], u: EXTRAS[k].price }))
+      ])
     };
     const phoneOk = r.phone.replace(/\D/g, '').length >= 8, emailOk = /^\S+@\S+\.\S+$/.test(r.email);
     const need = [
