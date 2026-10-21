@@ -841,7 +841,7 @@ footer.site .big span{color:var(--lime-deep)}
             <div class="sum-row"><span>When</span><b id="sWhen">Pick a day</b></div>
             <div class="sum-row total"><span>Estimated total</span><b id="sTotal">$950</b></div>
             <div class="sum-row pay"><span id="sPayLabel">Pay today (deposit)</span><b id="sPay">$100</b></div>
-            <p class="sum-note">Final price confirmed on site before we start loading. Cancellations less than 24 hours before collection are non-refundable.</p>
+            <p class="sum-note">Final price confirmed on site before we start loading. Cancellations less than 24 hours before collection are non-refundable. If you pay in full, any extra rubbish not in your booking won't be picked up unless the price difference is paid.</p>
           </aside>
           <div class="contact">
             <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
@@ -929,7 +929,7 @@ footer.site .big span{color:var(--lime-deep)}
                 <label><input type="radio" name="pay" id="p-dep" value="deposit" checked><span><b>Pay a deposit</b><em id="pDepAmt">$100 today</em><small>The rest on the day, once we've confirmed the load.</small></span></label>
                 <label><input type="radio" name="pay" id="p-full" value="full"><span><b>Pay in full</b><em id="pFullAmt">$950 today</em><small>Any difference is settled on the day.</small></span></label>
               </div>
-              <label class="agree" for="q-agree"><input type="checkbox" id="q-agree" name="agree" value="yes"><span>I understand that bookings cancelled less than 24 hours before the collection time are <b>non-refundable</b>.</span></label>
+              <label class="agree" for="q-agree"><input type="checkbox" id="q-agree" name="agree" value="yes"><span>I understand that bookings cancelled less than 24 hours before the collection time are <b>non-refundable</b>, and that any extra rubbish not included in my booking <b>won't be picked up unless the price difference is paid</b>.</span></label>
               <p class="secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Secure checkout by Stripe. Pay by card, Apple Pay, Google Pay or direct debit from your bank account. Mattresses, gas bottles and any change to the load size are settled on the day.</span></p>
             </div>
 
@@ -1419,7 +1419,7 @@ footer.site .big span{color:var(--lime-deep)}
       [r.phone && !phoneOk, 'a full phone number', '#q-phone'], [r.email && !emailOk, 'a valid email', '#q-email'],
       [!r.street, 'the pickup address', '#q-street'],
       [!r.suburb, 'your suburb', '#q-suburb'], [!/^\d{4}$/.test(r.postcode), 'a 4-digit postcode', '#q-postcode'],
-      [!$('#q-agree').checked, 'a tick to agree to the cancellation policy', '#q-agree']
+      [!$('#q-agree').checked, 'a tick to agree to the booking terms', '#q-agree']
     ];
     $$('.field input, #q-agree', form).forEach(i => i.classList.remove('bad'));
     const missing = need.filter(n => n[0]);
@@ -1479,8 +1479,8 @@ footer.site .big span{color:var(--lime-deep)}
     const text = summary(r);
     const details = `<dl><dt>When</dt><dd>${esc(r.dateLabel)}, ${esc(r.window)}</dd><dt>Where</dt><dd>${esc(r.street)}, ${esc(r.suburb)} ${esc(r.postcode)}</dd><dt>Job</dt><dd>${esc(r.job)}${r.extras ? ' + ' + esc(r.extras) : ''}</dd><dt>Total</dt><dd>${esc(r.total)} estimated</dd></dl>`;
     const payBox = payUrl
-      ? `<div class="paybox"><b>Last step: pay ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'now'}</b>${stripeTest ? '<span class="note"><b>Test mode:</b> no real money is taken. Use card 4242 4242 4242 4242, any future date and any CVC.</span>' : ''}<span class="note">Secure checkout by Stripe. Card, Apple Pay, Google Pay or direct debit.</span>${st.jobKey === 'bin' && bins > 1 ? `<span class="note"><b>At checkout, set the quantity to ${bins}</b> (one per bin).</span>` : ''}<a class="btn" href="${esc(payUrl)}" rel="noopener">Pay ${esc(r.payNow)} securely</a></div>`
-      : `<div class="paybox"><b>Payment: ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'in full'}</b><span class="note">We'll send a secure payment link to ${esc(r.phone || r.email)} shortly.</span></div>`;
+      ? `<div class="paybox"><b>Last step: pay ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'now'}</b>${stripeTest ? '<span class="note"><b>Test mode:</b> no real money is taken. Use card 4242 4242 4242 4242, any future date and any CVC.</span>' : ''}<span class="note">Secure checkout by Stripe. Card, Apple Pay, Google Pay or direct debit.</span>${st.payChoice === 'deposit' ? '' : `<span class="note"><b>Paying in full?</b> Your payment covers only the rubbish in your booking. Any extra rubbish won't be picked up unless the price difference is paid.</span>`}${st.jobKey === 'bin' && bins > 1 ? `<span class="note"><b>At checkout, set the quantity to ${bins}</b> (one per bin).</span>` : ''}<a class="btn" href="${esc(payUrl)}" rel="noopener">Pay ${esc(r.payNow)} securely</a></div>`
+      : `<div class="paybox"><b>Payment: ${esc(r.payNow)} ${st.payChoice === 'deposit' ? 'deposit' : 'in full'}</b>${st.payChoice === 'deposit' ? '' : `<span class="note">Your payment covers only the rubbish in your booking. Any extra rubbish won't be picked up unless the price difference is paid.</span>`}<span class="note">We'll send a secure payment link to ${esc(r.phone || r.email)} shortly.</span></div>`;
     done.innerHTML = saved
       ? `<span class="ref">Booking ${esc(r.ref)}</span><h3>You're booked in, ${first}!</h3><p>We'll ${r.phone ? 'text' : 'email'} you at <b>${esc(r.phone || r.email)}</b> 48 hours before to confirm.</p><p class="note">Need to cancel? Let us know at least 24 hours before your collection time, or the booking is non-refundable.</p>${details}${payBox}<div class="acts"><button class="btn ghost" type="button" id="again">Make another booking</button></div>`
       : `<span class="ref">Booking ${esc(r.ref)}</span><h3>Nearly there, ${first}.</h3><p>We couldn't send your booking from here. Copy it below and text it to <b>0493 866 368</b> or email <b>cleansweeprubbishremovals@gmail.com</b>.</p><pre id="sumText">${esc(text)}</pre><div class="acts"><button class="btn" type="button" id="copySum">Copy my booking</button><button class="btn ghost" type="button" id="again">Edit details</button></div>`;
