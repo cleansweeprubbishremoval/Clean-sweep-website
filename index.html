@@ -1276,7 +1276,11 @@ footer.site .big span{color:var(--lime-deep)}
 
   // ---- Booking settings: paste your links here once they're set up ----
   // Stripe Payment Links (Stripe dashboard > Payment Links). Leave '' until created.
-  const STRIPE_LIVE_LINKS = { deposit: '', q1: '', q2: '', q3: '', full: '', sweep: '', bin: '' };
+  const STRIPE_LIVE_LINKS = {
+    deposit: 'https://book.stripe.com/4gMaEXda60cA31w9v4fIs04', q1: 'https://book.stripe.com/eVq28r8TQaReby2fTsfIs01',
+    q2: 'https://book.stripe.com/fZucN56LI9NafOi4aKfIs02', q3: 'https://book.stripe.com/fZubJ12vs2kI59EgXwfIs05',
+    full: 'https://book.stripe.com/00w28r4DAf7u31wfTsfIs00', sweep: 'https://book.stripe.com/bJebJ15HEe3qcC6gXwfIs03',
+    bin: 'https://book.stripe.com/4gM4gz1ro2kI45AePofIs07' };
   // Stripe sandbox (test mode) links: used on the Claude preview, or on the live site at /#stripetest
   const STRIPE_TEST_LINKS = {
     deposit: 'https://book.stripe.com/test_00wbJ15QjdAGfL83NI4c800', q1: 'https://book.stripe.com/test_8x2cN5guX2W2aqO5VQ4c801',
