@@ -384,6 +384,8 @@ form.card{gap:26px}
 .done .paybox .btn{justify-self:start}
 
 .hint{font-size:.85rem;color:var(--ink-soft);margin-top:-4px}
+.wk-hint.on{color:var(--ink);background:color-mix(in oklab,var(--lime) 22%,transparent);border-radius:10px;padding:8px 10px;margin-top:0}
+.deal.extras li.wk b{color:var(--lime-deep)}
 .req{font-weight:500;color:var(--ink-soft);font-size:.82rem}
 .agree{display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-size:.92rem;background:var(--paper);border-radius:14px;padding:12px 14px;border:2px solid transparent}
 .agree input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--lime-deep)}
@@ -733,13 +735,14 @@ footer.site .big span{color:var(--lime-deep)}
           <ul>
             <li><span>Mattress (each)</span><b>+$120</b></li>
             <li><span>Gas bottle (each)</span><b>+$30</b></li>
+            <li class="wk"><span>Weekend pickup (Saturday or Sunday)</span><b>+$200</b></li>
             <li><span>Heavy waste: bricks, concrete, tiles</span><b>Quote</b></li>
             <li><span>Stairs or long carry</span><b>Quote</b></li>
             <li><span>Garden waste only</span><b class="save">20% off</b></li>
           </ul>
         </article>
       </div>
-      <p class="price-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>Prices are a guide. We confirm your final price on site before we start loading, so there are no surprises.</p>
+      <p class="price-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>Prices are a guide. We confirm your final price on site before we start loading, so there are no surprises. <b>Weekend rates:</b> Saturday and Sunday pickups are $200 extra.</p>
     </div>
   </section>
 
@@ -815,7 +818,7 @@ footer.site .big span{color:var(--lime-deep)}
         <p class="lede">Anything else, give us a call on 0493 866 368.</p>
       </div>
       <div>
-        <details open><summary>How do you work out the price?</summary><p>By how much of our trailer your rubbish fills, from $550 for a ¼ load up to $1,750 for a full load (about 16 m³). Mattresses are $120 extra and gas bottles $30, and garden waste on its own is 20% off. We confirm your final price on site before we start loading.</p></details>
+        <details open><summary>How do you work out the price?</summary><p>By how much of our trailer your rubbish fills, from $550 for a ¼ load up to $1,750 for a full load (about 16 m³). Mattresses are $120 extra and gas bottles $30, and garden waste on its own is 20% off. Weekend rates apply: Saturday and Sunday pickups are $200 extra. We confirm your final price on site before we start loading.</p></details>
         <details><summary>Are you insured?</summary><p>Yes. Clean Sweep is fully insured, so you can relax while we work on your property.</p></details>
         <details><summary>Do I need to be home?</summary><p>Not always. If the rubbish is easy to get to, like on the driveway or in an unlocked shed, we can collect it while you're out. We'll send you a photo when it's done.</p></details>
         <details><summary>How soon can you come?</summary><p>Get in touch and we'll give you the next available time. We're often able to come within a day or two.</p></details>
@@ -839,6 +842,7 @@ footer.site .big span{color:var(--lime-deep)}
             <div class="sum-row"><span>Job</span><b id="sJob">½ load</b></div>
             <div class="sum-row" id="sExtrasRow" hidden><span>Extras</span><b id="sExtras"></b></div>
             <div class="sum-row"><span>When</span><b id="sWhen">Pick a day</b></div>
+            <div class="sum-row" id="sWkRow" hidden><span>Weekend rate</span><b>+$200</b></div>
             <div class="sum-row total"><span>Estimated total</span><b id="sTotal">$950</b></div>
             <div class="sum-row pay"><span id="sPayLabel">Pay today (deposit)</span><b id="sPay">$100</b></div>
             <p class="sum-note">Final price confirmed on site before we start loading. Cancellations less than 24 hours before collection are non-refundable. If you pay in full, any extra rubbish not in your booking won't be picked up unless the price difference is paid.</p>
@@ -888,6 +892,7 @@ footer.site .big span{color:var(--lime-deep)}
             <div class="stepf" role="group" aria-labelledby="st2">
               <h3 class="sth" id="st2"><span class="sn">2</span>When suits you?</h3>
               <div class="field"><label for="q-date">Day</label><input id="q-date" name="date" type="date" required></div>
+              <p class="hint wk-hint" id="wkHint"><b>Weekend rates:</b> Saturday and Sunday pickups are $200 extra. Weekdays have no surcharge.</p>
               <div class="field"><span class="flabel" id="timeLabel">Preferred time <span class="opt">(swipe for more)</span></span>
                 <div class="times-wrap">
                   <button type="button" class="tscroll prev" aria-label="Earlier times" tabindex="-1">‹</button>
@@ -1280,13 +1285,20 @@ footer.site .big span{color:var(--lime-deep)}
     deposit: 'https://book.stripe.com/4gMaEXda60cA31w9v4fIs04', q1: 'https://book.stripe.com/eVq28r8TQaReby2fTsfIs01',
     q2: 'https://book.stripe.com/fZucN56LI9NafOi4aKfIs02', q3: 'https://book.stripe.com/fZubJ12vs2kI59EgXwfIs05',
     full: 'https://book.stripe.com/00w28r4DAf7u31wfTsfIs00', sweep: 'https://book.stripe.com/bJebJ15HEe3qcC6gXwfIs03',
-    bin: 'https://book.stripe.com/4gM4gz1ro2kI45AePofIs07' };
+    bin: 'https://book.stripe.com/4gM4gz1ro2kI45AePofIs07',
+    // weekend versions (job + $200 weekend rate), used when paying in full for a Saturday or Sunday
+    q1W: 'https://book.stripe.com/8x25kDgmi1gE1Xs4aKfIs08', q2W: 'https://book.stripe.com/4gM4gz0nk2kI1Xs8r0fIs09',
+    q3W: 'https://book.stripe.com/dRm00j6LI4sQfOi6iSfIs0a', fullW: 'https://book.stripe.com/eVq4gz0nkgby9pU7mWfIs0b',
+    sweepW: 'https://book.stripe.com/6oU9ATda6gbyfOicHgfIs0c', binW: 'https://book.stripe.com/28E14n3zw4sQby28r0fIs0d' };
   // Stripe sandbox (test mode) links: used on the Claude preview, or on the live site at /#stripetest
   const STRIPE_TEST_LINKS = {
     deposit: 'https://book.stripe.com/test_00wbJ15QjdAGfL83NI4c800', q1: 'https://book.stripe.com/test_8x2cN5guX2W2aqO5VQ4c801',
     q2: 'https://book.stripe.com/test_eVq3cvemP0NU1Ui4RM4c802', q3: 'https://book.stripe.com/test_6oU9AT3IbdAG0Qe9824c803',
     full: 'https://book.stripe.com/test_00wdR96UncwCdD0ac64c804', sweep: 'https://book.stripe.com/test_5kQ28rceH68e7eC6ZU4c805',
-    bin: 'https://book.stripe.com/test_aFa14nguX8gm42q6ZU4c808' };
+    bin: 'https://book.stripe.com/test_aFa14nguX8gm42q6ZU4c808',
+    q1W: 'https://book.stripe.com/test_14A5kD1A38gm7eC9824c809', q2W: 'https://book.stripe.com/test_dRm3cv0vZaou56u9824c80a',
+    q3W: 'https://book.stripe.com/test_fZu6oH6Un8gm0Qe4RM4c80b', fullW: 'https://book.stripe.com/test_8x2aEXceHaoucyW83Y4c80c',
+    sweepW: 'https://book.stripe.com/test_eVqeVd1A31RY2Ymesm4c80d', binW: 'https://book.stripe.com/test_3cI14nceHaou1Uicke4c80e' };
   const stripeTest = !!window.claude || location.hash === '#stripetest';
   const STRIPE_LINKS = stripeTest ? STRIPE_TEST_LINKS : STRIPE_LIVE_LINKS;
   // Google Apps Script web app URL that adds bookings to your Google Calendar.
@@ -1298,6 +1310,8 @@ footer.site .big span{color:var(--lime-deep)}
     full: { name: 'Full load', price: 1750 }, sweep: { name: 'The Big Sweep', price: 400 }, bin: { name: 'Bin collection', price: 50 },
   };
   const EXTRAS = { mattress: { name: 'Mattress', price: 120 }, gas: { name: 'Gas bottle', price: 30 } };
+  const WEEKEND_FEE = 200; // Saturday and Sunday pickups
+  const isWeekend = v => { if (!v) return false; const [y, m, d] = String(v).split('-').map(Number); const w = new Date(y, m - 1, d).getDay(); return w === 0 || w === 6; };
   const qty = { mattress: 0, gas: 0 };
   let bins = 1;
   const cash = n => '$' + Math.round(n).toLocaleString('en-AU');
@@ -1332,13 +1346,17 @@ footer.site .big span{color:var(--lime-deep)}
     const jobKey = f.get('job') || 'q2';
     const job = jobKey === 'bin' ? { name: `Bin collection × ${bins} bin${bins > 1 ? 's' : ''}`, price: JOBS.bin.price * bins } : JOBS[jobKey];
     const extrasTotal = Object.keys(qty).reduce((t, k) => t + qty[k] * EXTRAS[k].price, 0);
-    const total = job.price + extrasTotal;
+    const weekend = isWeekend(f.get('date'));
+    const wkFee = weekend ? WEEKEND_FEE : 0;
+    const total = job.price + extrasTotal + wkFee;
     const payChoice = jobKey === 'bin' ? 'full' : (f.get('pay') || 'deposit');
-    const payNow = payChoice === 'deposit' ? Math.min(DEPOSIT, job.price) : job.price;
-    return { f, jobKey, job, extrasTotal, total, payChoice, payNow };
+    const payNow = payChoice === 'deposit' ? Math.min(DEPOSIT, job.price) : job.price + wkFee;
+    const linkKey = payChoice === 'deposit' ? 'deposit' : jobKey + (weekend ? 'W' : '');
+    return { f, jobKey, job, extrasTotal, total, payChoice, payNow, weekend, wkFee, linkKey };
   };
   const refresh = () => {
-    const { f, jobKey, job, total, payChoice, payNow } = state();
+    const { f, jobKey, job, total, payChoice, payNow, weekend, wkFee } = state();
+    $('#sWkRow').hidden = !weekend; $('#wkHint').classList.toggle('on', weekend);
     $('#sJob').textContent = `${job.name} · ${cash(job.price)}`;
     const ex = Object.keys(qty).filter(k => qty[k]).map(k => `${qty[k]} × ${EXTRAS[k].name.toLowerCase()}${qty[k] > 1 ? 's' : ''}`);
     $('#sExtrasRow').hidden = !ex.length; $('#sExtras').textContent = ex.join(', ');
@@ -1347,7 +1365,7 @@ footer.site .big span{color:var(--lime-deep)}
     $('#sPayLabel').textContent = payChoice === 'deposit' ? 'Pay today (deposit)' : 'Pay today (in full)';
     $('#sPay').textContent = cash(payNow);
     $('#pDepAmt').textContent = cash(Math.min(DEPOSIT, job.price)) + ' today';
-    $('#pFullAmt').textContent = cash(job.price) + ' today';
+    $('#pFullAmt').textContent = cash(job.price + wkFee) + ' today';
     const dep = $('#p-dep');
     dep.disabled = jobKey === 'bin';
     $('#binsRow').hidden = jobKey !== 'bin';
@@ -1410,7 +1428,7 @@ footer.site .big span{color:var(--lime-deep)}
       name: (f.get('name') || '').trim(), phone: (f.get('phone') || '').trim(), email: (f.get('email') || '').trim(),
       street: (f.get('street') || '').trim(), suburb: (f.get('suburb') || '').trim(), postcode: (f.get('postcode') || '').trim(),
       jobKey: st.jobKey, job: `${st.job.name} (${cash(st.job.price)})`, size: st.job.name,
-      extras: Object.keys(qty).filter(k => qty[k]).map(k => `${qty[k]} × ${EXTRAS[k].name} (+${cash(qty[k] * EXTRAS[k].price)})`).join(', '),
+      extras: [...Object.keys(qty).filter(k => qty[k]).map(k => `${qty[k]} × ${EXTRAS[k].name} (+${cash(qty[k] * EXTRAS[k].price)})`), ...(st.weekend ? [`Weekend rate (+${cash(WEEKEND_FEE)})`] : [])].join(', '),
       date: f.get('date') || '', dateLabel: niceDate(f.get('date')), window: f.get('window') || '',
       total: cash(st.total), payChoice: st.payChoice === 'deposit' ? 'Deposit' : 'Paid in full', payNow: cash(st.payNow),
       items: f.getAll('items'), notes: (f.get('notes') || '').trim(), at: new Date().toISOString(),
@@ -1419,7 +1437,8 @@ footer.site .big span{color:var(--lime-deep)}
       lines: JSON.stringify([
         st.jobKey === 'bin' ? { d: 'Bin collection (standard wheelie bin)', q: bins, u: JOBS.bin.price }
           : { d: ({ q1: '¼ trailer load (about 4 m³)', q2: '½ trailer load (about 8 m³)', q3: '¾ trailer load (about 12 m³)', full: 'Full trailer load (about 16 m³)', sweep: 'The Big Sweep (kerbside pile)' })[st.jobKey] || st.job.name, q: 1, u: st.job.price },
-        ...Object.keys(qty).filter(k => qty[k]).map(k => ({ d: EXTRAS[k].name + ' (extra)', q: qty[k], u: EXTRAS[k].price }))
+        ...Object.keys(qty).filter(k => qty[k]).map(k => ({ d: EXTRAS[k].name + ' (extra)', q: qty[k], u: EXTRAS[k].price })),
+        ...(st.weekend ? [{ d: 'Weekend rate (Saturday or Sunday pickup)', q: 1, u: WEEKEND_FEE }] : [])
       ])
     };
     const phoneOk = r.phone.replace(/\D/g, '').length >= 8, emailOk = /^\S+@\S+\.\S+$/.test(r.email);
@@ -1445,7 +1464,7 @@ footer.site .big span{color:var(--lime-deep)}
     if (!ok) return;
 
     btn.disabled = true; btn.textContent = 'Booking…';
-    const willPay = !!STRIPE_LINKS[st.payChoice === 'deposit' ? 'deposit' : st.jobKey];
+    const willPay = !!STRIPE_LINKS[st.linkKey];
     const drivePromise = willPay ? Promise.resolve() : playDrive("You're booked in", `See you ${r.dateLabel}.`);
     let saved = false;
     try {
@@ -1484,7 +1503,7 @@ footer.site .big span{color:var(--lime-deep)}
     await drivePromise;
 
     const first = esc(r.name.split(' ')[0]);
-    const link = STRIPE_LINKS[st.payChoice === 'deposit' ? 'deposit' : st.jobKey];
+    const link = STRIPE_LINKS[st.linkKey];
     const payUrl = link ? `${link}${link.includes('?') ? '&' : '?'}client_reference_id=${encodeURIComponent(r.ref)}${r.email ? '&prefilled_email=' + encodeURIComponent(r.email) : ''}` : '';
     const text = summary(r);
     const details = `<dl><dt>When</dt><dd>${esc(r.dateLabel)}, ${esc(r.window)}</dd><dt>Where</dt><dd>${esc(r.street)}, ${esc(r.suburb)} ${esc(r.postcode)}</dd><dt>Job</dt><dd>${esc(r.job)}${r.extras ? ' + ' + esc(r.extras) : ''}</dd><dt>Total</dt><dd>${esc(r.total)} estimated</dd></dl>`;
