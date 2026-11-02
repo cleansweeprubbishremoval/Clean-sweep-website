@@ -167,7 +167,10 @@ p{margin:0}
 .note{font-size:.86rem;color:var(--ink-soft)}
 .vol .num .cur{font-size:.55em;vertical-align:.55em;margin-right:.04em}
 .deals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start;margin-top:clamp(36px,5vw,56px)}
-@media (max-width:980px){.deals{grid-template-columns:repeat(2,minmax(0,1fr))}.deals .extras{grid-column:1/-1}}
+.deals .extras{grid-column:1/-1}
+@media (min-width:981px){.deals .extras ul{columns:2;column-gap:40px}.deals .extras li{break-inside:avoid}}
+.deal.small{background:var(--card);border:2px solid var(--line)}
+@media (max-width:980px){.deals{grid-template-columns:repeat(2,minmax(0,1fr))}.deals .extras{grid-column:auto}}
 @media (max-width:620px){.deals{grid-template-columns:1fr}}
 .deal{border-radius:var(--r);padding:clamp(20px,2.6vw,28px);display:grid;gap:10px;align-content:start;min-width:0}
 .deal .tag{font:500 .74rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase}
@@ -344,6 +347,7 @@ form.card{gap:26px}
 .flabel{font-weight:700;font-size:.92rem}
 .opt{font-weight:500;opacity:.6}
 .jobs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.jobs label:has(#j-bin){grid-column:1/-1}
 @media (max-width:520px){.jobs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .jobs label,.payopts label{position:relative;cursor:pointer;display:grid}
 .jobs input,.payopts input{position:absolute;opacity:0;pointer-events:none}
@@ -617,12 +621,12 @@ footer.site .big span{color:var(--lime-deep)}
       <div class="guide">
         <div>
           <div class="sizes" role="group" aria-label="Trailer load">
-            <button class="size" type="button" data-i="0" aria-pressed="false">¼ load<b>$550</b><small>≈ 4 m³</small></button>
-            <button class="size" type="button" data-i="1" aria-pressed="true">½ load<b>$950</b><small>≈ 8 m³</small></button>
-            <button class="size" type="button" data-i="2" aria-pressed="false">¾ load<b>$1,350</b><small>≈ 12 m³</small></button>
-            <button class="size" type="button" data-i="3" aria-pressed="false">Full load<b>$1,750</b><small>≈ 16 m³</small></button>
+            <button class="size" type="button" data-i="0" aria-pressed="false">¼ load<b>$395</b><small>≈ 4 m³</small></button>
+            <button class="size" type="button" data-i="1" aria-pressed="true">½ load<b>$795</b><small>≈ 8 m³</small></button>
+            <button class="size" type="button" data-i="2" aria-pressed="false">¾ load<b>$1,195</b><small>≈ 12 m³</small></button>
+            <button class="size" type="button" data-i="3" aria-pressed="false">Full load<b>$1,595</b><small>≈ 16 m³</small></button>
           </div>
-          <div class="vol"><span class="num"><span class="cur">$</span><span id="volNum">950</span></span><span class="unit" id="volUnit">½ load · about 8 m³</span></div>
+          <div class="vol"><span class="num"><span class="cur">$</span><span id="volNum">795</span></span><span class="unit" id="volUnit">½ load · about 8 m³</span></div>
           <p class="fits" id="fits">A garage, shed or room clear-out.</p>
           <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
             <a class="btn" href="#quote" id="quoteSize">Book a ½ load</a>
@@ -719,9 +723,14 @@ footer.site .big span{color:var(--lime-deep)}
       </div>
 
       <div class="deals">
+        <article class="deal small">
+          <span class="tag">Small load</span>
+          <div class="price">$195<small>⅛ load · about 2 m³</small></div>
+          <p>Just a few things? A couch, a fridge, a mattress or a handful of bags. Perfect for a quick, small clean-up.</p>
+        </article>
         <article class="deal big">
           <span class="tag">The Big Sweep</span>
-          <div class="price">$400</div>
+          <div class="price">$295</div>
           <p>Your own council-style clean-up. Pile it on the kerb, up to 2 m wide × 1.5 m long, and we'll take the lot.</p>
         </article>
         <article class="deal bin">
@@ -735,14 +744,14 @@ footer.site .big span{color:var(--lime-deep)}
           <ul>
             <li><span>Mattress (each)</span><b>+$120</b></li>
             <li><span>Gas bottle (each)</span><b>+$30</b></li>
-            <li class="wk"><span>Weekend pickup (Saturday or Sunday)</span><b>+$200</b></li>
+            <li class="wk"><span>Weekend pickup (Saturday or Sunday)</span><b>+$100</b></li>
             <li><span>Heavy waste: bricks, concrete, tiles</span><b>Quote</b></li>
             <li><span>Stairs or long carry</span><b>Quote</b></li>
             <li><span>Garden waste only</span><b class="save">20% off</b></li>
           </ul>
         </article>
       </div>
-      <p class="price-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>Prices are a guide. We confirm your final price on site before we start loading, so there are no surprises. <b>Weekend rates:</b> Saturday and Sunday pickups are $200 extra.</p>
+      <p class="price-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>Prices are a guide. We confirm your final price on site before we start loading, so there are no surprises. <b>Weekend rates:</b> Saturday and Sunday pickups are $100 extra.</p>
     </div>
   </section>
 
@@ -818,7 +827,7 @@ footer.site .big span{color:var(--lime-deep)}
         <p class="lede">Anything else, give us a call on 0493 866 368.</p>
       </div>
       <div>
-        <details open><summary>How do you work out the price?</summary><p>By how much of our trailer your rubbish fills, from $550 for a ¼ load up to $1,750 for a full load (about 16 m³). Mattresses are $120 extra and gas bottles $30, and garden waste on its own is 20% off. Weekend rates apply: Saturday and Sunday pickups are $200 extra. We confirm your final price on site before we start loading.</p></details>
+        <details open><summary>How do you work out the price?</summary><p>By how much of our trailer your rubbish fills, from $195 for a small ⅛ load (about 2 m³) up to $1,595 for a full load (about 16 m³). Mattresses are $120 extra and gas bottles $30, and garden waste on its own is 20% off. Weekend rates apply: Saturday and Sunday pickups are $100 extra. We confirm your final price on site before we start loading.</p></details>
         <details><summary>Are you insured?</summary><p>Yes. Clean Sweep is fully insured, so you can relax while we work on your property.</p></details>
         <details><summary>Do I need to be home?</summary><p>Not always. If the rubbish is easy to get to, like on the driveway or in an unlocked shed, we can collect it while you're out. We'll send you a photo when it's done.</p></details>
         <details><summary>How soon can you come?</summary><p>Get in touch and we'll give you the next available time. We're often able to come within a day or two.</p></details>
@@ -842,8 +851,8 @@ footer.site .big span{color:var(--lime-deep)}
             <div class="sum-row"><span>Job</span><b id="sJob">½ load</b></div>
             <div class="sum-row" id="sExtrasRow" hidden><span>Extras</span><b id="sExtras"></b></div>
             <div class="sum-row"><span>When</span><b id="sWhen">Pick a day</b></div>
-            <div class="sum-row" id="sWkRow" hidden><span>Weekend rate</span><b>+$200</b></div>
-            <div class="sum-row total"><span>Estimated total</span><b id="sTotal">$950</b></div>
+            <div class="sum-row" id="sWkRow" hidden><span>Weekend rate</span><b>+$100</b></div>
+            <div class="sum-row total"><span>Estimated total</span><b id="sTotal">$795</b></div>
             <div class="sum-row pay"><span id="sPayLabel">Pay today (deposit)</span><b id="sPay">$100</b></div>
             <p class="sum-note">Final price confirmed on site before we start loading. Cancellations less than 24 hours before collection are non-refundable. If you pay in full, any extra rubbish not in your booking won't be picked up unless the price difference is paid.</p>
           </aside>
@@ -863,11 +872,12 @@ footer.site .big span{color:var(--lime-deep)}
             <div class="stepf" role="group" aria-labelledby="st1">
               <h3 class="sth" id="st1"><span class="sn">1</span>What are we taking?</h3>
               <div class="jobs" role="radiogroup" aria-label="Job">
-                <label><input type="radio" name="job" id="j-q1" value="q1"><span><i>¼ load</i><b>$550</b><small>≈ 4 m³</small></span></label>
-                <label><input type="radio" name="job" id="j-q2" value="q2" checked><span><i>½ load</i><b>$950</b><small>≈ 8 m³</small></span></label>
-                <label><input type="radio" name="job" id="j-q3" value="q3"><span><i>¾ load</i><b>$1,350</b><small>≈ 12 m³</small></span></label>
-                <label><input type="radio" name="job" id="j-full" value="full"><span><i>Full load</i><b>$1,750</b><small>≈ 16 m³</small></span></label>
-                <label><input type="radio" name="job" id="j-sweep" value="sweep"><span><i>The Big Sweep</i><b>$400</b><small>kerbside pile</small></span></label>
+                <label><input type="radio" name="job" id="j-q0" value="q0"><span><i>⅛ load</i><b>$195</b><small>≈ 2 m³</small></span></label>
+                <label><input type="radio" name="job" id="j-q1" value="q1"><span><i>¼ load</i><b>$395</b><small>≈ 4 m³</small></span></label>
+                <label><input type="radio" name="job" id="j-q2" value="q2" checked><span><i>½ load</i><b>$795</b><small>≈ 8 m³</small></span></label>
+                <label><input type="radio" name="job" id="j-q3" value="q3"><span><i>¾ load</i><b>$1,195</b><small>≈ 12 m³</small></span></label>
+                <label><input type="radio" name="job" id="j-full" value="full"><span><i>Full load</i><b>$1,595</b><small>≈ 16 m³</small></span></label>
+                <label><input type="radio" name="job" id="j-sweep" value="sweep"><span><i>The Big Sweep</i><b>$295</b><small>kerbside pile</small></span></label>
                 <label><input type="radio" name="job" id="j-bin" value="bin"><span><i>Bin collection</i><b>$50</b><small>per wheelie bin</small></span></label>
               </div>
               <div class="stepper bins-row" id="binsRow" hidden><span><b>How many bins?</b><small>$50 per standard wheelie bin</small></span><div class="ctl"><button type="button" data-b="-1" aria-label="One less bin">−</button><output id="x-bins" aria-live="polite">1</output><button type="button" data-b="1" aria-label="One more bin">+</button></div></div>
@@ -892,7 +902,7 @@ footer.site .big span{color:var(--lime-deep)}
             <div class="stepf" role="group" aria-labelledby="st2">
               <h3 class="sth" id="st2"><span class="sn">2</span>When suits you?</h3>
               <div class="field"><label for="q-date">Day</label><input id="q-date" name="date" type="date" required></div>
-              <p class="hint wk-hint" id="wkHint"><b>Weekend rates:</b> Saturday and Sunday pickups are $200 extra. Weekdays have no surcharge.</p>
+              <p class="hint wk-hint" id="wkHint"><b>Weekend rates:</b> Saturday and Sunday pickups are $100 extra. Weekdays have no surcharge.</p>
               <div class="field"><span class="flabel" id="timeLabel">Preferred time <span class="opt">(swipe for more)</span></span>
                 <div class="times-wrap">
                   <button type="button" class="tscroll prev" aria-label="Earlier times" tabindex="-1">‹</button>
@@ -932,7 +942,7 @@ footer.site .big span{color:var(--lime-deep)}
               <h3 class="sth" id="st4"><span class="sn">4</span>Payment</h3>
               <div class="payopts" role="radiogroup" aria-label="How much to pay now">
                 <label><input type="radio" name="pay" id="p-dep" value="deposit" checked><span><b>Pay a deposit</b><em id="pDepAmt">$100 today</em><small>The rest on the day, once we've confirmed the load.</small></span></label>
-                <label><input type="radio" name="pay" id="p-full" value="full"><span><b>Pay in full</b><em id="pFullAmt">$950 today</em><small>Any difference is settled on the day.</small></span></label>
+                <label><input type="radio" name="pay" id="p-full" value="full"><span><b>Pay in full</b><em id="pFullAmt">$795 today</em><small>Any difference is settled on the day.</small></span></label>
               </div>
               <label class="agree" for="q-agree"><input type="checkbox" id="q-agree" name="agree" value="yes"><span>I understand that bookings cancelled less than 24 hours before the collection time are <b>non-refundable</b>, and that any extra rubbish not included in my booking <b>won't be picked up unless the price difference is paid</b>.</span></label>
               <p class="secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Secure checkout by Stripe. Pay by card, Apple Pay, Google Pay or direct debit from your bank account. Mattresses, gas bottles and any change to the load size are settled on the day.</span></p>
@@ -1182,14 +1192,14 @@ footer.site .big span{color:var(--lime-deep)}
 
   // ---- Price picker + CountUp (React Bits) ----
   const SIZES = [
-    { price: 550, m3: 4, fill: .25, label: '¼ load', opt: 1, fits: 'A few bulky items or a small clean-up.' },
-    { price: 950, m3: 8, fill: .5, label: '½ load', opt: 2, fits: 'A garage, shed or room clear-out.' },
-    { price: 1350, m3: 12, fill: .75, label: '¾ load', opt: 3, fits: 'Several rooms or a big yard clean-up.' },
-    { price: 1750, m3: 16, fill: 1, label: 'Full load', opt: 4, fits: 'Move-outs, deceased estates and whole-house jobs.' },
+    { price: 395, m3: 4, fill: .25, label: '¼ load', opt: 1, fits: 'A few bulky items or a small clean-up.' },
+    { price: 795, m3: 8, fill: .5, label: '½ load', opt: 2, fits: 'A garage, shed or room clear-out.' },
+    { price: 1195, m3: 12, fill: .75, label: '¾ load', opt: 3, fits: 'Several rooms or a big yard clean-up.' },
+    { price: 1595, m3: 16, fill: 1, label: 'Full load', opt: 4, fits: 'Move-outs, deceased estates and whole-house jobs.' },
   ];
   const money = n => Math.round(n).toLocaleString('en-AU');
   const fill = $('#fill'), lvl = $('#lvlLine'), qGroups = $$('.trailer .q'), volNum = $('#volNum'), volUnit = $('#volUnit'), fits = $('#fits'), qs = $('#quoteSize');
-  let curPrice = 950, sel = 1, prevSel = 1, t3d = null;
+  let curPrice = 795, sel = 1, prevSel = 1, t3d = null;
   const setSize = (i, animate = true) => {
     sel = i; const s = SIZES[i];
     $$('.size').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.i === i)));
@@ -1221,7 +1231,6 @@ footer.site .big span{color:var(--lime-deep)}
   $$('.size').forEach(b => b.addEventListener('click', () => setSize(+b.dataset.i)));
   $$('.trailer .band').forEach(b => b.addEventListener('click', () => { if (+b.dataset.i !== sel) setSize(+b.dataset.i); }));
   setSize(1, false);
-  qs.addEventListener('click', () => { $('#q-size').selectedIndex = SIZES[sel].opt; });
 
   // ---- Reviews ----
   const revs = $('#revs');
@@ -1282,23 +1291,20 @@ footer.site .big span{color:var(--lime-deep)}
   // ---- Booking settings: paste your links here once they're set up ----
   // Stripe Payment Links (Stripe dashboard > Payment Links). Leave '' until created.
   const STRIPE_LIVE_LINKS = {
-    deposit: 'https://book.stripe.com/4gMaEXda60cA31w9v4fIs04', q1: 'https://book.stripe.com/eVq28r8TQaReby2fTsfIs01',
-    q2: 'https://book.stripe.com/fZucN56LI9NafOi4aKfIs02', q3: 'https://book.stripe.com/fZubJ12vs2kI59EgXwfIs05',
-    full: 'https://book.stripe.com/00w28r4DAf7u31wfTsfIs00', sweep: 'https://book.stripe.com/bJebJ15HEe3qcC6gXwfIs03',
+    deposit: 'https://book.stripe.com/4gMaEXda60cA31w9v4fIs04',
+    q0: 'https://book.stripe.com/7sYaEXb1Y2kI45A8r0fIs0e', q1: 'https://book.stripe.com/4gMdR96LI5wU8lQePofIs0f',
+    q2: 'https://book.stripe.com/3cI5kDb1Y5wU45AgXwfIs0g', q3: 'https://book.stripe.com/6oU5kD0nk9Na9pU7mWfIs0h',
+    full: 'https://book.stripe.com/aFacN51rof7u45A4aKfIs0i', sweep: 'https://book.stripe.com/cNi7sL6LI9NafOifTsfIs0j',
     bin: 'https://book.stripe.com/4gM4gz1ro2kI45AePofIs07',
-    // weekend versions (job + $200 weekend rate), used when paying in full for a Saturday or Sunday
-    q1W: 'https://book.stripe.com/8x25kDgmi1gE1Xs4aKfIs08', q2W: 'https://book.stripe.com/4gM4gz0nk2kI1Xs8r0fIs09',
-    q3W: 'https://book.stripe.com/dRm00j6LI4sQfOi6iSfIs0a', fullW: 'https://book.stripe.com/eVq4gz0nkgby9pU7mWfIs0b',
-    sweepW: 'https://book.stripe.com/6oU9ATda6gbyfOicHgfIs0c', binW: 'https://book.stripe.com/28E14n3zw4sQby28r0fIs0d' };
-  // Stripe sandbox (test mode) links: used on the Claude preview, or on the live site at /#stripetest
+    // weekend versions (job + $100 weekend rate), used when paying in full for a Saturday or Sunday
+    q0W: 'https://book.stripe.com/cNi7sLc621gE9pU22CfIs0k', q1W: 'https://book.stripe.com/eVq28r8TQ0cA8lQ0YyfIs0l',
+    q2W: 'https://book.stripe.com/4gM8wP7PM2kIby2az8fIs0m', q3W: 'https://book.stripe.com/9B69AT0nk0cA1Xs4aKfIs0n',
+    fullW: 'https://book.stripe.com/5kQ6oH1roaRe9pU7mWfIs0o', sweepW: 'https://book.stripe.com/cNi28rgmif7u1Xs5eOfIs0p',
+    binW: 'https://book.stripe.com/28EdR9b1Ygby7hM6iSfIs0q' };
+  // Stripe sandbox (test mode) links: used on the Claude preview, or on the live site at /#stripetest.
+  // Only the deposit and bin links match current prices; other jobs show "we'll send a payment link" in test mode.
   const STRIPE_TEST_LINKS = {
-    deposit: 'https://book.stripe.com/test_00wbJ15QjdAGfL83NI4c800', q1: 'https://book.stripe.com/test_8x2cN5guX2W2aqO5VQ4c801',
-    q2: 'https://book.stripe.com/test_eVq3cvemP0NU1Ui4RM4c802', q3: 'https://book.stripe.com/test_6oU9AT3IbdAG0Qe9824c803',
-    full: 'https://book.stripe.com/test_00wdR96UncwCdD0ac64c804', sweep: 'https://book.stripe.com/test_5kQ28rceH68e7eC6ZU4c805',
-    bin: 'https://book.stripe.com/test_aFa14nguX8gm42q6ZU4c808',
-    q1W: 'https://book.stripe.com/test_14A5kD1A38gm7eC9824c809', q2W: 'https://book.stripe.com/test_dRm3cv0vZaou56u9824c80a',
-    q3W: 'https://book.stripe.com/test_fZu6oH6Un8gm0Qe4RM4c80b', fullW: 'https://book.stripe.com/test_8x2aEXceHaoucyW83Y4c80c',
-    sweepW: 'https://book.stripe.com/test_eVqeVd1A31RY2Ymesm4c80d', binW: 'https://book.stripe.com/test_3cI14nceHaou1Uicke4c80e' };
+    deposit: 'https://book.stripe.com/test_00wbJ15QjdAGfL83NI4c800', bin: 'https://book.stripe.com/test_aFa14nguX8gm42q6ZU4c808' };
   const stripeTest = !!window.claude || location.hash === '#stripetest';
   const STRIPE_LINKS = stripeTest ? STRIPE_TEST_LINKS : STRIPE_LIVE_LINKS;
   // Google Apps Script web app URL that adds bookings to your Google Calendar.
@@ -1306,11 +1312,11 @@ footer.site .big span{color:var(--lime-deep)}
   const DEPOSIT = 100;
 
   const JOBS = {
-    q1: { name: '¼ load', price: 550 }, q2: { name: '½ load', price: 950 }, q3: { name: '¾ load', price: 1350 },
-    full: { name: 'Full load', price: 1750 }, sweep: { name: 'The Big Sweep', price: 400 }, bin: { name: 'Bin collection', price: 50 },
+    q0: { name: '⅛ load', price: 195 }, q1: { name: '¼ load', price: 395 }, q2: { name: '½ load', price: 795 }, q3: { name: '¾ load', price: 1195 },
+    full: { name: 'Full load', price: 1595 }, sweep: { name: 'The Big Sweep', price: 295 }, bin: { name: 'Bin collection', price: 50 },
   };
   const EXTRAS = { mattress: { name: 'Mattress', price: 120 }, gas: { name: 'Gas bottle', price: 30 } };
-  const WEEKEND_FEE = 200; // Saturday and Sunday pickups
+  const WEEKEND_FEE = 100; // Saturday and Sunday pickups
   const isWeekend = v => { if (!v) return false; const [y, m, d] = String(v).split('-').map(Number); const w = new Date(y, m - 1, d).getDay(); return w === 0 || w === 6; };
   const qty = { mattress: 0, gas: 0 };
   let bins = 1;
@@ -1436,7 +1442,7 @@ footer.site .big span{color:var(--lime-deep)}
       // invoice lines for the emailed invoice: d = description, q = quantity, u = unit price
       lines: JSON.stringify([
         st.jobKey === 'bin' ? { d: 'Bin collection (standard wheelie bin)', q: bins, u: JOBS.bin.price }
-          : { d: ({ q1: '¼ trailer load (about 4 m³)', q2: '½ trailer load (about 8 m³)', q3: '¾ trailer load (about 12 m³)', full: 'Full trailer load (about 16 m³)', sweep: 'The Big Sweep (kerbside pile)' })[st.jobKey] || st.job.name, q: 1, u: st.job.price },
+          : { d: ({ q0: '⅛ trailer load (about 2 m³)', q1: '¼ trailer load (about 4 m³)', q2: '½ trailer load (about 8 m³)', q3: '¾ trailer load (about 12 m³)', full: 'Full trailer load (about 16 m³)', sweep: 'The Big Sweep (kerbside pile)' })[st.jobKey] || st.job.name, q: 1, u: st.job.price },
         ...Object.keys(qty).filter(k => qty[k]).map(k => ({ d: EXTRAS[k].name + ' (extra)', q: qty[k], u: EXTRAS[k].price })),
         ...(st.weekend ? [{ d: 'Weekend rate (Saturday or Sunday pickup)', q: 1, u: WEEKEND_FEE }] : [])
       ])

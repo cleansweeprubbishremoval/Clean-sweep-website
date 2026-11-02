@@ -340,7 +340,8 @@ function sendMonthlyEmail() {
 }
 
 // ---------- income records (Stripe -> Google Sheet) ----------
-const PAY_LABELS = { deposit: 'Booking deposit', q1: '¼ load', q2: '½ load', q3: '¾ load', full: 'Full load', sweep: 'The Big Sweep', bin: 'Bin collection' };
+const PAY_LABELS = { deposit: 'Booking deposit', q0: '⅛ load', q1: '¼ load', q2: '½ load', q3: '¾ load', full: 'Full load', sweep: 'The Big Sweep', bin: 'Bin collection',
+  q0W: '⅛ load (weekend)', q1W: '¼ load (weekend)', q2W: '½ load (weekend)', q3W: '¾ load (weekend)', fullW: 'Full load (weekend)', sweepW: 'The Big Sweep (weekend)', binW: 'Bin collection (weekend)' };
 
 function incomeSheet_() {
   const props = PropertiesService.getScriptProperties();
@@ -453,9 +454,9 @@ function testBooking() {
   const t = new Date(Date.now() + 48 * 3600e3);
   doPost({ parameter: {
     ref: 'CS-TEST', name: 'Test Customer', phone: '', email: OWNER_EMAIL(),
-    street: '1 Test St', suburb: 'Parramatta', postcode: '2150', size: '½ load', job: '½ load ($950)',
+    street: '1 Test St', suburb: 'Parramatta', postcode: '2150', size: '½ load', job: '½ load ($795)',
     date: Utilities.formatDate(t, TZ, 'yyyy-MM-dd'), dateLabel: Utilities.formatDate(t, TZ, 'EEEE d MMMM'),
-    window: '10am', total: '$1,070', payChoice: 'Deposit', payNow: '$100', notes: 'Test booking, delete me',
-    lines: JSON.stringify([{ d: '½ trailer load (about 8 m³)', q: 1, u: 950 }, { d: 'Mattress (extra)', q: 1, u: 120 }]),
+    window: '10am', total: '$915', payChoice: 'Deposit', payNow: '$100', notes: 'Test booking, delete me',
+    lines: JSON.stringify([{ d: '½ trailer load (about 8 m³)', q: 1, u: 795 }, { d: 'Mattress (extra)', q: 1, u: 120 }]),
   } });
 }
