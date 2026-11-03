@@ -1681,17 +1681,18 @@ footer.site .big span{color:var(--lime-deep)}
       // business sign on the cage + vinyl lettering
       const signTex = canvasTex(1024, 420, (x, w, h) => {
         x.fillStyle = '#ffffff'; x.fillRect(0, 0, w, h); x.fillStyle = '#12203A'; x.fillRect(0, 0, w, 16); x.fillRect(0, h - 16, w, 16);
-        try { x.save(); x.beginPath(); x.arc(205, h / 2, 170, 0, Math.PI * 2); x.clip(); x.drawImage(badge, 35, h / 2 - 170, 340, 340); x.restore(); } catch (e) {}
-        x.fillStyle = '#12203A'; x.font = 'italic 900 112px Archivo, "Arial Black", sans-serif'; x.fillText('CLEAN', 410, 160);
-        x.fillStyle = '#5b9a1c'; x.fillText('SWEEP', 410, 268);
-        x.fillStyle = '#12203A'; x.font = '700 40px Figtree, Arial, sans-serif'; x.fillText('RUBBISH REMOVALS', 414, 322); x.font = '800 46px Figtree, Arial, sans-serif'; x.fillText('0493 866 368', 414, 378);
+        try { x.save(); x.beginPath(); x.arc(212, h / 2, 192, 0, Math.PI * 2); x.clip(); x.drawImage(badge, 20, h / 2 - 192, 384, 384); x.restore(); } catch (e) {}
+        x.fillStyle = '#12203A'; x.font = 'italic 900 112px Archivo, "Arial Black", sans-serif'; x.fillText('CLEAN', 430, 160);
+        x.fillStyle = '#5b9a1c'; x.fillText('SWEEP', 430, 268);
+        x.fillStyle = '#12203A'; x.font = '700 40px Figtree, Arial, sans-serif'; x.fillText('RUBBISH REMOVALS', 434, 322); x.font = '800 46px Figtree, Arial, sans-serif'; x.fillText('0493 866 368', 434, 378);
       });
       const signMat = new T.MeshStandardMaterial({ map: signTex, roughness: .55 });
-      [[-Z0 - .03 + .014, 0], [Z0 + .03 - .014, Math.PI]].forEach(([z, ry]) => {
-        const sy = FLOOR + LOWER + .62, out = ry ? -1 : 1;
-        add(B(1.27, .53, .006), std(0xe9ecef, .5), .55, sy, z - out * .004, trailer);
-        add(new T.PlaneGeometry(1.25, .51), signMat, .55, sy, z, trailer, [0, ry, 0]).castShadow = false;
-        [[-.58, .22], [.58, .22], [-.58, -.22], [.58, -.22]].forEach(([dx, dy]) => add(B(.006, .03, .012), std(0x111111, .7), .55 + dx, sy + dy, z + out * .004, trailer));
+      [[-Z0 + .036, 0], [Z0 - .036, Math.PI]].forEach(([z, ry]) => { // mounted on the outside of the cage posts
+        // sign is 2.2 m x 0.9 m (was 1.25 m x 0.51 m) so the logo reads clearly
+        const sy = FLOOR + LOWER + .78, out = ry ? -1 : 1, cx = .35;
+        add(B(2.23, .93, .006), std(0xe9ecef, .5), cx, sy, z - out * .004, trailer);
+        add(new T.PlaneGeometry(2.2, .9), signMat, cx, sy, z, trailer, [0, ry, 0]).castShadow = false;
+        [[-1.04, .4], [1.04, .4], [-1.04, -.4], [1.04, -.4], [0, .4], [0, -.4]].forEach(([dx, dy]) => add(B(.006, .03, .012), std(0x111111, .7), cx + dx, sy + dy, z + out * .004, trailer));
       });
       const decal = canvasTex(1024, 96, (x) => { x.font = 'italic 900 64px Archivo, "Arial Black", sans-serif'; x.textBaseline = 'middle'; x.fillStyle = '#12203A'; x.fillText('CLEAN', 20, 50); const cw = x.measureText('CLEAN ').width; x.fillStyle = '#4f8a17'; x.fillText('SWEEP', 20 + cw, 50); const sw = x.measureText('SWEEP').width; x.font = '800 40px Figtree, Arial, sans-serif'; x.fillStyle = '#12203A'; x.fillText('0493 866 368', 60 + cw + sw, 52); });
       const decalMat = new T.MeshStandardMaterial({ map: decal, transparent: true, roughness: .4, metalness: .1, polygonOffset: true, polygonOffsetFactor: -2 });
