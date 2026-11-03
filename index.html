@@ -152,8 +152,8 @@ p{margin:0}
 .guide{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,56px);align-items:center}
 @media (max-width:860px){.guide{grid-template-columns:1fr}}
 .guide>*{min-width:0}
-.sizes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 22px}
-@media (max-width:460px){.sizes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sizes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0 0 22px}
+@media (max-width:560px){.sizes{grid-template-columns:repeat(6,minmax(0,1fr))}.sizes .size{grid-column:span 2}.sizes .size:nth-child(n+4){grid-column:span 3}}
 .size{font:800 .9rem/1.1 var(--f-body);border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:14px;padding:12px 8px;cursor:pointer;display:grid;gap:5px;justify-items:center;transition:background .2s,color .2s,transform .15s}
 .size b{font:900 italic clamp(1.15rem,2.4vw,1.45rem)/1 var(--f-display);font-stretch:110%;font-variant-numeric:tabular-nums}
 .size small{font:500 .72rem/1 var(--f-mono);opacity:.75}
@@ -621,10 +621,11 @@ footer.site .big span{color:var(--lime-deep)}
       <div class="guide">
         <div>
           <div class="sizes" role="group" aria-label="Trailer load">
-            <button class="size" type="button" data-i="0" aria-pressed="false">¼ load<b>$395</b><small>≈ 4 m³</small></button>
-            <button class="size" type="button" data-i="1" aria-pressed="true">½ load<b>$795</b><small>≈ 8 m³</small></button>
-            <button class="size" type="button" data-i="2" aria-pressed="false">¾ load<b>$1,195</b><small>≈ 12 m³</small></button>
-            <button class="size" type="button" data-i="3" aria-pressed="false">Full load<b>$1,595</b><small>≈ 16 m³</small></button>
+            <button class="size" type="button" data-i="0" aria-pressed="false">⅛ load<b>$195</b><small>≈ 2 m³</small></button>
+            <button class="size" type="button" data-i="1" aria-pressed="false">¼ load<b>$395</b><small>≈ 4 m³</small></button>
+            <button class="size" type="button" data-i="2" aria-pressed="true">½ load<b>$795</b><small>≈ 8 m³</small></button>
+            <button class="size" type="button" data-i="3" aria-pressed="false">¾ load<b>$1,195</b><small>≈ 12 m³</small></button>
+            <button class="size" type="button" data-i="4" aria-pressed="false">Full load<b>$1,595</b><small>≈ 16 m³</small></button>
           </div>
           <div class="vol"><span class="num"><span class="cur">$</span><span id="volNum">795</span></span><span class="unit" id="volUnit">½ load · about 8 m³</span></div>
           <p class="fits" id="fits">A garage, shed or room clear-out.</p>
@@ -654,8 +655,8 @@ footer.site .big span{color:var(--lime-deep)}
           <g clip-path="url(#cage)">
             <!-- ¼ -->
             <g class="q" data-q="0">
-              <g class="it"><rect class="sky" x="96" y="214" width="128" height="36" rx="6"/><rect class="sky" x="100" y="194" width="120" height="26" rx="9"/><rect class="sky" x="90" y="206" width="16" height="44" rx="6"/><rect class="sky" x="214" y="206" width="16" height="44" rx="6"/></g>
-              <g class="it"><rect class="card" x="238" y="208" width="56" height="42" rx="3"/><path class="tape" d="M266 208v14"/></g>
+              <g class="it e"><rect class="sky" x="96" y="214" width="128" height="36" rx="6"/><rect class="sky" x="100" y="194" width="120" height="26" rx="9"/><rect class="sky" x="90" y="206" width="16" height="44" rx="6"/><rect class="sky" x="214" y="206" width="16" height="44" rx="6"/></g>
+              <g class="it e"><rect class="card" x="238" y="208" width="56" height="42" rx="3"/><path class="tape" d="M266 208v14"/></g>
               <g class="it"><rect class="sun" x="300" y="220" width="44" height="30" rx="3"/></g>
               <g class="it"><path class="bag" d="M350 250c-6-26 6-40 22-40s28 14 22 40z"/><path class="bag" d="M366 212l6-10 6 10z"/></g>
               <g class="it"><rect class="card" x="404" y="196" width="66" height="54" rx="6"/><circle class="sky" cx="437" cy="225" r="15"/><path class="tape" d="M410 204h20"/></g>
@@ -695,18 +696,20 @@ footer.site .big span{color:var(--lime-deep)}
           <circle class="tyre" cx="258" cy="290" r="22"/><circle class="hub" cx="258" cy="290" r="8"/>
           <circle class="tyre" cx="322" cy="290" r="22"/><circle class="hub" cx="322" cy="290" r="8"/>
           <!-- tap targets -->
-          <rect class="band" data-i="3" x="90" y="50" width="400" height="50"/>
-          <rect class="band" data-i="2" x="90" y="100" width="400" height="50"/>
-          <rect class="band" data-i="1" x="90" y="150" width="400" height="50"/>
-          <rect class="band" data-i="0" x="90" y="200" width="400" height="50"/>
+          <rect class="band" data-i="4" x="90" y="50" width="400" height="50"/>
+          <rect class="band" data-i="3" x="90" y="100" width="400" height="50"/>
+          <rect class="band" data-i="2" x="90" y="150" width="400" height="50"/>
+          <rect class="band" data-i="1" x="90" y="200" width="400" height="25"/>
+          <rect class="band" data-i="0" x="90" y="225" width="400" height="25"/>
         </g>
         <path class="road" d="M8 314h554"/>
         <!-- level ticks -->
         <g class="ticks">
-          <g class="tick" data-i="3"><path d="M496 50h14"/><text x="516" y="56">Full</text></g>
-          <g class="tick" data-i="2"><path d="M496 100h14"/><text x="516" y="106">¾</text></g>
-          <g class="tick" data-i="1"><path d="M496 150h14"/><text x="516" y="156">½</text></g>
-          <g class="tick" data-i="0"><path d="M496 200h14"/><text x="516" y="206">¼</text></g>
+          <g class="tick" data-i="4"><path d="M496 50h14"/><text x="516" y="56">Full</text></g>
+          <g class="tick" data-i="3"><path d="M496 100h14"/><text x="516" y="106">¾</text></g>
+          <g class="tick" data-i="2"><path d="M496 150h14"/><text x="516" y="156">½</text></g>
+          <g class="tick" data-i="1"><path d="M496 200h14"/><text x="516" y="206">¼</text></g>
+          <g class="tick" data-i="0"><path d="M496 225h14"/><text x="516" y="231">⅛</text></g>
         </g>
         <path id="lvlLine" class="lvl-line" d="M90 150h420"/>
       </svg>
@@ -1192,6 +1195,7 @@ footer.site .big span{color:var(--lime-deep)}
 
   // ---- Price picker + CountUp (React Bits) ----
   const SIZES = [
+    { price: 195, m3: 2, fill: .125, label: '⅛ load', fits: 'A couch, a fridge or a few bags. A quick, small clean-up.' },
     { price: 395, m3: 4, fill: .25, label: '¼ load', opt: 1, fits: 'A few bulky items or a small clean-up.' },
     { price: 795, m3: 8, fill: .5, label: '½ load', opt: 2, fits: 'A garage, shed or room clear-out.' },
     { price: 1195, m3: 12, fill: .75, label: '¾ load', opt: 3, fits: 'Several rooms or a big yard clean-up.' },
@@ -1199,7 +1203,9 @@ footer.site .big span{color:var(--lime-deep)}
   ];
   const money = n => Math.round(n).toLocaleString('en-AU');
   const fill = $('#fill'), lvl = $('#lvlLine'), qGroups = $$('.trailer .q'), volNum = $('#volNum'), volUnit = $('#volUnit'), fits = $('#fits'), qs = $('#quoteSize');
-  let curPrice = 795, sel = 1, prevSel = 1, t3d = null;
+  let curPrice = 795, sel = 2, prevSel = 2, t3d = null;
+  // which drawn items show for size i: the 1/8 load is the first two items of the bottom layer
+  const itemOn = (q, it, i) => i === 0 ? (q === 0 && it.classList.contains('e')) : q <= i - 1;
   const setSize = (i, animate = true) => {
     sel = i; const s = SIZES[i];
     $$('.size').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.i === i)));
@@ -1211,17 +1217,18 @@ footer.site .big span{color:var(--lime-deep)}
       gsap.to(o, { v: s.price, duration: .8, ease: 'power3.out', onUpdate: () => volNum.textContent = money(o.v) });
       gsap.to(fill, { attr: { y: 250 - h, height: h }, duration: .9, ease: 'elastic.out(1,.6)' });
       gsap.to(lvl, { attr: { d: `M90 ${250 - h}h420` }, duration: .9, ease: 'elastic.out(1,.6)' });
-      qGroups.forEach((g, q) => {
-        const items = $$('.it', g), on = q <= i, was = g.dataset.on === '1';
-        g.dataset.on = on ? '1' : '0';
-        if (on && !was) gsap.fromTo(items, { y: -90, opacity: 0, rotate: () => gsap.utils.random(-25, 25) }, { y: 0, opacity: 1, rotate: 0, duration: .7, ease: 'bounce.out', stagger: .07, delay: (q - prevSel - 1) * .18 + .1 });
-        if (!on && was) gsap.to(items, { y: -60, opacity: 0, duration: .3, ease: 'power2.in', stagger: .03 });
-      });
+      const base = Math.max(0, prevSel - 1);
+      qGroups.forEach((g, q) => $$('.it', g).forEach((it, k) => {
+        const on = itemOn(q, it, i), was = it.dataset.on === '1';
+        it.dataset.on = on ? '1' : '0';
+        if (on && !was) gsap.fromTo(it, { y: -90, opacity: 0, rotate: gsap.utils.random(-25, 25) }, { y: 0, opacity: 1, rotate: 0, duration: .7, ease: 'bounce.out', delay: Math.max(0, q - base) * .18 + k * .07 + .1 });
+        if (!on && was) gsap.to(it, { y: -60, opacity: 0, duration: .3, ease: 'power2.in', delay: k * .03 });
+      }));
       gsap.fromTo('#trailerG', { y: 0 }, { y: 5, duration: .12, yoyo: true, repeat: 3, ease: 'sine.inOut', delay: .35 });
     } else {
       volNum.textContent = money(s.price); fill.setAttribute('y', 250 - h); fill.setAttribute('height', h);
       lvl.setAttribute('d', `M90 ${250 - h}h420`);
-      qGroups.forEach((g, q) => { g.dataset.on = q <= i ? '1' : '0'; $$('.it', g).forEach(it => { it.style.opacity = q <= i ? '' : '0'; it.style.transform = ''; }); });
+      qGroups.forEach((g, q) => $$('.it', g).forEach(it => { const on = itemOn(q, it, i); it.dataset.on = on ? '1' : '0'; it.style.opacity = on ? '' : '0'; it.style.transform = ''; }));
     }
     $$('.trailer .tick').forEach(t => t.classList.toggle('on', +t.dataset.i === i));
     prevSel = i;
@@ -1230,7 +1237,7 @@ footer.site .big span{color:var(--lime-deep)}
   };
   $$('.size').forEach(b => b.addEventListener('click', () => setSize(+b.dataset.i)));
   $$('.trailer .band').forEach(b => b.addEventListener('click', () => { if (+b.dataset.i !== sel) setSize(+b.dataset.i); }));
-  setSize(1, false);
+  setSize(2, false);
 
   // ---- Reviews ----
   const revs = $('#revs');
@@ -1387,7 +1394,7 @@ footer.site .big span{color:var(--lime-deep)}
     $('#x-' + k).textContent = qty[k]; refresh();
   }));
   // Price list buttons pre-select the job here
-  const jobFromSize = ['q1', 'q2', 'q3', 'full'];
+  const jobFromSize = ['q0', 'q1', 'q2', 'q3', 'full'];
   qs.addEventListener('click', () => { const r = $('#j-' + jobFromSize[sel]); if (r) { r.checked = true; refresh(); } });
   refresh();
 
@@ -1988,7 +1995,7 @@ footer.site .big span{color:var(--lime-deep)}
 
       const tr = kit.makeTrailer(), FLOOR = tr.FLOOR, L = tr.L, W = tr.W;
       scene.add(tr.group);
-      const loads = kit.makeLoads(tr.group, FLOOR); loads.forEach(g => g.visible = false);
+      const loads = kit.makeLoads(tr.group, FLOOR); loads.forEach(g => g.children.forEach(o => { o.visible = false; o.userData.on = false; }));
       const fill = new T.Mesh(B(L - .1, 1, W - .1), new T.MeshBasicMaterial({ color: lin(0x84c430), transparent: true, opacity: .1, depthWrite: false }));
       fill.position.set(0, FLOOR, 0); fill.scale.y = .001; tr.group.add(fill);
       const ring = new T.LineSegments(new T.EdgesGeometry(new T.PlaneGeometry(L - .06, W - .06)), new T.LineBasicMaterial({ color: lin(0x6db32a) }));
@@ -2034,18 +2041,23 @@ footer.site .big span{color:var(--lime-deep)}
       let curLevel = -1;
       function setLevel(i, animate = true) {
         const anim = animate && hasGsap && !reduce;
+        // i: 0 = 1/8 (rear half of the bottom layer), 1..4 = 1/4 .. full (one 0.5 m layer each)
+        const base = Math.max(0, curLevel - 1);
         loads.forEach((g, q) => {
-          const on = q <= i, was = g.visible && g.userData.on;
-          g.userData.on = on;
-          if (on && !was) {
-            g.visible = true;
-            g.children.forEach((o, k) => { const h = o.userData.home; if (anim) gsap.fromTo(o.position, { y: h.y + 2.4 + k * .12 }, { y: h.y, duration: .7, ease: 'bounce.out', delay: Math.max(0, q - curLevel - 1) * .2 + k * .05 }); else o.position.copy(h); });
-          } else if (!on && was) {
-            if (anim) g.children.forEach((o, k) => gsap.to(o.position, { y: o.userData.home.y + 2.6, duration: .35, ease: 'power2.in', delay: k * .02, onComplete: () => { if (!g.userData.on) g.visible = false; } }));
-            else g.visible = false;
-          }
+          g.visible = true;
+          g.children.forEach((o, k) => {
+            const on = i === 0 ? (q === 0 && o.userData.home.x < 0) : q <= i - 1, was = o.visible && o.userData.on;
+            o.userData.on = on;
+            if (on && !was) {
+              o.visible = true; const h = o.userData.home;
+              if (anim) gsap.fromTo(o.position, { y: h.y + 2.4 + k * .12 }, { y: h.y, duration: .7, ease: 'bounce.out', delay: Math.max(0, q - base) * .2 + k * .05 }); else o.position.copy(h);
+            } else if (!on && was) {
+              if (anim) gsap.to(o.position, { y: o.userData.home.y + 2.6, duration: .35, ease: 'power2.in', delay: k * .02, onComplete: () => { if (!o.userData.on) o.visible = false; } });
+              else o.visible = false;
+            }
+          });
         });
-        const hgt = (i + 1) * .5;
+        const hgt = i === 0 ? .25 : i * .5;
         if (anim) { gsap.to(fill.scale, { y: hgt, duration: .8, ease: 'power2.out' }); gsap.to(fill.position, { y: FLOOR + hgt / 2, duration: .8, ease: 'power2.out' }); gsap.to(ring.position, { y: FLOOR + hgt, duration: .8, ease: 'elastic.out(1,.6)' }); }
         else { fill.scale.y = hgt; fill.position.y = FLOOR + hgt / 2; ring.position.y = FLOOR + hgt; }
         $('#t3dLvl').textContent = `${SIZES[i].label} · about ${SIZES[i].m3} m³`;
