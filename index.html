@@ -718,7 +718,7 @@ footer.site .big span{color:var(--lime-deep)}
         <span class="t3d-lvl" id="t3dLvl">½ load · about 8 m³</span>
         <span class="t3d-hint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 2v5h-5M6 22v-5h5"/></svg>Drag to spin</span>
         <div class="t3d-ctl" role="group" aria-label="Trailer views">
-          <button type="button" data-view="side">Side</button><button type="button" data-view="back">Back</button><button type="button" data-view="top">Look inside</button><button type="button" data-view="spin" aria-label="Reset and spin">↻</button>
+          <button type="button" data-view="side">Side</button><button type="button" data-view="back">Back</button><button type="button" data-view="top">Look inside</button><button type="button" data-view="spin" aria-label="Reset and spin">↻</button><button type="button" data-gate aria-pressed="false">Drop tailgate</button>
         </div>
       </div>
       <figcaption class="note" id="t3dCap">Tap the trailer or a price to see each load.</figcaption>
@@ -1658,26 +1658,33 @@ footer.site .big span{color:var(--lime-deep)}
       add(B(.012, .13, .37), [steelDark, new T.MeshStandardMaterial({ map: plateNo, roughness: .5 }), steelDark, steelDark, steelDark, steelDark], X0 - .045, FLOOR - .26, 0, trailer);
       // cage frame
       const LOWER = .32;
+      // the rear of the cage is a drop-down tailgate hinged at floor level (local coords: x - X0, y - FLOOR)
+      const gate = new T.Group(); gate.position.set(X0, FLOOR, 0); trailer.add(gate);
       const post = (x, z) => add(B(SHS, H, SHS), galv, x, FLOOR + H / 2, z, trailer);
       for (let i = 0; i <= 4; i++) [Z0 + SHS / 2, -Z0 - SHS / 2].forEach(z => post(X0 + SHS / 2 + i * (L - SHS) / 4, z));
-      [-1 / 3, 1 / 3].forEach(k => { post(-X0 - SHS / 2, k * W); post(X0 + SHS / 2, k * W); });
+      [-1 / 3, 1 / 3].forEach(k => { post(-X0 - SHS / 2, k * W); add(B(SHS, H, SHS), galv, SHS / 2, H / 2, k * W, gate); });
       [FLOOR + LOWER, FLOOR + H - SHS / 2, FLOOR + LOWER + (H - LOWER) / 2].forEach((y, j) => {
         [Z0 + SHS / 2, -Z0 - SHS / 2].forEach(z => add(B(L, SHS, SHS), galv, 0, y, z, trailer));
-        if (j !== 2) [X0 + SHS / 2, -X0 - SHS / 2].forEach(x => add(B(SHS, SHS, W), galv, x, y, 0, trailer));
+        if (j !== 2) { add(B(SHS, SHS, W - SHS * 2), galv, SHS / 2, y - FLOOR, 0, gate); add(B(SHS, SHS, W), galv, -X0 - SHS / 2, y, 0, trailer); }
       });
-      [-.6, .6].forEach(z => { add(C(.02, .1), steelDark, X0 - .02, FLOOR + .12, z, trailer); add(B(.05, .04, .1), steelDark, X0 - .02, FLOOR + H - .3, z, trailer); });
-      [[0, Z0 + .01, B(L, LOWER, .012)], [0, -Z0 - .01, B(L, LOWER, .012)], [X0 + .01, 0, B(.012, LOWER, W)], [-X0 - .01, 0, B(.012, LOWER, W)]].forEach(([x, z, g]) => add(g, galvDull, x, FLOOR + LOWER / 2, z, trailer));
+      [-.6, .6].forEach(z => { add(C(.02, .1), steelDark, X0 - .02, FLOOR + .03, z, trailer, [Math.PI / 2, 0, 0]); add(B(.05, .04, .1), steelDark, -.02, H - .3, z, gate); });
+      [[0, Z0 + .01, B(L, LOWER, .012)], [0, -Z0 - .01, B(L, LOWER, .012)], [-X0 - .01, 0, B(.012, LOWER, W)]].forEach(([x, z, g]) => add(g, galvDull, x, FLOOR + LOWER / 2, z, trailer));
+      add(B(.012, LOWER, W - SHS * 2), galvDull, .01, LOWER / 2, 0, gate);
       // welded mesh (real wires, 75 mm grid)
       const wireMat = new T.MeshStandardMaterial({ color: lin(0xc9d0d7), roughness: .35, metalness: .9 });
       const wires = [], dummy = new T.Object3D(), mh = H - LOWER - SHS, my = FLOOR + LOWER + mh / 2, G = .075, WIRE = .006;
-      const panel = (len, cx, cz, alongX) => {
-        for (let a = -len / 2 + G; a < len / 2 - .01; a += G) wires.push([alongX ? cx + a : cx, my, alongX ? cz : cz + a, WIRE, mh, WIRE]);
-        for (let b = -mh / 2 + G; b < mh / 2 - .01; b += G) wires.push([cx, my + b, cz, alongX ? len : WIRE, WIRE, alongX ? WIRE : len]);
+      const panel = (len, cx, cz, alongX, out = wires, cy = my) => {
+        for (let a = -len / 2 + G; a < len / 2 - .01; a += G) out.push([alongX ? cx + a : cx, cy, alongX ? cz : cz + a, WIRE, mh, WIRE]);
+        for (let b = -mh / 2 + G; b < mh / 2 - .01; b += G) out.push([cx, cy + b, cz, alongX ? len : WIRE, WIRE, alongX ? WIRE : len]);
       };
-      panel(L, 0, Z0 + .03, true); panel(L, 0, -Z0 - .03, true); panel(W, X0 + .03, 0, false); panel(W, -X0 - .03, 0, false);
-      const inst = new T.InstancedMesh(B(1, 1, 1), wireMat, wires.length);
-      wires.forEach((w, i) => { dummy.position.set(w[0], w[1], w[2]); dummy.scale.set(w[3], w[4], w[5]); dummy.updateMatrix(); inst.setMatrixAt(i, dummy.matrix); });
-      inst.castShadow = true; trailer.add(inst);
+      const gateWires = [];
+      panel(L, 0, Z0 + .03, true); panel(L, 0, -Z0 - .03, true); panel(W - SHS * 2, .03, 0, false, gateWires, my - FLOOR); panel(W, -X0 - .03, 0, false);
+      const wireMesh = (list, parent) => {
+        const inst = new T.InstancedMesh(B(1, 1, 1), wireMat, list.length);
+        list.forEach((w, i) => { dummy.position.set(w[0], w[1], w[2]); dummy.scale.set(w[3], w[4], w[5]); dummy.updateMatrix(); inst.setMatrixAt(i, dummy.matrix); });
+        inst.castShadow = true; parent.add(inst);
+      };
+      wireMesh(wires, trailer); wireMesh(gateWires, gate);
       // business sign on the cage + vinyl lettering
       const signTex = canvasTex(1024, 420, (x, w, h) => {
         x.fillStyle = '#ffffff'; x.fillRect(0, 0, w, h); x.fillStyle = '#12203A'; x.fillRect(0, 0, w, 16); x.fillRect(0, h - 16, w, 16);
@@ -1698,7 +1705,7 @@ footer.site .big span{color:var(--lime-deep)}
       const decalMat = new T.MeshStandardMaterial({ map: decal, transparent: true, roughness: .4, metalness: .1, polygonOffset: true, polygonOffsetFactor: -2 });
       add(new T.PlaneGeometry(3.4, .32), decalMat, -.05, FLOOR + LOWER / 2, -Z0 - .002, trailer).castShadow = false;
       add(new T.PlaneGeometry(3.4, .32), decalMat, -.05, FLOOR + LOWER / 2, Z0 + .002, trailer, [0, Math.PI, 0]).castShadow = false;
-      return { group: trailer, wheels, jockey, L, W, FLOOR, couplingX: nose + .4, couplingY: FLOOR - .07 };
+      return { group: trailer, wheels, jockey, gate, L, W, FLOOR, couplingX: nose + .4, couplingY: FLOOR - .07 };
     }
 
     // ---------- the load, in real-world colours: four 0.5 m layers ----------
@@ -2022,6 +2029,16 @@ footer.site .big span{color:var(--lime-deep)}
         stopAuto(); const tgtA = az + ((((a - az) % (Math.PI * 2)) + Math.PI * 3) % (Math.PI * 2) - Math.PI);
         if (hasGsap && !reduce) gsap.to(view, { az: tgtA, el: e, duration: .9, ease: 'power3.inOut' }); else { az = tgtA; el = e; }
       };
+      // drop / close the tailgate so customers can see how the load goes in
+      const gateBtn = $('.t3d-ctl [data-gate]');
+      let gateOpen = false;
+      if (gateBtn) gateBtn.addEventListener('click', () => {
+        gateOpen = !gateOpen; stopAuto();
+        gateBtn.setAttribute('aria-pressed', String(gateOpen)); gateBtn.textContent = gateOpen ? 'Close tailgate' : 'Drop tailgate';
+        const to = gateOpen ? Math.PI / 2 * .97 : 0;
+        if (hasGsap && !reduce) gsap.to(tr.gate.rotation, { z: to, duration: gateOpen ? 1.1 : .7, ease: gateOpen ? 'bounce.out' : 'power2.inOut' }); else tr.gate.rotation.z = to;
+        if (gateOpen) goView(-Math.PI / 2 + .55, .28);
+      });
       $$('.t3d-ctl [data-view]').forEach(b => b.addEventListener('click', () => {
         const v = b.dataset.view;
         if (v === 'side') goView(0, .14); if (v === 'back') goView(-Math.PI / 2, .22); if (v === 'top') goView(az, 1.3);
