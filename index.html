@@ -1010,6 +1010,7 @@ footer.site .big span{color:var(--lime-deep)}
 
 <div class="drive" id="drive" hidden aria-hidden="true">
   <canvas id="driveCanvas"></canvas>
+  <div id="driveStage" style="position:absolute;inset:0"></div>
   <video id="driveVideo" muted playsinline preload="none" hidden></video>
   <div class="drive-text"><span class="drive-tag">Clean Sweep Rubbish Removals</span><b id="driveTitle">You're booked in</b><span id="driveSub">We're on our way.</span></div>
   <button class="drive-skip" type="button" id="driveSkip">Skip</button>
@@ -1841,8 +1842,6 @@ footer.site .big span{color:var(--lime-deep)}
     sc.onload = () => res(!!window.THREE); sc.onerror = () => res(false);
     document.head.appendChild(sc);
   }));
-  form.addEventListener('pointerenter', loadThree, { once: true });
-  form.addEventListener('focusin', loadThree, { once: true });
 
   // Real footage beats 3D: put the file name of a short clip of the ute + trailer driving off here (e.g. 'drive-off.mp4').
   const DRIVE_VIDEO = '';
@@ -1858,112 +1857,52 @@ footer.site .big span{color:var(--lime-deep)}
       v.play().catch(end); setTimeout(end, 15000);
     });
   }
+  // ---- after booking / payment: the Clean Sweep tipper truck (tipper3d.js, bundles its own three.js) ----
+  // It reverses up to the tip, raises the tray, the load slides out, and it drives off as "Thank you!" rises.
+  const TIPPER_SRC = 'tipper3d.js';
+  let tipperP = null;
+  const loadTipper = () => tipperP || (tipperP = new Promise(res => {
+    if (window.CleanSweepTipper) return res(true);
+    const sc = document.createElement('script'); sc.src = TIPPER_SRC; sc.async = true;
+    sc.onload = () => res(!!window.CleanSweepTipper); sc.onerror = () => res(false);
+    document.head.appendChild(sc);
+  }));
+  form.addEventListener('pointerenter', loadTipper, { once: true });
+  form.addEventListener('focusin', loadTipper, { once: true });
   function playDrive(title, sub) {
     if (DRIVE_VIDEO && !reduce) return playVideo(title || "You're booked in", sub || "We're on our way.");
-    return new Promise(async resolve => { try {
-      if (reduce) return resolve();
-      const ok = await Promise.race([loadThree(), new Promise(r => setTimeout(() => r(false), 5000))]);
-      if (!ok || !window.THREE) return resolve();
-      const T = window.THREE, wrap = $('#drive'), cv = $('#driveCanvas');
-      let renderer;
-      try { renderer = new T.WebGLRenderer({ canvas: cv, antialias: true }); } catch (e) { return resolve(); }
-      $('#driveTitle').textContent = title || "You're booked in!";
-      $('#driveSub').textContent = sub || "We're on our way.";
-      const small = Math.min(innerWidth, innerHeight) < 700;
-      renderer.setPixelRatio(Math.min(small ? 1.75 : 2, devicePixelRatio || 1));
-      const kit = makeKit(T, renderer, { exposure: .92 });
-      const { add, B, canvasTex, speckle, std, lin, rnd } = kit;
-      const scene = new T.Scene();
-      const sun = kit.setupLights(scene, 13, small ? 1024 : 2048);
-      sun.position.set(8, 11, 9);
-
-      // sky + haze
-      const skyGeo = new T.SphereGeometry(160, 32, 16), cols = [];
-      const top = new T.Color(0x7fb2e2).convertSRGBToLinear(), hor = new T.Color(0xe8eef2).convertSRGBToLinear();
-      for (let i = 0; i < skyGeo.attributes.position.count; i++) { const y = Math.max(0, skyGeo.attributes.position.getY(i) / 160); const c = hor.clone().lerp(top, Math.pow(y, .5)); cols.push(c.r, c.g, c.b); }
-      skyGeo.setAttribute('color', new T.Float32BufferAttribute(cols, 3));
-      scene.add(new T.Mesh(skyGeo, new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide, fog: false })));
-      scene.fog = new T.Fog(lin(0xdde5ea), 16, 70);
-
-      // suburban street: asphalt, line marking, kerbs, footpath, grass, fence, trees
-      const asphalt = canvasTex(512, 512, speckle('#4b4d50', .22, 9000), [40, 2]);
-      const road = add(new T.PlaneGeometry(400, 7.4), new T.MeshStandardMaterial({ map: asphalt, roughness: .92 }), 0, 0, 1.6, scene, [-Math.PI / 2, 0, 0]); road.castShadow = false;
-      const lineMat = std(0xf2f0ea, .6);
-      for (let x = -200; x < 200; x += 6) add(new T.PlaneGeometry(3, .1), lineMat, x, .005, 1.85, scene, [-Math.PI / 2, 0, 0]).castShadow = false;
-      const concrete = canvasTex(256, 256, speckle('#bdb8ae', .14, 3000), [80, 1]);
-      const conc = new T.MeshStandardMaterial({ map: concrete, roughness: .9 });
-      [[-2.12, -1], [5.32, 1]].forEach(([z, s]) => { add(B(400, .15, .3), conc, 0, .075, z, scene).castShadow = false; });
-      add(new T.PlaneGeometry(400, 1.5), conc, 0, .151, -3.0, scene, [-Math.PI / 2, 0, 0]).castShadow = false;
-      const grassTex = canvasTex(256, 256, speckle('#6f8a45', .3, 6000), [120, 6]);
-      const grass = new T.MeshStandardMaterial({ map: grassTex, roughness: 1 });
-      add(new T.PlaneGeometry(400, 30), grass, 0, .14, -18.75, scene, [-Math.PI / 2, 0, 0]).castShadow = false;
-      add(new T.PlaneGeometry(400, 30), grass, 0, .14, 20.5, scene, [-Math.PI / 2, 0, 0]).castShadow = false;
-      add(new T.PlaneGeometry(400, .9), grass, 0, .145, -4.2, scene, [-Math.PI / 2, 0, 0]).castShadow = false;
-      const paling = canvasTex(256, 128, (x, w, h) => { for (let i = 0; i < w; i += 16) { x.fillStyle = `rgb(${120 + rnd() * 30},${92 + rnd() * 20},${66 + rnd() * 15})`; x.fillRect(i, 0, 15, h); x.fillStyle = 'rgba(0,0,0,.25)'; x.fillRect(i + 15, 0, 1, h); } }, [100, 1]);
-      add(new T.PlaneGeometry(400, 1.8), new T.MeshStandardMaterial({ map: paling, roughness: .9 }), 0, 1.04, -5.2, scene);
-      // the rig: ute towing the tandem cage trailer, full to the top
-      const rig = new T.Group(); scene.add(rig);
-      const ute = kit.makeUte(); rig.add(ute.group);
-      const tr = kit.makeTrailer(); rig.add(tr.group);
-      tr.group.position.x = ute.towX - tr.couplingX; tr.group.position.y = ute.towY - tr.couplingY;
-      tr.jockey.rotation.x = 0; tr.jockey.position.y = .32; // jockey wheel wound up for towing
-      const loads = kit.makeLoads(tr.group, tr.FLOOR);
-
-      // camera: low three-quarter front, like a photographer on the footpath
-      const cam = new T.PerspectiveCamera(30, 1, .1, 400);
-      let x0 = 0;
-      const frame = () => {
-        const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); cam.aspect = w / h;
-        x0 = .3;
-        if (cam.aspect < 1) { cam.fov = 36; cam.position.set(x0 + 12.5, 1.75, 10.5); cam.lookAt(x0 - 2.6, 1.3, 0); }
-        else { const k = Math.max(1, 1.6 / cam.aspect); cam.fov = 30; cam.position.set(x0 + .6 * k, 1.6 + .3 * k, 15.5 * k); cam.lookAt(x0 - 2.9, 1.3, 0); }
-        const d = cam.position.length(); scene.fog.near = d + 6; scene.fog.far = d + 75;
-        cam.updateProjectionMatrix();
-      };
-      frame(); addEventListener('resize', frame);
-      rig.position.x = x0;
-
-      // exhaust puffs
-      const puffs = [], puffMat = new T.MeshStandardMaterial({ color: lin(0xb9b9b4), transparent: true, opacity: .32, depthWrite: false, roughness: 1 });
-      const puff = () => { const p = new T.Mesh(new T.SphereGeometry(.08, 10, 8), puffMat.clone()); p.position.set(rig.position.x - 1.95, .3, -.55); p.userData = { t: 0, vx: -.25 - rnd() * .3, vy: .12 + rnd() * .15 }; scene.add(p); puffs.push(p); };
-
-      wrap.hidden = false; wrap.style.opacity = '0'; if (lenis) lenis.stop();
-      requestAnimationFrame(() => { wrap.style.transition = 'opacity .35s'; wrap.style.opacity = '1'; });
-      const text = $('.drive-text');
-      if (hasGsap) gsap.fromTo(text.children, { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: .8, stagger: .12, ease: 'power3.out', delay: .25 });
-
-      try { renderer.compile(scene, cam); } catch (e) {}
-      let t = 0, last = 0, finished = false, raf = 0, prevX = x0, distU = 0;
-      const DUR = 5.6, GO = 1.4;
+    return new Promise(async resolve => {
+      const wrap = $('#drive'), stage = $('#driveStage'), text = $('.drive-text');
+      let h = null, finished = false, timer = 0;
       const end = () => {
-        if (finished) return; finished = true; cancelAnimationFrame(raf);
+        if (finished) return; finished = true; clearTimeout(timer);
         wrap.style.transition = 'opacity .5s'; wrap.style.opacity = '0';
         setTimeout(() => {
           wrap.hidden = true; wrap.style.opacity = ''; wrap.style.transition = '';
-          removeEventListener('resize', frame); renderer.dispose(); if (lenis) lenis.start(); resolve();
+          try { if (h) h.dispose(); } catch (e) {}
+          stage.innerHTML = ''; text.hidden = false; $('#driveCanvas').hidden = false;
+          if (lenis) lenis.start(); resolve();
         }, 520);
       };
-      wrap.onclick = end; $('#driveSkip').onclick = e => { e.stopPropagation(); end(); };
-      const loop = now => {
-        const dt = last ? Math.min(1 / 30, (now - last) / 1000) : 0; last = now; t += dt;
-        const go = Math.max(0, t - GO);
-        rig.position.x = x0 + .42 * go * go * go + 1.25 * go * go;
-        const dx = rig.position.x - prevX; prevX = rig.position.x; distU += dx;
-        ute.wheels.forEach(w => w.rotation.z = -distU / ute.R);
-        tr.wheels.forEach(w => w.rotation.z = -distU / .3);
-        // engine idle shake, then squat under acceleration and settle
-        const accel = go > 0 && go < 1.4 ? Math.sin(go / 1.4 * Math.PI) : 0;
-        ute.body.position.y = t < GO ? Math.sin(t * 70) * .0035 : Math.sin(go * 11) * .004 * (1 - Math.min(1, go / 3));
-        ute.body.rotation.z = accel * .018;
-        loads.forEach((g, q) => { g.position.y = go > 0 ? Math.abs(Math.sin(go * 9 + q)) * .012 : 0; });
-        if (rnd() < (t < GO ? .25 : .6)) puff();
-        for (let i = puffs.length - 1; i >= 0; i--) { const p = puffs[i], u = p.userData; u.t += dt; p.position.x += u.vx * dt; p.position.y += u.vy * dt; p.scale.setScalar(1 + u.t * 5); p.material.opacity = Math.max(0, .32 - u.t * .22); if (u.t > 1.5) { scene.remove(p); puffs.splice(i, 1); } }
-        renderer.render(scene, cam);
-        if (t > DUR) return end();
-        raf = requestAnimationFrame(loop);
-      };
-      raf = requestAnimationFrame(loop);
-    } catch (err) { console.error('drive-off', err); const w = $('#drive'); w.hidden = true; if (lenis) lenis.start(); resolve(); } });
+      try {
+        if (reduce) return resolve();
+        const ok = await Promise.race([loadTipper(), new Promise(r => setTimeout(() => r(false), 8000))]);
+        if (!ok || !window.CleanSweepTipper) return resolve();
+        $('#driveTitle').textContent = title || "You're booked in"; $('#driveSub').textContent = sub || "We're on our way.";
+        $('#driveCanvas').hidden = true; text.hidden = true; // the tipper shows its own "Thank you!"
+        wrap.hidden = false; wrap.style.opacity = '0'; if (lenis) lenis.stop();
+        const logo = ($('.hero-art .badge') || {}).src;
+        h = CleanSweepTipper.mountTipper(stage, {
+          logoUrl: logo, displayFont: '"Archivo"', bodyFont: '"Figtree"', loop: false,
+          onDone: () => { timer = setTimeout(end, 2500); },
+        });
+        if (!h) { wrap.hidden = true; text.hidden = false; $('#driveCanvas').hidden = false; if (lenis) lenis.start(); return resolve(); }
+        requestAnimationFrame(() => { wrap.style.transition = 'opacity .35s'; wrap.style.opacity = '1'; });
+        timer = setTimeout(end, ((h.duration || 20.5) + 5) * 1000); // safety net if onDone never fires
+        wrap.onclick = null; // dragging looks around; the Skip button closes it
+        $('#driveSkip').onclick = e => { e.stopPropagation(); end(); };
+      } catch (err) { console.error('tipper', err); end(); }
+    });
   }
 
 
